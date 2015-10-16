@@ -7,7 +7,7 @@ XJC plugin to restrict marshalled data according to the TolerantReader pattern.
 
 == Motivation
 Sometimes you have an extensive system of schema files with lots of classes and attributes, at times so large that developers struggle with the richness of the schema.
-Furthermore, the schema might evolve in incompatible ways for reasons which are out of my control.
+Furthermore, the schema might evolve in incompatible ways for reasons which are out of your control.
 
 The client on the other hand uses only a tiny fraction of the types from the schema. As a developer, I do not want to bother with an enormous tree of classes I don't understand and I want no changes to affect my code base which are irrelevant to my client.
 
@@ -78,3 +78,6 @@ This allows to handle situations where you only want a bean in one package, but 
 
 === properties attribute
 List of expected bean properties as space-separated strings.
+
+== Acknowledgements
+David Tiller, https://www.captechconsulting.com/blogs/make-a-surgical-strike-with-a-custom-xjc-plugin[Make a Surgical Strike with a Custom XJC Plugin]
