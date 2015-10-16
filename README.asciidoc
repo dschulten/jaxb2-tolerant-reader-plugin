@@ -7,7 +7,9 @@ XJC plugin to restrict marshalled data according to the TolerantReader pattern.
 
 == Motivation
 Sometimes you have an extensive system of schema files with lots of classes and attributes, sometimes so large that developers struggle with the richness of the schema. Furthermore, the schema evolves in incompatible ways for reasons which should not affect  your client.
+
 The client on the other hand uses only a tiny fraction of the types from the schema.
+
 The goal of this plugin is to handle this situation by applying ideas of TolerantReader. We still want to generate beans from the schema, but we want to be able to use only elements we care about.
 
 The current version allows to pick only those beans and attributes the client is really interested in.
