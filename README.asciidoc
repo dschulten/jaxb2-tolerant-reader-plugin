@@ -18,7 +18,7 @@ The current version allows to restrict beans and attributes. In situations where
 
 == First steps
 To set up the plugin for a maven build, use the maven-jaxb2-plugin.
-In the maven plugin configuration add the tolerant-reader xjc plugin and make sure you enable xjc extension mode.
+In the maven plugin configuration add the tolerant-reader xjc plugin and make sure you enable xjc extension mode. The https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tree/master/tests/person[tests/person subproject] shows how.
 The plugin is activated via the -Xtolerant-reader switch.
 
 == Usage
