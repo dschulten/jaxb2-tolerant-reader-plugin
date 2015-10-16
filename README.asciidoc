@@ -1,0 +1,62 @@
+= jaxb2-tolerant-reader-plugin
+:toc:
+:toc-placement: preamble
+
+XJC plugin to restrict marshalled data according to the TolerantReader pattern
+
+== First steps
+To set up the plugin for a maven build, use the maven-jaxb2-plugin.
+In the maven plugin configuration add the tolerant-reader xjc plugin and make sure you enable xjc extension mode.
+The plugin is activated via the -Xtolerant-reader switch.
+
+== Usage
+In launch and debug configurations one can execute the plugin via the Java main class
+
+    com.sun.tools.xjc.Driver
+
+Use the tests/person project as current working directory of the commandline and pass the following arguments:
+
+    -extension -no-header -d target -Xtolerant-reader -b src/main/wsdl/bindings.xjb src/main/wsdl/Person.xsd
+
+
+== Configuration: Include Required Data Only
+The idea is to require only the Java beans and bean attributes your client really needs and be tolerant about the rest.
+For this, you define a binding file with an `include` element on the schema level where you describe a bean that should be generated.
+
+
+=== Example
+The configuration takes place in the bindings.xjb file. In the sample binding below we use the extension binding prefix `tr` to bind the plugin namespace.
+
+```
+<jxb:bindings version="2.1" xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:tr="http://jaxb2-commons.dev.java.net/tolerant-reader"
+	xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+	jxb:extensionBindingPrefixes="xjc tr">
+	<jxb:globalBindings>
+		<xjc:simple />
+		<xjc:serializable uid="1" />
+	</jxb:globalBindings>
+
+	<jxb:bindings schemaLocation="schema.xsd">
+		<tr:include packageRoot="com.example.customer" bean="Person" properties="name age shippingAddress"/>
+		<tr:include bean="Name" properties="firstName lastName"/>
+		<tr:include bean="BaseAddress" properties="addr1 city"/>
+		<tr:include bean="USAddress" properties="state zip"/>
+		<tr:include bean="GlobalAddress" properties="postalCode country"/>
+	</jxb:bindings>
+</jxb:bindings>
+```
+
+=== include element
+Add one include element for each bean you need.
+
+=== bean attribute
+Simple name of the expected bean. If no packageRoot is given, the bean will be included regardless of its package. Use in conjunction with `packageRoot` to narrow down matching beans.
+
+=== packageRoot attribute (optional)
+If `packageRoot` is present, the bean will only be included if it is in a package starting with the value given for `packageRoot`.
+This allows to handle situations where you only want a bean in one package, but not a bean having the same simple name from another package. In the example above, `com.example.customer.v1.Person` will be included whereas `com.example.employee.v3.Person` will not be included.
+
+=== properties attribute
+List of expected bean properties as space-separated strings.
