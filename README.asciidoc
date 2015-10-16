@@ -7,12 +7,18 @@ XJC plugin to restrict marshalled data according to the TolerantReader pattern.
 
 == Motivation
 Sometimes you have an extensive system of schema files with lots of classes and attributes, at times so large that developers struggle with the richness of the schema.
-Furthermore, the schema might evolve in incompatible ways for reasons which should not affect your client.
+Furthermore, the schema might evolve in incompatible ways for reasons which are out of my control.
 
-The client on the other hand uses only a tiny fraction of the types from the schema. As a developer, I do not want to bother with changes that do not affect my code base.
+The client on the other hand uses only a tiny fraction of the types from the schema. As a developer, I do not want to bother with an enormous tree of classes I don't understand and I want no changes to affect my code base which are irrelevant to my client.
 
 The goal of this plugin is to handle this situation by applying ideas of http://martinfowler.com/bliki/TolerantReader.html[TolerantReader] to JAXB. In an attempt to eat the cake and have it, too, I want to generate beans from the schema, but I want to be able to depend only on the data I care about, and most importantly, I still want to avoid the http://www.alwaysagileconsulting.com/application-antipattern-serialisation/[serialization antipattern] of enterprise integration.
-I want to process a business document defined in terms of a schema by creating a Java bean from it. But I want to decouple my Java bean from the evolution of the schema as much as possible, thus avoiding the http://blog.iancartwright.com/2006/11/dangers-of-serialization.html[dangers of serialization].
+
+I want to use the incoming xml as a _business document_ defined in terms of a schema by creating a Java bean from it, but not by deserializing it as a remote binary object. I want to decouple my Java bean from the evolution of the schema as much as possible, thus at least partially avoiding the http://blog.iancartwright.com/2006/11/dangers-of-serialization.html[dangers of serialization].
+
+Note that schema changes might still require regeneration and recompilation of the client code. The goal is that at least this should be all there is to do, and that I get immediate feedback when the schema change breaks my client, so I can fix the breaking change at the root.
+
+The plugin configuration can also be handed to the service as an executable description of my client expectations.
+It could be http://martinfowler.com/articles/consumerDrivenContracts.html[used as a test] by the service to see which client will break upon any given change.
 
 The current version allows to restrict beans and attributes. In situations where the schema uses versioned namespaces, apply https://jaxb.java.net/guide/Customizing_Java_packages.html[custom java packages] to further decouple your beans.
 
