@@ -81,3 +81,4 @@ List of expected bean properties as space-separated strings.
 
 == Acknowledgements
 David Tiller, https://www.captechconsulting.com/blogs/make-a-surgical-strike-with-a-custom-xjc-plugin[Make a Surgical Strike with a Custom XJC Plugin]
+Dr. Aleksei Valikov, whose http://stackoverflow.com/questions/32560138/tell-jaxb-binding-compiler-which-elements-to-include[answer on stackoverflow] encouraged me to write this plugin
