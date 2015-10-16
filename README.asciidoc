@@ -24,7 +24,7 @@ The current version allows to restrict beans and attributes. In situations where
 
 == First steps
 To set up the plugin for a maven build, use the maven-jaxb2-plugin.
-In the maven plugin configuration add the tolerant-reader xjc plugin and make sure you enable xjc extension mode. The https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tree/master/tests/person[tests/person subproject] shows how.
+In the maven plugin configuration add the jaxb2-tolerant-reader xjc plugin and make sure you enable xjc extension mode. The https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tree/master/tests/person[tests/person subproject] shows how.
 The plugin is activated via the -Xtolerant-reader switch.
 
 == Usage
@@ -80,5 +80,5 @@ This allows to handle situations where you only want a bean in one package, but 
 List of expected bean properties as space-separated strings.
 
 == Acknowledgements
-David Tiller, https://www.captechconsulting.com/blogs/make-a-surgical-strike-with-a-custom-xjc-plugin[Make a Surgical Strike with a Custom XJC Plugin]
+David Tiller, https://www.captechconsulting.com/blogs/make-a-surgical-strike-with-a-custom-xjc-plugin[Make a Surgical Strike with a Custom XJC Plugin] +
 Dr. Aleksei Valikov, whose http://stackoverflow.com/questions/32560138/tell-jaxb-binding-compiler-which-elements-to-include[answer on stackoverflow] encouraged me to write this plugin
