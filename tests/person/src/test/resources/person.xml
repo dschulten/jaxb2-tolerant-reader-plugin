@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Person xmlns="http://captech.com/person">
+    <Name>
+        <FirstName>John</FirstName>
+        <MiddleInitial>M</MiddleInitial>
+        <LastName>Doe</LastName>
+    </Name>
+    <age>18</age>
+    <HomeAddress xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="USAddress">
+        <Addr1>4 Grant Street</Addr1>
+        <City>Pebble Beach</City>
+        <State>CA</State>
+        <Zip>70123</Zip>
+    </HomeAddress>
+    <ShippingAddress xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="GlobalAddress">
+        <Addr1>Carl Benz Str. 12</Addr1>
+        <City>Schwetzingen</City>
+        <PostalCode>12121</PostalCode>
+        <Country>Germany</Country>
+    </ShippingAddress>
+    <Extra>
+        <UselessField1>42</UselessField1>
+    </Extra>
+</Person>
