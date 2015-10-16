@@ -6,13 +6,15 @@ XJC plugin to restrict marshalled data according to the TolerantReader pattern.
 
 
 == Motivation
-Sometimes you have an extensive system of schema files with lots of classes and attributes, sometimes so large that developers struggle with the richness of the schema. Furthermore, the schema evolves in incompatible ways for reasons which should not affect  your client.
+Sometimes you have an extensive system of schema files with lots of classes and attributes, at times so large that developers struggle with the richness of the schema.
+Furthermore, the schema might evolve in incompatible ways for reasons which should not affect your client.
 
-The client on the other hand uses only a tiny fraction of the types from the schema.
+The client on the other hand uses only a tiny fraction of the types from the schema. As a developer, I do not want to bother with changes that do not affect my code base.
 
-The goal of this plugin is to handle this situation by applying ideas of TolerantReader. We still want to generate beans from the schema, but we want to be able to use only elements we care about.
+The goal of this plugin is to handle this situation by applying ideas of http://martinfowler.com/bliki/TolerantReader.html[TolerantReader] to JAXB. In an attempt to eat the cake and have it, too, I want to generate beans from the schema, but I want to be able to depend only on the data I care about, and most importantly, I still want to avoid the http://www.alwaysagileconsulting.com/application-antipattern-serialisation/[serialization antipattern] of enterprise integration.
+I want to process a business document defined in terms of a schema by creating a Java bean from it. But I want to decouple my Java bean from the evolution of the schema as much as possible, thus avoiding the http://blog.iancartwright.com/2006/11/dangers-of-serialization.html[dangers of serialization].
 
-The current version allows to pick only those beans and attributes the client is really interested in.
+The current version allows to restrict beans and attributes. In situations where the schema uses versioned namespaces, apply https://jaxb.java.net/guide/Customizing_Java_packages.html[custom java packages] to further decouple your beans.
 
 == First steps
 To set up the plugin for a maven build, use the maven-jaxb2-plugin.
@@ -24,7 +26,7 @@ In launch and debug configurations one can execute the plugin via the Java main 
 
     com.sun.tools.xjc.Driver
 
-Use the tests/person project as current working directory of the commandline and pass the following arguments:
+Use the _tests/person_ project as current working directory of the commandline and pass the following arguments:
 
     -extension -no-header -d target -Xtolerant-reader -b src/main/wsdl/bindings.xjb src/main/wsdl/Person.xsd
 
