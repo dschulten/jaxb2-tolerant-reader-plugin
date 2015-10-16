@@ -14,13 +14,5 @@
 		<tr:include bean="BaseAddress" properties="addr1 city"/>
 		<tr:include bean="USAddress" properties="state zip"/>
 		<tr:include bean="GlobalAddress" properties="postalCode country"/>
-		<!--<jxb:bindings node="//xs:complexType[@name='Name']">-->
-			<!--<tr:class getLastName="public synchronized"-->
-						<!--setFirstName="public synchronized"/>-->
-			<!--<tr:class setLastName="public synchronized"/>-->
-			<!--<jxb:bindings node=".//xs:element[@name='FirstName']">-->
-				<!--<tr:property modifiers="private"/>-->
-			<!--</jxb:bindings>-->
-		<!--</jxb:bindings>-->
 	</jxb:bindings>
 </jxb:bindings>
