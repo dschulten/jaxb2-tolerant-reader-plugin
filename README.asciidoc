@@ -11,7 +11,7 @@ Furthermore, the schema might evolve in incompatible ways for reasons which are 
 
 The client on the other hand uses only a tiny fraction of the types from the schema. As a developer, I do not want to bother with an enormous tree of classes I don't understand and I want no changes to affect my code base which are irrelevant to my client.
 
-The goal of this plugin is to handle this situation by applying ideas of http://martinfowler.com/bliki/TolerantReader.html[TolerantReader] to JAXB. In an attempt to eat the cake and have it, too, I want to generate beans from the schema, but I want to be able to depend only on the data I care about, and most importantly, I still want to avoid the http://www.alwaysagileconsulting.com/application-antipattern-serialisation/[serialization antipattern] of enterprise integration.
+The goal of this plugin is to handle this situation by applying ideas of http://martinfowler.com/bliki/TolerantReader.html[TolerantReader] to JAXB. In an attempt to eat the cake and have it, too, I want to generate beans from the schema, but I want to be able to depend only on the data I care about, and most importantly, I still want to avoid the http://www.alwaysagileconsulting.com/articles/application-antipattern-serialisation/[serialization antipattern] of enterprise integration.
 
 I want to use the incoming xml as a _business document_ defined in terms of a schema by creating a Java bean from it, but not by deserializing it as a remote binary object. I want to decouple my Java bean from the evolution of the schema as much as possible, thus at least partially avoiding the http://blog.iancartwright.com/2006/11/dangers-of-serialization.html[dangers of serialization].
 
