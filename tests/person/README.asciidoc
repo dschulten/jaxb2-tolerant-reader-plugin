@@ -1,0 +1,29 @@
+= jaxb-tolerant-reader-plugin-test-person
+:toc:
+:toc-placement: preamble
+
+Test project to demonstrate usage of Tolerant Reader Plugin
+
+== Execution
+
+Run mvn clean install to see the plugin at work. Note that the generated Person class has no getExtra and setExtra methods. That is the effect of the tolerant-reader configuration in src/main/wsdl/bindings.xjb, which does not include the extra property of Person:
+
+----
+<jxb:bindings schemaLocation="Person.xsd">
+	<tr:include packageRoot="com" bean="Person" 
+		properties="name age shippingAddress"/>       <-- no 'extra' property
+	...
+</jxb:bindings>
+----
+
+The maven-jaxb2-plugin has an Eclipse lifecycle integration, therefore you can immediately see the effect of the tolerant-reader plugin by editing the bindings.xjb file. For instance, if you remove the shippingAddress property:
+
+----
+<jxb:bindings schemaLocation="Person.xsd">
+	<tr:include packageRoot="com" bean="Person" 
+		properties="name age"/>                       <-- shippingAddress removed
+	...
+</jxb:bindings>
+----
+
+Then the Person class below target/generated-sources/xjc will be updated accordingly, i.e. the getShippingAddress and setShippingAddress will be removed.
