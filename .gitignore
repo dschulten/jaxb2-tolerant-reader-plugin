@@ -3,3 +3,6 @@
 /target
 /tests/person/jaxb2-tolerant-reader-plugin-test-person.iml
 target
+.classpath
+.project
+.settings

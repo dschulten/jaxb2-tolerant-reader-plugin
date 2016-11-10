@@ -60,8 +60,42 @@ import com.sun.xml.xsom.impl.util.SchemaWriter;
 
 import de.escalon.hypermedia.hydra.mapping.Expose;
 
+// TODO find a way to introduce the patch to CClassInfo would it work to include the class itself?
+// TODO try with other plugins, e.g. fluent builder
+// TODO execute tests with /tests project automatically, add assertions
+// TODO automatically keep required fields or attributes
+// TODO automatically adjust getter and setter names for alias beans according to alias
+// beans
+// TODO annotate @Expose on class
+// TODO package-info prefix annotation, currently we expose with full url and use prefix
+// TODO decouple structurally: support EL for property paths to aliases, or xpath or use
+// https://blog.frankel.ch/customize-your-jaxb-bindings/ converter method
+// TODO create XSD Schema for tr extensions
+// TODO use renamed namespace without version part for Expose (xjc renames packages, this
+// TODO would require introducing a namespace-rename feature)
+// TODO add getter Javadoc which allows to tell where property comes from, have XCD XPointer
+// syntax there
+
 /**
- * @author dschulten
+ * What we already achieve is decoupling names. If the service just renames an element or attribute, we can handle it.
+ * What we don't do yet is decoupling structurally. Decoupling structurally means having an alias whose source is not defined by a simple property:
+ * 
+ * <pre>
+ * &lt;tr:alias property="risikoschluessel"&gt;riskKey&lt;/tr:alias&gt;
+ * </pre>
+ * 
+ * but by a recipe to convert. Converting means:
+ * <ul>
+ * <li>reading a single value from an xpath in the current document
+ * <li>do calculations with multiple xpaths
+ * <li>in the extreme case creating a whole bean from several schema types and fill it from xpaths
+ * <li>alongside a new property which reflects the structural change
+ * </ul>
+ * 
+ * We should at least prove that an xpath based conversion works, along these lines
+ * <pre>
+ * &lt;tr:alias xpath="//risikoschluessel"&gt;riskKey&lt;/tr:alias&gt;
+ * </pre> 
  */
 public class TolerantReaderPlugin extends Plugin {
 
@@ -273,18 +307,7 @@ public class TolerantReaderPlugin extends Plugin {
         CCustomizations customizations = outline.getModel()
             .getCustomizations();
 
-        // TODO try with other plugins, e.g. builder or tostring
-        // TODO automatically keep required fields or attributes
-        // TODO automatically adjust getter and setter names for alias beans
-        // TODO annotate @Expose on class
-        // TODO package-info prefix annotation, currently we expose with full url and use prefix
-        // TODO create XSD Schema for tr extensions
-        // TODO decouple structurally: support EL for property paths to aliases, or xpath or use
-        // https://blog.frankel.ch/customize-your-jaxb-bindings/ converter method
-        // TODO use renamed namespace without version part for Expose (xjc renames packages, this
-        // TODO would require introducing a namespace-rename feature)
-        // TODO add getter Javadoc which allows to tell where property comes from, have XCD XPointer
-        // syntax there
+
         BeanInclusions beanInclusions = getBeanInclusions(customizations);
 
         Collection<? extends ClassOutline> classOutlines = outline.getClasses();

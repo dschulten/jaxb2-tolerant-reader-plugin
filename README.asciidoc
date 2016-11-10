@@ -20,32 +20,32 @@ Note that schema changes might still require regeneration and recompilation of t
 The plugin configuration can also be handed to the service as an executable description of my client expectations.
 It could be http://martinfowler.com/articles/consumerDrivenContracts.html[used as a test] by the service to see which client will break upon any given change.
 
-The current version allows to restrict beans and attributes. In situations where the schema uses versioned namespaces, apply https://jaxb.java.net/guide/Customizing_Java_packages.html[custom java packages] to further decouple your beans.
+The current version allows to restrict beans and attributes. In situations where the schema uses versioned namespaces, apply https://jaxb.java.net/guide/Customizing_Java_packages.html[custom java packages] to further decouple your beans. Note that the original namespace is preserved during marshalling from the package definition in package-info.java.
 
 == First steps
 To set up the plugin for a maven build, use the maven-jaxb2-plugin.
 In the maven plugin configuration add the jaxb2-tolerant-reader xjc plugin and make sure you enable xjc extension mode. The https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tree/master/tests/person[tests/person subproject] shows how.
 The plugin is activated via the -Xtolerant-reader switch.
 
-== Usage
-In launch and debug configurations one can execute the plugin via the Java main class
+== Manual execution
+In launch and debug configurations one can execute the plugin via the `com.sun.tools.xjc.Driver` Java main class, with the tolerant-reader-plugin on the classpath.
 
     com.sun.tools.xjc.Driver
 
-Use the _tests/person_ project as current working directory of the commandline and pass the following arguments:
+Use the _tests/person_ project as current working directory of the launch configuration and pass the following arguments:
 
     -extension -no-header -d target -Xtolerant-reader -b src/main/wsdl/bindings.xjb src/main/wsdl/Person.xsd
 
 
 == Configuration: Include Required Data Only
 The idea is to require only the Java beans and bean attributes your client really needs and be tolerant about the rest.
-For this, you define a binding file with an `include` element on the schema level where you describe a bean that should be generated.
+For this, you define a binding file with an `include` element on the schema level where you describe beans that should be generated.
 
 
 === Example
-The configuration takes place in the bindings.xjb file. In the sample binding below we use the extension binding prefix `tr` to bind the plugin namespace.
+The configuration takes place in the bindings.xjb file. In the sample binding below we use the extension binding prefix `tr` to bind the tolerant-reader plugin namespace.
 
-```
+----
 <jxb:bindings version="2.1" xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
 	xmlns:xs="http://www.w3.org/2001/XMLSchema"
 	xmlns:tr="http://jaxb2-commons.dev.java.net/tolerant-reader"
@@ -57,28 +57,41 @@ The configuration takes place in the bindings.xjb file. In the sample binding be
 	</jxb:globalBindings>
 
 	<jxb:bindings schemaLocation="schema.xsd">
-		<tr:include packageRoot="com.example.customer" bean="Person" properties="name age shippingAddress"/>
-		<tr:include bean="Name" properties="firstName lastName"/>
+		<tr:include packageRoot="com.example.customer" bean="Person" 
+		  properties="name age shippingAddress"/>
 		<tr:include bean="BaseAddress" properties="addr1 city"/>
 		<tr:include bean="USAddress" properties="state zip"/>
 		<tr:include bean="GlobalAddress" properties="postalCode country"/>
+		
+		<!-- property firstName will be included as-is, 
+			property lastName will appear as givenName -->
+		<tr:include bean="Name" properties="firstName">
+		  <tr:alias property="lastName">givenName</tr:alias>
+		</tr:include>	
 	</jxb:bindings>
 </jxb:bindings>
-```
+----
 
 === include element
-Add one include element for each bean you need.
+Add one include element for each bean you need. Super classes will be included automatically.
 
-=== bean attribute
+==== bean attribute
 Simple name of the expected bean. If no packageRoot is given, the bean will be included regardless of its package. Use in conjunction with `packageRoot` to narrow down matching beans.
 
-=== packageRoot attribute (optional)
+==== packageRoot attribute (optional)
 If `packageRoot` is present, the bean will only be included if it is in a package starting with the value given for `packageRoot`.
 This allows to handle situations where you only want a bean in one package, but not a bean having the same simple name from another package. In the example above, `com.example.customer.v1.Person` will be included whereas `com.example.employee.v3.Person` will not be included.
 
-=== properties attribute
-List of expected bean properties as space-separated strings.
+==== properties attribute
+List of expected bean properties as space-separated strings. You have to define all properties which should be generated.
+If an included property has a complex type, the bean for that type will be included automatically.
+
+==== alias element
+List of aliased properties to include inside an include element, can be used in combination with the properties attribute.
+
+===== property attribute
+Property name of an alias element
 
 == Acknowledgements
-David Tiller, https://www.captechconsulting.com/blogs/make-a-surgical-strike-with-a-custom-xjc-plugin[Make a Surgical Strike with a Custom XJC Plugin] +
+David Tiller, https://www.captechconsulting.com/blogs/make-a-surgical-strike-with-a-custom-xjc-plugin[Make a Surgical Strike with a Custom XJC Plugin] and http://www.captechconsulting.com/blogs/extending-xjc-functionality-with-a-custom-plugin[Extending XJC Functionality With a Custom Plugin]+
 Dr. Aleksei Valikov, whose http://stackoverflow.com/questions/32560138/tell-jaxb-binding-compiler-which-elements-to-include[answer on stackoverflow] encouraged me to write this plugin
