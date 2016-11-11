@@ -72,7 +72,7 @@ import org.xml.sax.Locator;
 
 /**
  * Mutable {@link ClassInfo} representation.
- *
+ * With patch for JAX_WS-1187.
  * <p>
  * Schema parsers build these objects.
  *

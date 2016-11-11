@@ -25,10 +25,10 @@ public class AnnotationHelper {
     }
 
     public static void applyAnnotations(Outline outline, Annotatable annotationTarget,
-            Collection<JAnnotationUse> annotations, Set<String> excludedSet) throws IOException,
+            Collection<JAnnotationUse> annotations, Set<String> excludedAnnotations) throws IOException,
             ClassNotFoundException {
         for (JAnnotationUse jAnnotationUse : annotations) {
-            if (excludedSet.contains(jAnnotationUse.getAnnotationClass()
+            if (excludedAnnotations.contains(jAnnotationUse.getAnnotationClass()
                 .fullName())) {
                 continue;
             }
@@ -44,7 +44,10 @@ public class AnnotationHelper {
                 writer.flush();
                 String valueString = new String(bos.toByteArray());
 
-                JAnnotationUse annotation = annotationTarget.annotate(jAnnotationUse.getAnnotationClass());
+                JAnnotationUse annotation = annotationTarget.getAnnotation(jAnnotationUse);
+                if (annotation == null) {
+                    annotation = annotationTarget.annotate(jAnnotationUse.getAnnotationClass());
+                }
 
                 if (isClassLiteral(valueString)) {
                     annotation.param(annotationParamName,

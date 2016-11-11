@@ -3,7 +3,6 @@ package de.escalon.xml.xjc;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,20 +29,17 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 
-import com.sun.codemodel.ClassType;
 import com.sun.codemodel.JAnnotationArrayMember;
 import com.sun.codemodel.JAnnotationUse;
 import com.sun.codemodel.JAnnotationValue;
 import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JClassAlreadyExistsException;
-import com.sun.codemodel.JClassContainer;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JExpr;
 import com.sun.codemodel.JFieldVar;
 import com.sun.codemodel.JFormatter;
 import com.sun.codemodel.JMethod;
-import com.sun.codemodel.JMods;
 import com.sun.codemodel.JPackage;
 import com.sun.codemodel.JType;
 import com.sun.codemodel.JVar;
@@ -77,8 +73,9 @@ import de.escalon.hypermedia.hydra.mapping.Expose;
 // syntax there
 
 /**
- * What we already achieve is decoupling names. If the service just renames an element or attribute, we can handle it.
- * What we don't do yet is decoupling structurally. Decoupling structurally means having an alias whose source is not defined by a simple property:
+ * What we already achieve is decoupling names. If the service just renames an element or attribute,
+ * we can handle it. What we don't do yet is decoupling structurally. Decoupling structurally means
+ * having an alias whose source is not defined by a simple property:
  * 
  * <pre>
  * &lt;tr:alias property="risikoschluessel"&gt;riskKey&lt;/tr:alias&gt;
@@ -93,13 +90,13 @@ import de.escalon.hypermedia.hydra.mapping.Expose;
  * </ul>
  * 
  * We should at least prove that an xpath based conversion works, along these lines
+ * 
  * <pre>
  * &lt;tr:alias xpath="//risikoschluessel"&gt;riskKey&lt;/tr:alias&gt;
- * </pre> 
+ * </pre>
  */
 public class TolerantReaderPlugin extends Plugin {
 
-    @SuppressWarnings("unchecked")
     private static final Set<String> IGNORED_ANNOTATIONS = new HashSet<String>(
             Arrays.asList(XmlSeeAlso.class.getName(),
                     XmlAccessorType.class.getName()));
@@ -307,7 +304,6 @@ public class TolerantReaderPlugin extends Plugin {
         CCustomizations customizations = outline.getModel()
             .getCustomizations();
 
-
         BeanInclusions beanInclusions = getBeanInclusions(customizations);
 
         Collection<? extends ClassOutline> classOutlines = outline.getClasses();
@@ -318,12 +314,8 @@ public class TolerantReaderPlugin extends Plugin {
                 ClassOutline found = findMatchingInclusionEntry(classOutlines, beanInclusion);
                 if (found == null) {
                     throw new IllegalArgumentException(
-                            "Expected bean " + inclusionCandidates.toString() + " not found in schema");
+                            "Tolerant reader expects bean " + inclusionCandidates.toString() + ", but schema has no such bean");
                 }
-                // check that all included bean properties are present
-                // TODO: the classOutline does not contain superclass properties, must consider
-                // superclass properties,
-                // too
                 List<CPropertyInfo> ownAndInheritedProperties = new ArrayList<CPropertyInfo>(found.target
                     .getProperties());
                 CClassInfo currentClass = found.target;
@@ -337,7 +329,7 @@ public class TolerantReaderPlugin extends Plugin {
                     propertyNames.add(cPropertyInfo.getName(false));
                 }
                 if (!beanInclusion.isSatisfiedByProperties(ownAndInheritedProperties)) {
-                    throw new IllegalArgumentException("Expected " +
+                    throw new IllegalArgumentException("Tolerant reader expects " +
                             beanInclusion.toString()
                             + " but only found properties " + propertyNames + " in schema");
                 }
@@ -413,7 +405,7 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private void applyXmlTypeToClasses(Collection<? extends ClassOutline> classOutlines, BeanInclusions beanInclusions,
-            Map<String, Set<String>> classesToKeep) {
+            Map<String, Set<String>> classesToKeep) throws IOException {
         for (final ClassOutline classOutline : classOutlines) {
             CClassInfo classInfo = classOutline.target;
             String className = classInfo.getName();
@@ -451,12 +443,7 @@ public class TolerantReaderPlugin extends Plugin {
                 OutputStreamWriter outputStreamWriter = new OutputStreamWriter(System.out);
                 SchemaWriter schemaWriter = new SchemaWriter(outputStreamWriter);
                 sequenceElement.visit(schemaWriter);
-                try {
-                    outputStreamWriter.flush();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                outputStreamWriter.flush();
             }
         }
     }
@@ -972,20 +959,6 @@ public class TolerantReaderPlugin extends Plugin {
                 }
             }
         }
-    }
-
-    private JDefinedClass addClass(JMods jMods, Outline outline, JClassContainer targetPackage, String className,
-            ClassType classType) throws JClassAlreadyExistsException {
-        JDefinedClass aliasBean = targetPackage._class(jMods.getValue(), className,
-                classType);
-        String factoryName = aliasBean._package()
-            .name() + ".ObjectFactory";
-        JDefinedClass objFactory = OutlineHelper.getJDefinedClassFromOutline(outline, factoryName);
-        JMethod factoryMethod = objFactory.method(1, aliasBean, "create" + aliasBean.name());
-        factoryMethod.body()
-            ._return(JExpr._new(aliasBean));
-
-        return aliasBean;
     }
 
     private JDefinedClass addClass(Outline outline, JPackage targetPackage, String className, ClassOutline replaces) {

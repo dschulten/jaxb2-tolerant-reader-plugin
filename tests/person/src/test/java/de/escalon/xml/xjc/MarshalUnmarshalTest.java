@@ -6,8 +6,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.math.BigDecimal;
-import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -19,26 +17,17 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.junit.Test;
 
-import com.captech.person.BaseAddress;
-import com.captech.person.GlobalAddress;
-import com.captech.person.Name;
-import com.captech.person.ObjectFactory;
-import com.captech.person.Person;
-
-import de.allianz.namespace.absvertragsachprivatservice.v5.CTGetVertragRequest;
-import de.allianz.namespace.absvertragsachprivatservice.v5.CTGetVertragResponse;
-import de.allianz.namespace.basis.ProductComponent;
-import de.allianz.namespace.person.NaturalPerson;
-import de.allianz.namespace.vertragsachprivat.PrivatePropertyContract;
-import de.allianz.namespace.vertragsachprivat.PrivatePropertyInsuranceContract;
-import de.allianz.namespace.vertragsachprivat.PrivatePropertyInsuredPerson;
-import de.allianz.namespace.vertragsachprivat.PrivatePropertyProductCharacteristic;
+import com.example.person.Address;
+import com.example.person.BaseAddress;
+import com.example.person.Name;
+import com.example.person.ObjectFactory;
+import com.example.person.Person;
 
 public class MarshalUnmarshalTest {
 
     @Test
     public void testMarshallingPerson() throws JAXBException {
-        JAXBContext context = JAXBContext.newInstance("com.captech.person");
+        JAXBContext context = JAXBContext.newInstance("com.example.person");
 
         Marshaller marshaller = context.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
@@ -49,16 +38,16 @@ public class MarshalUnmarshalTest {
 
         Name name = new Name();
         name.setFirstName("John");
-        name.setLastName("Doe");
+        name.setGivenName("Doe");
         person.setName(name);
 
         person.setAge(18);
 
-        GlobalAddress globalAddress = new GlobalAddress();
+        Address globalAddress = new Address();
         globalAddress.setCity("Schwetzingen");
         globalAddress.setAddr1("Carl Benz Str. 12");
         globalAddress.setCountry("Germany");
-        globalAddress.setPostalCode("12121");
+        globalAddress.setPostCode("12121");
         person.setShippingAddress(globalAddress);
 
         JAXBElement<Person> jaxbElement = new JAXBElement<Person>(new QName("uri", "local"), Person.class, person);
@@ -74,15 +63,15 @@ public class MarshalUnmarshalTest {
         assertNotNull("Person not unmarshalled", personJAXBElement.getValue());
         assertNotNull("Name not unmarshalled", personJAXBElement.getValue().getName());
         assertEquals("John", personJAXBElement.getValue().getName().getFirstName());
-        assertEquals("Doe", personJAXBElement.getValue().getName().getLastName());
+        assertEquals("Doe", personJAXBElement.getValue().getName().getGivenName());
         assertEquals(18, personJAXBElement.getValue().getAge().intValue());
         BaseAddress shippingAddress = personJAXBElement.getValue().getShippingAddress();
         assertNotNull("ShippingAddress not unmarshalled", shippingAddress);
         assertEquals("Carl Benz Str. 12", shippingAddress.getAddr1());
         assertEquals("Schwetzingen", shippingAddress.getCity());
-        assertTrue(shippingAddress instanceof GlobalAddress);
-        assertEquals("12121", ((GlobalAddress) shippingAddress).getPostalCode());
-        assertEquals("Germany", ((GlobalAddress) shippingAddress).getCountry());
+        assertTrue(shippingAddress instanceof Address);
+        assertEquals("12121", ((Address) shippingAddress).getPostCode());
+        assertEquals("Germany", ((Address) shippingAddress).getCountry());
 
     }
 

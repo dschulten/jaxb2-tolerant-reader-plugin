@@ -6,6 +6,7 @@
   <version>0.1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>JAXB2 Tolerant Reader xjc patch</name>
+  <description>Patch for CClassInfo constructor which takes FQCN parameter, see JAX_WS-1187</description>
   <dependencies>
       <dependency>
       <groupId>org.glassfish.jaxb</groupId>

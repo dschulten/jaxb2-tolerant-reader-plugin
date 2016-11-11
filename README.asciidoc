@@ -46,29 +46,30 @@ For this, you define a binding file with an `include` element on the schema leve
 The configuration takes place in the bindings.xjb file. In the sample binding below we use the extension binding prefix `tr` to bind the tolerant-reader plugin namespace.
 
 ----
-<jxb:bindings version="2.1" xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
-	xmlns:xs="http://www.w3.org/2001/XMLSchema"
-	xmlns:tr="http://jaxb2-commons.dev.java.net/tolerant-reader"
-	xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
-	jxb:extensionBindingPrefixes="xjc tr">
-	<jxb:globalBindings>
-		<xjc:simple />
-		<xjc:serializable uid="1" />
-	</jxb:globalBindings>
+<jxb:bindings version="2.1" xmlns:jxb="http://java.sun.com/xml/ns/jaxb" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:tr="http://jaxb2-commons.dev.java.net/tolerant-reader" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+  jxb:extensionBindingPrefixes="xjc tr">
+  <jxb:globalBindings>
+    <xjc:simple />
+    <xjc:serializable uid="1" />
+  </jxb:globalBindings>
 
-	<jxb:bindings schemaLocation="schema.xsd">
-		<tr:include packageRoot="com.example.customer" bean="Person" 
-		  properties="name age shippingAddress"/>
-		<tr:include bean="BaseAddress" properties="addr1 city"/>
-		<tr:include bean="USAddress" properties="state zip"/>
-		<tr:include bean="GlobalAddress" properties="postalCode country"/>
-		
-		<!-- property firstName will be included as-is, 
-			property lastName will appear as givenName -->
-		<tr:include bean="Name" properties="firstName">
-		  <tr:alias property="lastName">givenName</tr:alias>
-		</tr:include>	
-	</jxb:bindings>
+  <jxb:bindings schemaLocation="Person.xsd">
+    <tr:include packageRoot="com.example">
+      <tr:bean name="Person" properties="name age shippingAddress" />
+      <tr:bean name="BaseAddress" properties="addr1 city" />
+      <tr:bean name="USAddress" properties="state zip" />
+      <!-- bean alias with property alias -->
+      <tr:bean name="GlobalAddress" alias="Address" properties="country">
+        <tr:alias property="postalCode">postCode</tr:alias>
+      </tr:bean>
+      <!-- property firstName will be included as-is,
+        property lastName will appear as givenName -->
+      <tr:bean name="Name" properties="firstName">
+        <tr:alias property="lastName">givenName</tr:alias>
+      </tr:bean>
+    </tr:include>
+  </jxb:bindings>
 </jxb:bindings>
 ----
 

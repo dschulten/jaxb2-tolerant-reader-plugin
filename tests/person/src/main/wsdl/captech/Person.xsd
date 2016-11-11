@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://captech.com/person"
-	xmlns:tns="http://captech.com/person" elementFormDefault="qualified">
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://example.com/person"
+	xmlns:tns="http://example.com/person" elementFormDefault="qualified">
 
     <complexType name="Name">
     	<sequence>

@@ -1,6 +1,5 @@
 package de.escalon.xml.xjc;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -57,7 +56,7 @@ public class PropOrderVisitor implements XSVisitor {
     }
 
     public void simpleType(XSSimpleType simpleType) {
-        System.out.println(simpleType);
+//        System.out.println(simpleType);
     }
 
     public void particle(XSParticle particle) {
@@ -69,19 +68,19 @@ public class PropOrderVisitor implements XSVisitor {
                         PropOrderVisitor.this.elementDecl(decl, extraAtts);
                     else {
                         // element reference
-                        System.out.println(MessageFormat.format("<element ref=\"'{'{0}'}'{1}\"{2}/>",
-                                decl.getTargetNamespace(),
-                                decl.getName(),
-                                extraAtts));
+//                        System.out.println(MessageFormat.format("<element ref=\"'{'{0}'}'{1}\"{2}/>",
+//                                decl.getTargetNamespace(),
+//                                decl.getName(),
+//                                extraAtts));
                     }
                 }
 
                 public void modelGroupDecl(XSModelGroupDecl decl) {
                     // group reference
-                    System.out.println(MessageFormat.format("<group ref=\"'{'{0}'}'{1}\"{2}/>",
-                            decl.getTargetNamespace(),
-                            decl.getName(),
-                            extraAtts));
+//                    System.out.println(MessageFormat.format("<group ref=\"'{'{0}'}'{1}\"{2}/>",
+//                            decl.getTargetNamespace(),
+//                            decl.getName(),
+//                            extraAtts));
                 }
 
                 public void modelGroup(XSModelGroup group) {
