@@ -27,27 +27,6 @@
     </license>
   </licenses>
 
-    <developers>
-        <developer>
-            <id>dschulten</id>
-            <name>Dietrich Schulten</name>
-            <email>ds(at)escalon.de</email>
-            <organization>Escalon System-Entwicklung</organization>
-            <organizationUrl>https://github.com/dschulten</organizationUrl>
-            <roles>
-                <role>Project lead</role>
-            </roles>
-            <timezone>+1</timezone>
-        </developer>
-    </developers>
-
-    <scm>
-        <url>https://github.com/dschulten/jaxb2-tolerant-reader-plugin</url>
-        <connection>scm:git:https://github.com/dschulten/jaxb2-tolerant-reader-plugin.git</connection>
-        <developerConnection>scm:git:https://github.com/dschulten/jaxb2-tolerant-reader-plugin.git</developerConnection>
-        <tag>HEAD</tag>
-    </scm>
-
   <dependencies>
     <dependency>
       <groupId>org.glassfish.jaxb</groupId>
