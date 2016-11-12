@@ -323,10 +323,31 @@ public class TolerantReaderPlugin extends Plugin {
 
             applyXmlTypeToClasses(classOutlines, beanInclusions, classesToKeep);
             applyXmlTypeToAliases(classOutlines, beanInclusions, classesToKeep, beansToRename);
+            applyExposeToClasses(outline, beanInclusions, classOutlines, beansToRename);
+            applyExposeToAliases(outline, beanInclusions, beansToRename);
 
             removeBeansWhichHaveAliases(outline, beansToRename);
         } catch (Exception e) {
             throw new RuntimeException("failed to edit class", e);
+        }
+    }
+
+    private void applyExposeToClasses(Outline outline, BeanInclusions beanInclusions,
+            Collection<? extends ClassOutline> classOutlines,
+            Map<String, ChangeSet> beansToRename) {
+        for (final ClassOutline classOutline : classOutlines) {
+            applyExpose((String) null, Annotatable.from(classOutline.implClass), beanInclusions, outline,
+                    classOutline.target);
+        }
+
+    }
+
+    private void applyExposeToAliases(Outline outline, BeanInclusions beanInclusions,
+            Map<String, ChangeSet> beansToRename) {
+        Collection<ChangeSet> values = beansToRename.values();
+        for (ChangeSet changeSet : values) {
+            applyExpose((String) null, Annotatable.from(changeSet.definedClass), beanInclusions, outline,
+                    changeSet.sourceClassOutline.target);
         }
     }
 
@@ -388,19 +409,18 @@ public class TolerantReaderPlugin extends Plugin {
             JDefinedClass implClass = classOutline.implClass;
 
             addXmlSeeAlso(outline, classesToKeep, beansToRename, classInfo, implClass);
-            updateAliasFieldsAndAccessors(outline, beanInclusions, beansToRename, classInfo, implClass);
+            applyBeanAliasesToFieldsAndAccessors(outline, beanInclusions, beansToRename, classInfo, implClass);
         }
     }
 
-    private void updateAliasFieldsAndAccessors(Outline outline, BeanInclusions beanInclusions,
+    private void applyBeanAliasesToFieldsAndAccessors(Outline outline, BeanInclusions beanInclusions,
             Map<String, ChangeSet> beansToRename, CClassInfo classInfo, JDefinedClass implClass)
             throws ClassNotFoundException, IOException {
         Collection<JMethod> methods = implClass.methods();
         Map<String, JFieldVar> fields = implClass.fields();
 
-        Map<String, JFieldVar> originalFields = new HashMap<String, JFieldVar>();
-        originalFields.putAll(fields); // concurrent modification
-        for (Entry<String, JFieldVar> entry : originalFields.entrySet()) {
+        for (Entry<String, JFieldVar> entry : new HashMap<String, JFieldVar>(fields).entrySet()) { // concurrent
+                                                                                                   // mod
             JFieldVar field = entry.getValue();
             String fieldName = entry.getKey();
             JType fieldType = field.type();
@@ -410,11 +430,13 @@ public class TolerantReaderPlugin extends Plugin {
             }
             String publicName = propertyInfo.getName(true);
             JClass aliasFieldType = getAliasFieldType(outline, beansToRename, fieldType);
-            if (aliasFieldType == null) {
-                applyExpose(propertyInfo.getName(false), Annotatable.from(ClassHelper.findGetterInClass(implClass,
-                        publicName)),
-                        beanInclusions, outline, classInfo);
-            } else {
+            // if (aliasFieldType == null) {
+            // applyExpose(propertyInfo.getName(false),
+            // Annotatable.from(ClassHelper.findGetterInClass(implClass,
+            // publicName)),
+            // beanInclusions, outline, classInfo);
+            // } else {
+            if (aliasFieldType != null) {
                 // field
                 implClass.removeField(field);
                 JFieldVar aliasTypeField = implClass.field(field.mods()
@@ -422,7 +444,6 @@ public class TolerantReaderPlugin extends Plugin {
 
                 AnnotationHelper.applyAnnotations(outline, Annotatable.from(aliasTypeField), field.annotations());
 
-                // getter
                 JMethod getter = ClassHelper.findGetterInClass(implClass, publicName);
                 if (getter != null) {
                     JMethod aliasedMethod = implClass.method(getter.mods()
@@ -448,7 +469,6 @@ public class TolerantReaderPlugin extends Plugin {
                             beanInclusions, outline, classInfo);
                     methods.remove(getter);
                 }
-                // setter
                 JMethod setter = ClassHelper.findSetterInClass(implClass, publicName, fieldType);
                 if (setter != null) {
                     addSetter(outline, implClass, field, setter, aliasFieldType);
@@ -645,10 +665,7 @@ public class TolerantReaderPlugin extends Plugin {
                                 String propertyAliasPublic = propertyAlias.substring(0, 1)
                                     .toUpperCase()
                                         + propertyAlias.substring(1);
-                                if (!(propertyPrivateName.equals(propertyAlias))) {
-                                    propertyInfo.setName(true, StringHelper.capitalize(propertyAlias));
-                                    propertyInfo.setName(false, propertyAlias);
-                                }
+
                                 JFieldVar fieldVar = fields.get(propertyPrivateName);
                                 fieldVar.name(propertyAlias);
                                 for (JMethod method : methods) {
@@ -662,6 +679,15 @@ public class TolerantReaderPlugin extends Plugin {
                                         }
                                     }
                                 }
+
+                                if (!(propertyPrivateName.equals(propertyAlias))) {
+                                    propertyInfo.setName(true, StringHelper.capitalize(propertyAlias));
+                                    propertyInfo.setName(false, propertyAlias);
+                                }
+                            } else {
+                                applyExpose(propertyInfo.getName(false),
+                                        Annotatable.from(ClassHelper.findGetterInClass(implClass, propertyPublicName)),
+                                        beanInclusions, outline, classInfo);
                             }
 
                         }

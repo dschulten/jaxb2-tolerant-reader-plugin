@@ -44,6 +44,11 @@
             <artifactId>xjc-classinfo-patch</artifactId>
             <version>@project.version@</version>
           </dependency>
+          <dependency>
+            <groupId>de.escalon.hypermedia</groupId>
+            <artifactId>hydra-jsonld</artifactId>
+            <version>0.3.0</version>
+          </dependency>
         </dependencies>
         <configuration>
           <extension>true</extension>

@@ -62,8 +62,7 @@
         <configuration>
           <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
           <settingsFile>src/it/settings.xml</settingsFile>
-<!--           <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath> -->
-          <postBuildHookScript>verify</postBuildHookScript> <!-- no extension required -->
+          <mavenHome>${env.MAVEN_HOME}</mavenHome>
         </configuration>
         <executions>
           <execution>
@@ -77,6 +76,7 @@
       </plugin>    
       <plugin>
         <artifactId>maven-source-plugin</artifactId>
+        <version>3.0.1</version>
         <executions>
           <execution>
             <id>attach-source</id>
