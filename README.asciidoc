@@ -1,4 +1,4 @@
-= jaxb2-tolerant-reader-plugin
+= jaxb2-tolerant-reader-plugin image:https://travis-ci.org/dschulten/jaxb2-tolerant-reader-plugin.svg?branch=master["Build Status", link="https://travis-ci.org/dschulten/jaxb2-tolerant-reader-plugin"]
 :toc:
 :toc-placement: preamble
 
