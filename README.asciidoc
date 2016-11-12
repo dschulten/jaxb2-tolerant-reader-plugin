@@ -20,11 +20,13 @@ Note that schema changes might still require regeneration and recompilation of t
 The plugin configuration can also be handed to the service as an executable description of my client expectations.
 It could be http://martinfowler.com/articles/consumerDrivenContracts.html[used as a test] by the service to see which client will break upon any given change.
 
+Finally, the plugin annotates the generated beans with the `@Expose` annotation from https://github.com/dschulten/hydra-java/tree/master/hydra-jsonld[hydra-jsonld], if hydra-jsonld is on the classpath.
+
 == Maven Build
 To set up the plugin for a maven build, use the maven-jaxb2-plugin. In the maven plugin configuration add the jaxb2-tolerant-reader xjc plugin and make sure you enable xjc extension mode, as shown below. 
 The plugin is activated via the -Xtolerant-reader switch.
 
-NOTE: Currently the tolerant-reader-plugin requires a patch to xjc classinfo (xjc-classinfo-patch). The patch is based upon the xjc version 2.2.11 used by the maven-jaxb2-plugin 0.12.3. A https://github.com/gf-metro/jaxb/pull/30[pull request] has been submitted to gf-metro. In order to introduce the patch, add it as dependency to the maven-jaxb2-plugin as shown below.
+NOTE: Currently the tolerant-reader-plugin requires a patch to xjc classinfo (xjc-classinfo-patch). The patch is based upon the xjc version 2.2.11 used by the current maven-jaxb2-plugin. A https://github.com/gf-metro/jaxb/pull/30[pull request] has been submitted to gf-metro. In order to introduce the patch, add it as dependency to the maven-jaxb2-plugin as shown below.
 
 Since the tolerant-reader-plugin updates the `Outline` built from the schema, it must run before other plugins such as the jaxb2-basics plugin, so they can pick up the changes introduced by tolerant-reader-plugin. The pom.xml of the https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tree/master/tests/person[tests/person subproject] uses tolerant-reader-plugin with jaxb2-basics plugin.
 
@@ -75,21 +77,20 @@ Since the tolerant-reader-plugin updates the `Outline` built from the schema, it
 ----
 
 == Manual execution
-In launch and debug configurations one can execute the plugin via the `com.sun.tools.xjc.Driver` Java main class, with the tolerant-reader-plugin on the classpath.
+In launch and debug configurations one can execute the plugin via the `com.sun.tools.xjc.Driver` Java main class, with the tolerant-reader-plugin and the xjc-classinfo-patch on the classpath (make sure the xjc-classinfo-patch comes before tolerant-reader-plugin on the classpath).
 
     com.sun.tools.xjc.Driver
 
-Use the _tests/person_ project as current working directory of the launch configuration and pass the following arguments:
+Use the _it/person_ project as *current working directory of the launch configuration* and pass the following arguments:
 
-    -extension -no-header -d target -Xtolerant-reader -b src/main/wsdl/bindings.xjb src/main/wsdl/Person.xsd
-
+    -extension -no-header -d target -Xtolerant-reader -b src/main/wsdl/example/bindings.xjb src/main/wsdl/example/Person.xsd
 
 == Configuration: Include Required Data Only
 The idea is to require only the Java beans and bean attributes your client really needs and be tolerant about the rest.
 For this, you define a binding file with an `include` element on the schema level where you describe beans that should be generated.
 
 
-=== Example
+=== Example bindings file
 The configuration of the tolerant-reader-plugin uses the http://docs.oracle.com/cd/E17802_01/webservices/webservices/docs/1.5/tutorial/doc/JAXBUsing4.html[standard customization options] of the xml-to-java compiler xjc. 
 Below you see an example of an external binding customization file, i.e a _bindings.xjb_ file which you put into your schemadirectory. In the sample binding below we use the extension binding prefix `tr` for the tolerant-reader plugin namespace.
 
@@ -120,34 +121,47 @@ Below you see an example of an external binding customization file, i.e a _bindi
 </jxb:bindings>
 ----
 
-=== include element
+==== include element
 Add one include element as customization root.
 
-==== packageRoot attribute (optional)
+===== packageRoot attribute (optional)
 You may add a `packageRoot` attribute to an `include` element if you have to select beans from specific packages. The package root does not have to be the entire package name, it uses startsWith to match packages. That way you can be tolerant about particular versions of a schema if the schema provider uses version numbers in namespaces.
 
 I.e. if the schema uses a target namespace `com.example.namespace.fun.v5_7`, you can use a packageRoot `com.example.namespace.fun` to select your beans. 
 
 TIP: In situations where the schema uses versioned namespaces, apply https://jaxb.java.net/guide/Customizing_Java_packages.html[custom java packages] to further decouple your beans. If you do this, the original versioned namespace is preserved during marshalling via the package definition in _package-info.java_.
 
-=== bean element
+==== bean element
 Describes an expected bean. Super classes will be included automatically.
 
-==== name attribute
+===== name attribute
 Simple name of the expected bean. 
 
-==== properties attribute
+===== properties attribute
 List of expected bean properties as space-separated strings. You have to define all properties which should be generated. Properties may be defined in super classes.
 If an included property has a complex type, the bean for that type will be included automatically.
 
 In cases where you do not simply expect an attribute, but also want to rename it, use an alias element instead.
 
-=== alias element
+==== alias element
 List of aliased properties to include inside a bean element, can be used in combination with the properties attribute.
 The generated property will be renamed to the value of the alias element. Specify the property you want to rename with the property attribute.
 
-==== property attribute
+===== property attribute
 Original property name of an alias element
+
+=== Configuring annotation with hydra-jsonld `@Expose`
+
+Have the following dependency in your pom.xml:
+
+----
+    <dependency>
+      <groupId>de.escalon.hypermedia</groupId>
+      <artifactId>hydra-jsonld</artifactId>
+      <version>0.3.0</version>
+    </dependency>
+----
+
 
 == Acknowledgements
 David Tiller, https://www.captechconsulting.com/blogs/make-a-surgical-strike-with-a-custom-xjc-plugin[Make a Surgical Strike with a Custom XJC Plugin] and http://www.captechconsulting.com/blogs/extending-xjc-functionality-with-a-custom-plugin[Extending XJC Functionality With a Custom Plugin]+

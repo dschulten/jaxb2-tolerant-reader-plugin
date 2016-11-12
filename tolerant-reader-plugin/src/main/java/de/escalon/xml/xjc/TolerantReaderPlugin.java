@@ -57,12 +57,12 @@ import com.sun.xml.xsom.impl.util.SchemaWriter;
 import de.escalon.hypermedia.hydra.mapping.Expose;
 import de.escalon.xml.xjc.TolerantReaderPlugin.ChangeSet;
 
-// TODO try with other plugins, e.g. fluent builder
+// TODO annotate @Expose on class
 // TODO execute tests with /tests project automatically, add assertions
+// TODO try with other plugins, e.g. fluent builder
 // TODO automatically keep required fields or attributes
 // TODO automatically adjust getter and setter names for alias beans according to alias
 // beans
-// TODO annotate @Expose on class
 // TODO package-info prefix annotation, currently we expose with full url and use prefix
 // TODO decouple structurally: support EL for property paths to aliases, or xpath or use
 // https://blog.frankel.ch/customize-your-jaxb-bindings/ converter method
