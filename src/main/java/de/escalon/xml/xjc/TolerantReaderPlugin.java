@@ -55,8 +55,8 @@ import com.sun.xml.xsom.XSComponent;
 import com.sun.xml.xsom.impl.util.SchemaWriter;
 
 import de.escalon.hypermedia.hydra.mapping.Expose;
+import de.escalon.xml.xjc.TolerantReaderPlugin.ChangeSet;
 
-// TODO find a way to introduce the patch to CClassInfo would it work to include the class itself?
 // TODO try with other plugins, e.g. fluent builder
 // TODO execute tests with /tests project automatically, add assertions
 // TODO automatically keep required fields or attributes
@@ -314,7 +314,8 @@ public class TolerantReaderPlugin extends Plugin {
                 ClassOutline found = findMatchingInclusionEntry(classOutlines, beanInclusion);
                 if (found == null) {
                     throw new IllegalArgumentException(
-                            "Tolerant reader expects bean " + inclusionCandidates.toString() + ", but schema has no such bean");
+                            "Tolerant reader expects bean " + inclusionCandidates.toString()
+                                    + ", but schema has no such bean");
                 }
                 List<CPropertyInfo> ownAndInheritedProperties = new ArrayList<CPropertyInfo>(found.target
                     .getProperties());
@@ -342,31 +343,48 @@ public class TolerantReaderPlugin extends Plugin {
         performEditing(outline, beanInclusions, classOutlines, classesToKeep);
     }
 
+    class ChangeSet {
+        final ClassOutline sourceClassOutline;
+        final ClassOutline targetClassOutline;
+        final JDefinedClass definedClass;
+
+        public ChangeSet(ClassOutline sourceClassOutline, ClassOutline targetClassOutline, JDefinedClass definedClass) {
+            super();
+            this.sourceClassOutline = sourceClassOutline;
+            this.targetClassOutline = targetClassOutline;
+            this.definedClass = definedClass;
+        }
+
+        public String getAliasBeanName() {
+            return definedClass.fullName();
+        }
+    }
+
     private void performEditing(Outline outline, BeanInclusions beanInclusions,
             Collection<? extends ClassOutline> classOutlines, Map<String, Set<String>> classesToKeep) {
         try {
-            Map<ClassOutline, JDefinedClass> beansToRename = new HashMap<ClassOutline, JDefinedClass>();
-            Map<String, String> beanAliases = new HashMap<String, String>();
+            Map<String, ChangeSet> beansToRename = new HashMap<String, ChangeSet>();
 
             removeUnusedAndRenameProperties(outline, beanInclusions, classOutlines, classesToKeep);
-            createAliasBeans(outline, beanInclusions, classOutlines, beansToRename, beanAliases);
-            applyBeanAliasesToClasses(outline, beanInclusions, classOutlines, classesToKeep, beanAliases);
-            fillAliasBeanContent(outline, classesToKeep, beansToRename, beanAliases);
+            createAliasBeans(outline, beanInclusions, classOutlines, beansToRename);
+            applyBeanAliasesToClasses(outline, beanInclusions, classOutlines, classesToKeep, beansToRename);
+            fillAliasBeanContent(outline, classesToKeep, beanInclusions, beansToRename);
 
             applyXmlTypeToClasses(classOutlines, beanInclusions, classesToKeep);
             applyXmlTypeToAliases(classOutlines, beanInclusions, classesToKeep, beansToRename);
 
-            removeBeansWhichHaveAliases(outline, beanAliases);
+            removeBeansWhichHaveAliases(outline, beansToRename);
         } catch (Exception e) {
             throw new RuntimeException("failed to edit class", e);
         }
     }
 
     private void applyXmlTypeToAliases(Collection<? extends ClassOutline> classOutlines, BeanInclusions beanInclusions,
-            Map<String, Set<String>> classesToKeep, Map<ClassOutline, JDefinedClass> beansToRename) {
+            Map<String, Set<String>> classesToKeep, Map<String, ChangeSet> beansToRename) {
 
-        for (Entry<ClassOutline, JDefinedClass> beanToRenameEntry : beansToRename.entrySet()) {
-            final ClassOutline classOutline = beanToRenameEntry.getKey();
+        for (Entry<String, ChangeSet> beanToRenameEntry : beansToRename.entrySet()) {
+            ChangeSet changeSet = beanToRenameEntry.getValue();
+            final ClassOutline classOutline = changeSet.sourceClassOutline;
             CClassInfo classInfo = classOutline.target;
             String className = classInfo.getName();
 
@@ -374,32 +392,12 @@ public class TolerantReaderPlugin extends Plugin {
             if (propertiesToKeep == null) {
                 continue;
             }
-            JDefinedClass implClass = beanToRenameEntry.getValue();
+            JDefinedClass implClass = changeSet.definedClass;
 
             // add XmlType with name and propOrder
             JAnnotationUse annotateXmlType = implClass.annotate(XmlType.class);
             annotateXmlType.param("name", classInfo.getTypeName()
                 .getLocalPart());
-
-            XSComponent schemaComponent = classInfo.getSchemaComponent();
-            // namespace my typeName
-            /** @see <a href="https://www.w3.org/TR/xmlschema-ref/">SCD</a> */
-            String scd = "/type::my:" + classInfo.getTypeName()
-                .getLocalPart() + "/model::sequence";
-            NamespaceContext nsContext = SimpleNamespaceContextBuilder.aSingleNamespaceContext()
-                .withNs("my", classInfo.getTypeName()
-                    .getNamespaceURI())
-                .build();
-            Collection<XSComponent> select = schemaComponent.select(scd, nsContext);
-            System.out.println(scd);
-            for (XSComponent sequenceElement : select) {
-                PropOrderVisitor visitor = new PropOrderVisitor(classOutline, beanInclusions, propertiesToKeep);
-                sequenceElement.visit(visitor);
-                JAnnotationArrayMember paramArray = annotateXmlType.paramArray("propOrder");
-                for (String propOrderItem : visitor.getPropOrderList()) {
-                    paramArray.param(propOrderItem);
-                }
-            }
 
         }
     }
@@ -421,54 +419,30 @@ public class TolerantReaderPlugin extends Plugin {
             annotateXmlType.param("name", classInfo.getTypeName()
                 .getLocalPart());
 
-            XSComponent schemaComponent = classInfo.getSchemaComponent();
-            // namespace my typeName
-            /** @see <a href="https://www.w3.org/TR/xmlschema-ref/">SCD</a> */
-            String scd = "/type::my:" + classInfo.getTypeName()
-                .getLocalPart() + "/model::sequence";
-            NamespaceContext nsContext = SimpleNamespaceContextBuilder.aSingleNamespaceContext()
-                .withNs("my", classInfo.getTypeName()
-                    .getNamespaceURI())
-                .build();
-            Collection<XSComponent> select = schemaComponent.select(scd, nsContext);
-            System.out.println(scd);
-
-            for (XSComponent sequenceElement : select) {
-                PropOrderVisitor visitor = new PropOrderVisitor(classOutline, beanInclusions, propertiesToKeep);
-                sequenceElement.visit(visitor);
-                JAnnotationArrayMember paramArray = annotateXmlType.paramArray("propOrder");
-                for (String propOrderItem : visitor.getPropOrderList()) {
-                    paramArray.param(propOrderItem);
-                }
-                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(System.out);
-                SchemaWriter schemaWriter = new SchemaWriter(outputStreamWriter);
-                sequenceElement.visit(schemaWriter);
-                outputStreamWriter.flush();
-            }
         }
     }
 
-    private void removeBeansWhichHaveAliases(Outline outline, Map<String, String> beanAliases) {
-        for (String renamedBean : beanAliases.keySet()) {
+    private void removeBeansWhichHaveAliases(Outline outline, Map<String, ChangeSet> beansToRename) {
+        for (String renamedBean : beansToRename.keySet()) {
             removeClass(outline, renamedBean);
         }
     }
 
     private void applyBeanAliasesToClasses(Outline outline, BeanInclusions beanInclusions,
             Collection<? extends ClassOutline> classOutlines, Map<String, Set<String>> classesToKeep,
-            Map<String, String> beanAliases) throws ClassNotFoundException, IOException {
+            Map<String, ChangeSet> beansToRename) throws ClassNotFoundException, IOException {
 
         for (ClassOutline classOutline : classOutlines) {
             CClassInfo classInfo = classOutline.target;
             JDefinedClass implClass = classOutline.implClass;
 
-            addXmlSeeAlso(outline, classesToKeep, beanAliases, classInfo, implClass);
-            updateAliasFieldsAndAccessors(outline, beanInclusions, beanAliases, classInfo, implClass);
+            addXmlSeeAlso(outline, classesToKeep, beansToRename, classInfo, implClass);
+            updateAliasFieldsAndAccessors(outline, beanInclusions, beansToRename, classInfo, implClass);
         }
     }
 
     private void updateAliasFieldsAndAccessors(Outline outline, BeanInclusions beanInclusions,
-            Map<String, String> beanAliases, CClassInfo classInfo, JDefinedClass implClass)
+            Map<String, ChangeSet> beansToRename, CClassInfo classInfo, JDefinedClass implClass)
             throws ClassNotFoundException, IOException {
         Collection<JMethod> methods = implClass.methods();
         Map<String, JFieldVar> fields = implClass.fields();
@@ -484,7 +458,7 @@ public class TolerantReaderPlugin extends Plugin {
                 continue;
             }
             String publicName = propertyInfo.getName(true);
-            JClass aliasFieldType = getAliasFieldType(outline, beanAliases, fieldType);
+            JClass aliasFieldType = getAliasFieldType(outline, beansToRename, fieldType);
             if (aliasFieldType == null) {
                 applyExpose(propertyInfo.getName(false), Annotatable.from(ClassHelper.findGetterInClass(implClass,
                         publicName)),
@@ -534,7 +508,8 @@ public class TolerantReaderPlugin extends Plugin {
 
     }
 
-    private void addXmlSeeAlso(Outline outline, Map<String, Set<String>> classesToKeep, Map<String, String> beanAliases,
+    private void addXmlSeeAlso(Outline outline, Map<String, Set<String>> classesToKeep,
+            Map<String, ChangeSet> beansToRename,
             CClassInfo classInfo, JDefinedClass implClass) {
         Iterator<CClassInfo> subclasses = classInfo.listSubclasses();
         JAnnotationArrayMember arrayValue = null;
@@ -546,9 +521,10 @@ public class TolerantReaderPlugin extends Plugin {
                     JAnnotationUse annotateXmlSeeAlso = implClass.annotate(XmlSeeAlso.class);
                     arrayValue = annotateXmlSeeAlso.paramArray("value");
                 }
-                String aliasClassName = beanAliases.get(subclassName);
-                if (aliasClassName != null) {
-                    subclassName = aliasClassName;
+                ChangeSet changeSet = beansToRename.get(subclassName);
+
+                if (changeSet != null) {
+                    subclassName = changeSet.getAliasBeanName();
                 }
                 JDefinedClass clazz = outline.getCodeModel()
                     ._getClass(subclassName);
@@ -558,30 +534,42 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private void fillAliasBeanContent(Outline outline, Map<String, Set<String>> classesToKeep,
-            Map<ClassOutline, JDefinedClass> beansToRename, Map<String, String> beanAliases)
+            BeanInclusions beanInclusions,
+            Map<String, ChangeSet> beansToRename)
             throws ClassNotFoundException, IOException {
-        for (Entry<ClassOutline, JDefinedClass> beanToRenameEntry : beansToRename.entrySet()) {
-            ClassOutline originalClassOutline = beanToRenameEntry.getKey();
-            CClassInfo classInfo = originalClassOutline.target;
-            JDefinedClass implClass = originalClassOutline.implClass;
-            JDefinedClass aliasBean = beanToRenameEntry.getValue();
+        for (ChangeSet changeSet : beansToRename.values()) {
+            ClassOutline sourceClassOutline = changeSet.sourceClassOutline;
+            CClassInfo sourceClassInfo = sourceClassOutline.target;
+            JDefinedClass sourceImplClass = sourceClassOutline.implClass;
+            JDefinedClass aliasBean = changeSet.definedClass;
 
             // copy class content
             aliasBean.javadoc()
-                .add(classInfo.javadoc);
-            aliasBean._extends(implClass._extends());
+                .add(sourceClassInfo.javadoc);
+            aliasBean._extends(sourceImplClass._extends());
             Iterator<JClass> impls = aliasBean._implements();
             while (impls.hasNext()) {
                 JClass iface = impls.next();
                 aliasBean._implements(iface);
             }
 
-            Collection<JMethod> methods = implClass.methods();
-            Map<String, JFieldVar> fields = implClass.fields();
+            Collection<JMethod> methods = sourceImplClass.methods();
+            Map<String, JFieldVar> fields = sourceImplClass.fields();
 
-            for (Entry<String, JFieldVar> entry : fields.entrySet()) {
-                JFieldVar field = entry.getValue();
-                String fieldName = entry.getKey();
+            List<CPropertyInfo> properties = sourceClassInfo.getProperties();
+            for (CPropertyInfo cPropertyInfo : properties) {
+
+                String sourcePropertyName = cPropertyInfo.getName(false);
+
+                BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(sourceClassInfo);
+                String fieldName = sourcePropertyName;
+                if (beanInclusion != null) {
+                    String aliasFieldName = beanInclusion.getPropertyAlias(sourcePropertyName);
+                    if (aliasFieldName != null) {
+                        fieldName = aliasFieldName;
+                    }
+                }
+                JFieldVar field = fields.get(fieldName);
 
                 // TODO how can we read the value of a field?
                 if ("serialVersionUID".equals(fieldName)) {
@@ -589,8 +577,11 @@ public class TolerantReaderPlugin extends Plugin {
                         .getValue(), field.type(), fieldName, JExpr.lit(-1L));
                 } else {
                     JType fieldType = field.type();
-                    JType aliasFieldType = getAliasFieldType(outline, beanAliases, fieldType);
+                    JType aliasFieldType = getAliasFieldType(outline, beansToRename, fieldType);
                     fieldType = aliasFieldType != null ? aliasFieldType : fieldType;
+
+                    CPropertyInfo sourceProperty = changeSet.sourceClassOutline.target.getProperty(sourcePropertyName);
+                    changeSet.targetClassOutline.target.addProperty(sourceProperty);
 
                     JFieldVar aliasBeanField = aliasBean.field(field.mods()
                         .getValue(), fieldType, fieldName);
@@ -618,24 +609,27 @@ public class TolerantReaderPlugin extends Plugin {
             }
 
             // fix XmlSeeAlso
-            Iterator<CClassInfo> subclasses = originalClassOutline.target.listSubclasses();
+            Iterator<CClassInfo> subclasses = sourceClassOutline.target.listSubclasses();
             JAnnotationArrayMember arrayValue = null;
             while (subclasses.hasNext()) {
                 CClassInfo subclass = subclasses.next();
-                String subclassAlias = beanAliases.get(subclass.fullName());
-                String subclassName = subclassAlias == null ? subclass.getName() : subclassAlias;
-                if (classesToKeep.containsKey(subclass.getName())) {
-                    if (arrayValue == null) {
-                        JAnnotationUse annotateXmlSeeAlso = aliasBean.annotate(XmlSeeAlso.class);
-                        arrayValue = annotateXmlSeeAlso.paramArray("value");
+                ChangeSet subClassChangeSet = beansToRename.get(subclass.fullName());
+                if (subClassChangeSet != null) {
+                    String subclassAlias = subClassChangeSet.getAliasBeanName();
+                    String subclassName = subclassAlias == null ? subclass.getName() : subclassAlias;
+                    if (classesToKeep.containsKey(subclass.getName())) {
+                        if (arrayValue == null) {
+                            JAnnotationUse annotateXmlSeeAlso = aliasBean.annotate(XmlSeeAlso.class);
+                            arrayValue = annotateXmlSeeAlso.paramArray("value");
+                        }
+                        JDefinedClass clazz = outline.getCodeModel()
+                            ._getClass(subclassName);
+                        arrayValue.param(clazz);
                     }
-                    JDefinedClass clazz = outline.getCodeModel()
-                        ._getClass(subclassName);
-                    arrayValue.param(clazz);
                 }
             }
 
-            Collection<JAnnotationUse> annotations = implClass.annotations();
+            Collection<JAnnotationUse> annotations = sourceImplClass.annotations();
             // XmlSeeAlso is handled by ourselves
             AnnotationHelper.applyAnnotations(outline, Annotatable.from(aliasBean), annotations, IGNORED_ANNOTATIONS);
 
@@ -643,8 +637,8 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private void createAliasBeans(Outline outline, BeanInclusions beanInclusions,
-            Collection<? extends ClassOutline> classOutlines, Map<ClassOutline, JDefinedClass> beansToRename,
-            Map<String, String> beanAliases) throws JClassAlreadyExistsException {
+            Collection<? extends ClassOutline> classOutlines, Map<String, ChangeSet> beansToRename)
+            throws JClassAlreadyExistsException {
         for (ClassOutline classOutline : new ArrayList<ClassOutline>(classOutlines)) { // no
                                                                                        // concurrent
                                                                                        // mod
@@ -654,12 +648,8 @@ public class TolerantReaderPlugin extends Plugin {
             String aliasBeanName = getBeanAlias(classInfo, beanInclusions);
             if (!aliasBeanName.isEmpty()) {
                 JPackage parent = implClass.getPackage();
-                JDefinedClass aliasBean = addClass(outline, parent, aliasBeanName, classOutline);
-                // JDefinedClass aliasBean = addClass(implClass.mods(), outline, parent,
-                // aliasBeanName, implClass
-                // .getClassType());
-                beansToRename.put(classOutline, aliasBean); // keep for later
-                beanAliases.put(classOutline.target.fullName(), aliasBean.fullName());
+                ChangeSet changeSet = addClass(outline, parent, aliasBeanName, classOutline);
+                beansToRename.put(classOutline.target.fullName(), changeSet); // keep for later
             }
         }
     }
@@ -680,13 +670,12 @@ public class TolerantReaderPlugin extends Plugin {
                 Collection<JMethod> methodsToRemove = new ArrayList<JMethod>();
                 final Set<String> propertiesToKeep = classesToKeep.get(className);
                 List<CPropertyInfo> properties = classInfo.getProperties();
-                List<CPropertyInfo> propertiesToRemove = new ArrayList<CPropertyInfo>();
-                for (CPropertyInfo propertyInfo : properties) {
+                for (CPropertyInfo propertyInfo : new ArrayList<CPropertyInfo>(properties)) {
                     String propertyPrivateName = propertyInfo.getName(false); // fooBar
                     String propertyPublicName = propertyInfo.getName(true);
                     if (!propertiesToKeep.contains(propertyPrivateName)) {
                         // remove unused field and accessor methods
-                        propertiesToRemove.add(propertyInfo); // no concurrent modification
+                        properties.remove(propertyInfo);
                         JFieldVar fieldVar = fields.get(propertyPrivateName);
                         implClass.removeField(fieldVar);
                         for (JMethod method : methods) {
@@ -705,6 +694,10 @@ public class TolerantReaderPlugin extends Plugin {
                                 String propertyAliasPublic = propertyAlias.substring(0, 1)
                                     .toUpperCase()
                                         + propertyAlias.substring(1);
+                                if (!(propertyPrivateName.equals(propertyAlias))) {
+                                    propertyInfo.setName(true, StringHelper.capitalize(propertyAlias));
+                                    propertyInfo.setName(false, propertyAlias);
+                                }
                                 JFieldVar fieldVar = fields.get(propertyPrivateName);
                                 fieldVar.name(propertyAlias);
                                 for (JMethod method : methods) {
@@ -723,8 +716,6 @@ public class TolerantReaderPlugin extends Plugin {
                         }
                     }
                 }
-                properties.removeAll(propertiesToRemove);
-
                 // remove XmlType and XmlSeeAlso
                 Collection<JAnnotationUse> annotations = implClass.annotations();
                 List<JAnnotationUse> annotationsToRemove = new ArrayList<JAnnotationUse>();
@@ -764,7 +755,7 @@ public class TolerantReaderPlugin extends Plugin {
 
     }
 
-    private JClass getAliasFieldType(Outline outline, Map<String, String> beanAliases, JType fieldType)
+    private JClass getAliasFieldType(Outline outline, Map<String, ChangeSet> beansToRename, JType fieldType)
             throws ClassNotFoundException {
         JClass ret = null;
         if (fieldType instanceof JClass) {
@@ -773,8 +764,9 @@ public class TolerantReaderPlugin extends Plugin {
                 List<JClass> typeParameters = fieldAsJClass.getTypeParameters();
                 // getter must have one type parameter
                 JClass typeParameter = typeParameters.get(0);
-                String genericTypeParameterAlias = beanAliases.get(typeParameter.fullName());
-                if (genericTypeParameterAlias != null) {
+                ChangeSet changeSet = beansToRename.get(typeParameter.fullName());
+                if (changeSet != null) {
+                    String genericTypeParameterAlias = changeSet.getAliasBeanName();
                     JDefinedClass aliasOfGenericTypeParameter = OutlineHelper.getJDefinedClassFromOutline(outline,
                             genericTypeParameterAlias);
                     JClass parseType = outline.getCodeModel()
@@ -782,9 +774,10 @@ public class TolerantReaderPlugin extends Plugin {
                     ret = parseType.narrow(aliasOfGenericTypeParameter);
                 }
             } else {
-                String propertyTypeAlias = beanAliases.get(fieldType.fullName());
-                if (propertyTypeAlias != null) {
-                    ret = OutlineHelper.getJDefinedClassFromOutline(outline, propertyTypeAlias);
+                ChangeSet changeSet = beansToRename.get(fieldType.fullName());
+
+                if (changeSet != null) {
+                    ret = OutlineHelper.getJDefinedClassFromOutline(outline, changeSet.getAliasBeanName());
                 }
             }
         }
@@ -961,7 +954,7 @@ public class TolerantReaderPlugin extends Plugin {
         }
     }
 
-    private JDefinedClass addClass(Outline outline, JPackage targetPackage, String className, ClassOutline replaces) {
+    private ChangeSet addClass(Outline outline, JPackage targetPackage, String className, ClassOutline replaces) {
 
         CClassInfo classInfo = replaces.target;
         Locator locator = classInfo.getLocator();
@@ -969,16 +962,10 @@ public class TolerantReaderPlugin extends Plugin {
         QName elementName = classInfo.getElementName();
         XSComponent source = classInfo.getSchemaComponent();
         CCustomizations customizations = classInfo.getCustomizations();
-        // Ring ring = Ring.begin();
-        // CClassInfo myClassInfo = new CClassInfo(classInfo.model,targetPackage, className,
-        // locator, typeName, elementName, source, customizations);
-        // ring.end(ring);
+
         CClassInfo newClassInfo = new CClassInfo(classInfo.model, targetPackage.owner(), targetPackage.name()
             .isEmpty() ? className : targetPackage.name() + "." + className, locator,
                 typeName, elementName, source, customizations);
-        // CClassInfo newClassInfo = new CClassInfo(classInfo.model, targetPackage.owner(),
-        // className, locator,
-        // typeName, elementName, source, customizations);
         // also adds classInfo to outline:
         ClassOutline classOutline = outline.getClazz(newClassInfo);
         JDefinedClass aliasBean = classOutline.implClass;
@@ -988,8 +975,7 @@ public class TolerantReaderPlugin extends Plugin {
         JMethod factoryMethod = objFactory.method(1, aliasBean, "create" + aliasBean.name());
         factoryMethod.body()
             ._return(JExpr._new(aliasBean));
-
-        return aliasBean;
+        return new ChangeSet(replaces, classOutline, aliasBean);
     }
 
     private boolean hasXmlElementDeclScope(JMethod method, String removedClassName) {

@@ -7,12 +7,6 @@
   <packaging>jar</packaging>
   <name>JAXB2 Tolerant Reader Plugin - Test</name>
   <dependencies>
-<!--     <dependency> -->
-<!--       <groupId>org.glassfish.jaxb</groupId> -->
-<!--       <artifactId>jaxb-xjc</artifactId> -->
-<!--       <version>2.2.11</version> -->
-<!--       <scope>provided</scope> -->
-<!--     </dependency> -->
     <dependency>
       <groupId>org.jvnet.jaxb2_commons</groupId>
       <artifactId>jaxb2-basics-runtime</artifactId>
@@ -43,15 +37,7 @@
       <plugin>
         <groupId>org.jvnet.jaxb2.maven2</groupId>
         <artifactId>maven-jaxb2-plugin</artifactId>
-        <version>0.12.3</version>
-        <!-- <dependencies> -->
-        <!-- <dependency> -->
-        <!-- <groupId>org.glassfish.jaxb</groupId> -->
-        <!-- <artifactId>jaxb-xjc</artifactId> -->
-        <!-- <version>2.3.0-SNAPSHOT</version> -->
-        <!-- <scope>runtime</scope> -->
-        <!-- </dependency> -->
-        <!-- </dependencies> -->
+        <version>0.13.1</version>
         <dependencies>
           <dependency>
             <groupId>de.escalon.jaxb2</groupId>
@@ -60,26 +46,26 @@
           </dependency>
         </dependencies>
         <configuration>
-          <schemaDirectory>src/main/wsdl</schemaDirectory>
           <extension>true</extension>
           <verbose>true</verbose>
         </configuration>
         <executions>
           <execution>
-            <id>captech</id>
+            <id>person</id>
             <goals>
               <goal>generate</goal>
             </goals>
             <configuration>
               <args>
                 <arg>-Xtolerant-reader</arg>
+                <arg>-XtoString</arg>
+                <arg>-Xequals</arg>
+                <arg>-XhashCode</arg>
               </args>
-              <schemaDirectory>${basedir}/src/main/wsdl/captech</schemaDirectory>
-              <!-- <produces> -->
-              <!-- can't use namespace alone, conflicts with other generation results -->
-              <!-- <produce>de/allianz/namespace/personservice/v5/*.java</produce> -->
-              <!-- </produces> -->
-              <verbose>true</verbose>
+              <schemaDirectory>${basedir}/src/main/wsdl/example</schemaDirectory>
+              <produces>
+                <produce>com.example.person/**/*.java</produce>
+              </produces>
               <episode>false</episode>
               <specVersion>2.0</specVersion>
               <plugins>
@@ -87,6 +73,11 @@
                   <groupId>de.escalon.jaxb2</groupId>
                   <artifactId>jaxb2-tolerant-reader</artifactId>
                   <version>0.1.0-SNAPSHOT</version>
+                </plugin>
+                <plugin>
+                  <groupId>org.jvnet.jaxb2_commons</groupId>
+                  <artifactId>jaxb2-basics</artifactId>
+                  <version>0.9.4</version>
                 </plugin>
               </plugins>
             </configuration>
@@ -105,11 +96,9 @@
               </args>
               <schemaDirectory>${basedir}/src/main/wsdl/services_v5</schemaDirectory>
               <produces>
-                <!-- can't use namespace alone, conflicts with other generation results -->
                 <produce>de/allianz/namespace/**/*.java</produce>
               </produces>
               <episode>false</episode>
-              <verbose>true</verbose>
               <specVersion>2.0</specVersion>
               <plugins>
                 <plugin>
