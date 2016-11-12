@@ -152,4 +152,4 @@ Original property name of an alias element
 == Acknowledgements
 David Tiller, https://www.captechconsulting.com/blogs/make-a-surgical-strike-with-a-custom-xjc-plugin[Make a Surgical Strike with a Custom XJC Plugin] and http://www.captechconsulting.com/blogs/extending-xjc-functionality-with-a-custom-plugin[Extending XJC Functionality With a Custom Plugin]+
 Dr. Aleksei Valikov, whose http://stackoverflow.com/questions/32560138/tell-jaxb-binding-compiler-which-elements-to-include[answer on stackoverflow] encouraged me to write this plugin
-Nicolas Fr√§nkel's blog entry https://blog.frankel.ch/customize-your-jaxb-bindings[Customize your JAXB bindings] shows additional ways to customize your JAXB classes, e.g. with base classes and converters.
+Nicolas Fr‰nkel's blog entry https://blog.frankel.ch/customize-your-jaxb-bindings[Customize your JAXB bindings] shows additional ways to customize your JAXB classes, e.g. with base classes and converters.
