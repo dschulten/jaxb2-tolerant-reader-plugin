@@ -6,7 +6,15 @@ Test project to demonstrate usage of Tolerant Reader Plugin
 
 == Execution
 
-Run mvn clean install to see the plugin at work. Note that the generated Person class has no getExtra and setExtra methods. That is the effect of the tolerant-reader configuration in src/main/wsdl/bindings.xjb, which does not include the extra property of Person:
+This test project is part of maven-invoker-plugin integration tests. It contains configuration placeholders and it is therefore not executable as-is.
+
+Run mvn integration-test on jaxb2-tolerant-reader to generate an executable project from this project. 
+
+The invoker plugin filters resources and creates an executable project below target/it/person. That project can also be imported into an IDE.
+
+== Execution Results
+
+Note that the generated Person class has no getExtra and setExtra methods. That is the effect of the tolerant-reader configuration in src/main/wsdl/bindings.xjb, which does not include the extra property of Person:
 
 ----
 <jxb:bindings schemaLocation="Person.xsd">
