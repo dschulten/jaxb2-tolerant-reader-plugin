@@ -18,7 +18,6 @@ import java.util.Set;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 
 import org.w3c.dom.Element;
@@ -52,10 +51,8 @@ import com.sun.tools.xjc.model.CPropertyInfo;
 import com.sun.tools.xjc.outline.ClassOutline;
 import com.sun.tools.xjc.outline.Outline;
 import com.sun.xml.xsom.XSComponent;
-import com.sun.xml.xsom.impl.util.SchemaWriter;
 
 import de.escalon.hypermedia.hydra.mapping.Expose;
-import de.escalon.xml.xjc.TolerantReaderPlugin.ChangeSet;
 
 // TODO annotate @Expose on class
 // TODO execute tests with /tests project automatically, add assertions
@@ -157,52 +154,6 @@ public class TolerantReaderPlugin extends Plugin {
         // }
 
         return true;
-    }
-
-    private static class SimpleNamespaceContext implements NamespaceContext {
-
-        Map<String, String> namespaces;
-        Map<String, String> prefixes;
-
-        private SimpleNamespaceContext(Map<String, String> namespaces, Map<String, String> prefixes) {
-            super();
-            this.namespaces = namespaces;
-            this.prefixes = prefixes;
-        }
-
-        @SuppressWarnings({ "rawtypes" })
-        public Iterator getPrefixes(String namespaceURI) {
-            return Collections.singleton(namespaces.get(namespaceURI))
-                .iterator();
-        }
-
-        public String getPrefix(String namespaceURI) {
-            return namespaces.get(namespaceURI);
-        }
-
-        public String getNamespaceURI(String prefix) {
-            return prefixes.get(prefix);
-        }
-    }
-
-    private static final class SimpleNamespaceContextBuilder {
-        Map<String, String> namespaces = new HashMap<String, String>();
-        Map<String, String> prefixes = new HashMap<String, String>();
-
-        private static SimpleNamespaceContextBuilder aSingleNamespaceContext() {
-            return new SimpleNamespaceContextBuilder();
-        }
-
-        SimpleNamespaceContextBuilder withNs(String prefix, String nsURI) {
-            this.namespaces.put(nsURI, prefix);
-            this.prefixes.put(prefix, nsURI);
-            return this;
-        }
-
-        NamespaceContext build() {
-            return new SimpleNamespaceContext(namespaces, prefixes);
-        }
-
     }
 
     class BeanInclusions implements Iterable<List<BeanInclusion>> {
