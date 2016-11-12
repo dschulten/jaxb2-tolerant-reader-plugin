@@ -174,15 +174,16 @@ public class Person {
     }
 }
 ----
+== Plugin Developers
 
-== Building the Plugin Project
+=== Building the Plugin Project
 This section is for peoply who do not want to use the plugin, but who want to build the plugin themselves.
 
 Normally it should be sufficient to invoke mvn clean install on the plugin project.
 
 If you run the maven build of the plugin project with embedded maven (e.g. inside Eclipse), make sure you have an environment variable `MAVEN_HOME` pointing to a standalone maven installation which can be picked up by the maven invoker plugin during integration test.
 
-== Manual execution
+=== Manual execution
 As a plugin developer you may want to execute the plugin manually, but you want its output in the same place where maven puts it.
 
 In launch and debug configurations you can execute the plugin via the `com.sun.tools.xjc.Driver` Java main class, with the tolerant-reader-plugin and the xjc-classinfo-patch on the classpath (make sure the xjc-classinfo-patch comes before tolerant-reader-plugin on the classpath in your launch configuration). 
@@ -193,6 +194,16 @@ Use the _target/it/person_ project as *current working directory* of the launch 
 
     -extension -no-header -d target/generated-sources/xjc -Xtolerant-reader -b src/main/wsdl/example/bindings.xjb src/main/wsdl/example/Person.xsd
 
+=== Running the Sample Project in Eclipse
+The sample project in _src/it_ makes use of placeholders for the maven invoker plugin. Therefore it cannot run as-is; you have to import the project created by maven-invoker-plugin in _target/it_. 
+
+* Import the parent project as Maven project
+* Execute a maven build on the parent (with standalone maven; or make sure you have a `MAVEN_HOME` environment variable) so that the invoker plugin creates a runnable project in _target/it_.
+* Open the parent project
+* Open the module tolerant-reader-plugin
+* Navigate to _target/it/person_
+* Right click the _person_ folder and select "Import as Project"
+* Right click the newly imported project and select "Run As - Maven build"
 
 == Acknowledgements
 David Tiller, https://www.captechconsulting.com/blogs/make-a-surgical-strike-with-a-custom-xjc-plugin[Make a Surgical Strike with a Custom XJC Plugin] and http://www.captechconsulting.com/blogs/extending-xjc-functionality-with-a-custom-plugin[Extending XJC Functionality With a Custom Plugin]+
