@@ -9,9 +9,7 @@
   <name>JAXB2 Tolerant Reader Plugin Parent Project</name>
   
   <description>
-    This plugin implements a tolerant reader approach for JAXB by allowing 
-    to restrict mapped elements using an include-style configuration in a 
-    custom bindings file.
+    This plugin implements a tolerant reader approach for JAXB by allowing to restrict mapped elements using an include-style configuration in a custom bindings file.
   </description>
 
   <properties>
