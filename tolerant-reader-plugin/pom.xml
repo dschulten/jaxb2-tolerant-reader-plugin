@@ -12,20 +12,6 @@
 
   <url>http://java.net/projects/jaxb2-commons/pages/default-value</url>
 
-  <description>
-		This plugin implements a tolerant reader approach for JAXB by allowing 
-		to restrict mapped elements using an include-style configuration in a 
-		custom bindings file.
-	</description>
-
-  <licenses>
-    <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
-
   <dependencies>
     <dependency>
       <groupId>org.glassfish.jaxb</groupId>
