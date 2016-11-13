@@ -183,7 +183,7 @@ This section is for peoply who do not want to use the plugin, but who want to bu
 
 Normally it should be sufficient to invoke mvn clean install on the plugin project.
 
-If you run the maven build of the plugin project with embedded maven (e.g. inside Eclipse), make sure you have an environment variable `MAVEN_HOME` pointing to a standalone maven installation which can be picked up by the maven invoker plugin during integration test.
+If you run the maven build of the plugin project with embedded maven (e.g. inside Eclipse), make sure you have an environment variable `M2_HOME` pointing to a standalone maven installation which can be picked up by the maven invoker plugin during integration test.
 
 === Manual execution
 As a plugin developer you may want to execute the plugin manually, but you want its output in the same place where maven puts it.
@@ -200,7 +200,7 @@ Use the _target/it/person_ project as *current working directory* of the launch 
 The sample project in _src/it_ makes use of placeholders for the maven invoker plugin. Therefore it cannot run as-is; you have to import the project created by maven-invoker-plugin in _target/it_. 
 
 * Import the parent project as Maven project
-* Execute a maven build on the parent (with standalone maven; or make sure you have a `MAVEN_HOME` environment variable) so that the invoker plugin creates a runnable project in _target/it_.
+* Execute a maven build on the parent (with standalone maven; or make sure you have a `M2_HOME` environment variable) so that the invoker plugin creates a runnable project in _target/it_.
 * Open the parent project
 * Open the module tolerant-reader-plugin
 * Navigate to _target/it/person_

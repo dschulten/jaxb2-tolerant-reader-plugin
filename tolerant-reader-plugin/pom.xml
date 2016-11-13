@@ -53,7 +53,7 @@
         <configuration>
           <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
           <settingsFile>src/it/settings.xml</settingsFile>
-          <mavenHome>${env.MAVEN_HOME}</mavenHome>
+          <mavenHome>${env.M2_HOME}</mavenHome>
         </configuration>
         <executions>
           <execution>
