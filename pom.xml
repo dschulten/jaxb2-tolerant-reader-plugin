@@ -5,11 +5,20 @@
   <artifactId>jaxb2-tolerant-reader-parent</artifactId>
   <version>0.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
+  
   <name>JAXB2 Tolerant Reader Plugin Parent Project</name>
+  
+  <description>
+    This plugin implements a tolerant reader approach for JAXB by allowing 
+    to restrict mapped elements using an include-style configuration in a 
+    custom bindings file.
+  </description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+  
+  <inceptionYear>2015</inceptionYear>
 
   <url>https://github.com/dschulten/jaxb2-tolerant-reader-plugin</url>
 
