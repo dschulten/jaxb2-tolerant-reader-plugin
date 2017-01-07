@@ -15,8 +15,8 @@
       <tr:bean name="GlobalAddress" alias="Address" properties="country">
         <tr:alias property="postalCode">postCode</tr:alias>
       </tr:bean>
-      <tr:bean name="SimpleName" properties="firstName lastName">
-      </tr:bean>
+      <tr:bean name="Name" properties="firstName middleInitial lastName"/>
+      <tr:bean name="SimpleName"/>
     </tr:include>
   </jxb:bindings>
 </jxb:bindings>

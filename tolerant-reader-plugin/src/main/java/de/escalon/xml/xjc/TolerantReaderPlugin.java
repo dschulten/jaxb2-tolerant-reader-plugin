@@ -52,6 +52,11 @@ import com.sun.tools.xjc.outline.ClassOutline;
 import com.sun.tools.xjc.outline.Outline;
 import com.sun.xml.xsom.XSComplexType;
 import com.sun.xml.xsom.XSComponent;
+import com.sun.xml.xsom.XSContentType;
+import com.sun.xml.xsom.XSElementDecl;
+import com.sun.xml.xsom.XSModelGroup;
+import com.sun.xml.xsom.XSParticle;
+import com.sun.xml.xsom.XSTerm;
 import com.sun.xml.xsom.XSType;
 
 import de.escalon.hypermedia.hydra.mapping.Expose;
@@ -542,7 +547,7 @@ public class TolerantReaderPlugin extends Plugin {
             copyJavadocAndImplementsClause(sourceClassInfo, aliasBean);
 
             copyProperties(outline, beanInclusions, beansToRename, sourceClassInfo, sourceImplClass, changeSet,
-                    aliasBean);
+                    aliasBean, Collections.<String, XSParticle> emptyMap());
 
             // fix XmlSeeAlso
             Iterator<CClassInfo> subclasses = sourceClassOutline.target.listSubclasses();
@@ -603,7 +608,7 @@ public class TolerantReaderPlugin extends Plugin {
     private void createRestrictedBeans(Outline outline, BeanInclusions beanInclusions,
             Collection<? extends ClassOutline> classOutlines, Map<String, ChangeSet> beansToRename)
             throws JClassAlreadyExistsException, ClassNotFoundException, IOException {
-        for (ClassOutline sourceClassOutline : new ArrayList<ClassOutline>(classOutlines)) { 
+        for (ClassOutline sourceClassOutline : new ArrayList<ClassOutline>(classOutlines)) {
             CClassInfo sourceClassInfo = sourceClassOutline.target;
             JDefinedClass sourceImplClass = sourceClassOutline.implClass;
 
@@ -613,7 +618,25 @@ public class TolerantReaderPlugin extends Plugin {
                 int derivationMethod = xsComplexType.getDerivationMethod();
                 XSType baseType = xsComplexType.getBaseType();
                 if (XSType.RESTRICTION == derivationMethod && !"anyType".equals(baseType.getName())) {
-                    System.out.println("found restriction");
+                    XSContentType contentType = xsComplexType.getContentType();
+                    // TODO this might be nested element restrictions, maybe visit instead
+                    Map<String, XSParticle> expectedProperties = new HashMap<String, XSParticle>();
+                    if (contentType instanceof XSParticle) {
+                        XSParticle contentTypeParticle = (XSParticle) contentType;
+                        XSTerm term = contentTypeParticle.getTerm();
+                        if (term instanceof XSModelGroup) {
+                            XSModelGroup modelGroup = (XSModelGroup) term;
+                            for (XSParticle xsParticle : modelGroup) {
+                                XSTerm elementDeclTerm = xsParticle.getTerm();
+
+                                if (elementDeclTerm.isElementDecl()) {
+                                    XSElementDecl elementDecl = elementDeclTerm.asElementDecl();
+                                    String name = elementDecl.getName();
+                                    expectedProperties.put(name, xsParticle);
+                                }
+                            }
+                        }
+                    }
 
                     JPackage parent = sourceImplClass.getPackage();
                     parent.remove(sourceImplClass);
@@ -632,7 +655,7 @@ public class TolerantReaderPlugin extends Plugin {
                     // only copy properties matching restrictions
                     copyProperties(outline, beanInclusions, beansToRename, restrictionBaseClassInfo,
                             restrictionBaseImplClass, changeSet,
-                            aliasBean);
+                            aliasBean, expectedProperties);
 
                 }
             }
@@ -640,7 +663,8 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private void copyProperties(Outline outline, BeanInclusions beanInclusions, Map<String, ChangeSet> beansToRename,
-            CClassInfo sourceClassInfo, JDefinedClass sourceImplClass, ChangeSet changeSet, JDefinedClass aliasBean)
+            CClassInfo sourceClassInfo, JDefinedClass sourceImplClass, ChangeSet changeSet, JDefinedClass aliasBean,
+            Map<String, XSParticle> expectedProperties)
             throws ClassNotFoundException, IOException {
 
         // TODO review parameter list:ChangeSet vs sourceClassInfo/sourceImplClass
@@ -650,7 +674,9 @@ public class TolerantReaderPlugin extends Plugin {
 
         List<CPropertyInfo> properties = sourceClassInfo.getProperties();
         for (CPropertyInfo cPropertyInfo : properties) {
-
+            if (!expectedProperties.isEmpty() && !expectedProperties.containsKey(cPropertyInfo.getName(true))) {
+                continue;
+            }
             String sourcePropertyName = cPropertyInfo.getName(false);
 
             BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(sourceClassInfo);
