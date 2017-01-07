@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jaxb2-tolerant-reader</artifactId>
   <packaging>jar</packaging>
@@ -7,17 +6,9 @@
   <parent>
 	  <groupId>de.escalon.jaxb2</groupId>
 	  <artifactId>jaxb2-tolerant-reader-parent</artifactId>
-	  <version>0.1.0-SNAPSHOT</version>  
+	  <version>0.2.1-SNAPSHOT</version>  
   </parent>
   <name>JAXB2 Tolerant Reader Plugin</name>
-
-  <url>http://java.net/projects/jaxb2-commons/pages/default-value</url>
-
-  <description>
-		This plugin implements a tolerant reader approach for JAXB by allowing 
-		to restrict mapped elements using an include-style configuration in a 
-		custom bindings file.
-	</description>
 
   <licenses>
     <license>
@@ -49,8 +40,8 @@
           <inherited>true</inherited>
           <artifactId>maven-compiler-plugin</artifactId>
           <configuration>
-            <source>1.5</source>
-            <target>1.5</target>
+            <source>1.6</source>
+            <target>1.6</target>
           </configuration>
         </plugin>
       </plugins>
@@ -62,7 +53,7 @@
         <configuration>
           <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
           <settingsFile>src/it/settings.xml</settingsFile>
-          <mavenHome>${env.MAVEN_HOME}</mavenHome>
+          <mavenHome>${env.M2_HOME}</mavenHome>
         </configuration>
         <executions>
           <execution>
@@ -70,18 +61,6 @@
             <goals>
               <goal>install</goal>
               <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>    
-      <plugin>
-        <artifactId>maven-source-plugin</artifactId>
-        <version>3.0.1</version>
-        <executions>
-          <execution>
-            <id>attach-source</id>
-            <goals>
-              <goal>jar</goal>
             </goals>
           </execution>
         </executions>

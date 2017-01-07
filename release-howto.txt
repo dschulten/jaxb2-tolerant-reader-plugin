@@ -1,0 +1,25 @@
+Performing a release to Maven and Openshift involves the following steps
+
+Publish to Maven Central
+
+Add Sonatype password to server ossrh in local settings.xml
+
+<settings>
+  <servers>
+    <server>
+      <id>ossrh</id>
+      <username>XXX</username>
+      <password>XXX</password>
+    </server>
+  </servers>
+</settings>
+
+Release to Sonatype with Github password and gpg passphrase:
+mvn release:prepare release:perform -Dusername=ds@escalon.de -Dpassword=XXX -Darguments="-Dgpg.passphrase=XXX"
+
+The above command should automatically release from staging repo https://oss.sonatype.org/
+Details:
+http://central.sonatype.org/pages/releasing-the-deployment.html#locate-and-examine-your-staging-repository
+
+In case that signing failed and the build asks for the gpg passphrase over and over again, perform the release once more:
+mvn release:perform -Darguments="-Dgpg.passphrase=XXX"
