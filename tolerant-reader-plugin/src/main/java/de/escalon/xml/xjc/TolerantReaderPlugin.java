@@ -50,13 +50,14 @@ import com.sun.tools.xjc.model.CPluginCustomization;
 import com.sun.tools.xjc.model.CPropertyInfo;
 import com.sun.tools.xjc.outline.ClassOutline;
 import com.sun.tools.xjc.outline.Outline;
+import com.sun.xml.xsom.XSComplexType;
 import com.sun.xml.xsom.XSComponent;
+import com.sun.xml.xsom.XSType;
 
 import de.escalon.hypermedia.hydra.mapping.Expose;
+import de.escalon.hypermedia.hydra.mapping.Term;
 
-// TODO annotate @Expose on class
-// TODO execute tests with /tests project automatically, add assertions
-// TODO try with other plugins, e.g. fluent builder
+// TODO expose implicitly included classes, too?
 // TODO automatically keep required fields or attributes
 // TODO automatically adjust getter and setter names for alias beans according to alias
 // beans
@@ -336,8 +337,29 @@ public class TolerantReaderPlugin extends Plugin {
             Collection<? extends ClassOutline> classOutlines,
             Map<String, ChangeSet> beansToRename) {
         for (final ClassOutline classOutline : classOutlines) {
-            applyExpose((String) null, Annotatable.from(classOutline.implClass), beanInclusions, outline,
+            Annotatable annotatable = Annotatable.from(classOutline.implClass);
+            applyPrefixTerm(annotatable, beanInclusions, outline, classOutline.target);
+            applyExpose((String) null, annotatable, beanInclusions, outline,
                     classOutline.target);
+        }
+
+    }
+
+    private void applyPrefixTerm(Annotatable target, BeanInclusions beanInclusions, Outline outline,
+            CClassInfo classInfo) {
+        if (HYDRA_PRESENT) {
+            BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(classInfo);
+            if (beanInclusion == null) {
+                return;
+            }
+            String prefix = beanInclusion.getPrefix();
+            if (!prefix.isEmpty()) {
+                JAnnotationUse annotateExpose = target.annotate(Term.class);
+                QName typeName = classInfo.getTypeName();
+                annotateExpose.param("define", prefix);
+                annotateExpose.param("as", typeName.getNamespaceURI() + "/");
+            }
+
         }
 
     }
@@ -346,7 +368,9 @@ public class TolerantReaderPlugin extends Plugin {
             Map<String, ChangeSet> beansToRename) {
         Collection<ChangeSet> values = beansToRename.values();
         for (ChangeSet changeSet : values) {
-            applyExpose((String) null, Annotatable.from(changeSet.definedClass), beanInclusions, outline,
+            Annotatable target = Annotatable.from(changeSet.definedClass);
+            applyPrefixTerm(target, beanInclusions, outline, changeSet.sourceClassOutline.target);
+            applyExpose((String) null, target, beanInclusions, outline,
                     changeSet.sourceClassOutline.target);
         }
     }
@@ -641,10 +665,18 @@ public class TolerantReaderPlugin extends Plugin {
                 Collection<JMethod> methodsToRemove = new ArrayList<JMethod>();
                 final Set<String> propertiesToKeep = classesToKeep.get(className);
                 List<CPropertyInfo> properties = classInfo.getProperties();
+                XSComponent schemaComponent = classInfo.getSchemaComponent();
+                if(schemaComponent instanceof XSComplexType) {
+                    XSComplexType xsComplexType = (XSComplexType) schemaComponent;
+                    int derivationMethod = xsComplexType.getDerivationMethod();
+                    if (XSType.RESTRICTION == derivationMethod) {
+                        //xsComplexType.get
+                    }
+                }
                 for (CPropertyInfo propertyInfo : new ArrayList<CPropertyInfo>(properties)) {
                     String propertyPrivateName = propertyInfo.getName(false); // fooBar
                     String propertyPublicName = propertyInfo.getName(true);
-                    if (!propertiesToKeep.contains(propertyPrivateName)) {
+                    if (!(propertiesToKeep.contains(propertyPrivateName))) {
                         // remove unused field and accessor methods
                         properties.remove(propertyInfo);
                         JFieldVar fieldVar = fields.get(propertyPrivateName);
@@ -718,16 +750,14 @@ public class TolerantReaderPlugin extends Plugin {
             if (beanInclusion == null) {
                 return;
             }
-            if (beanInclusion.includesClass(classInfo.fullName())) {
-                JAnnotationUse annotateExpose = target.annotate(Expose.class);
-                String prefix = beanInclusion.getPrefix();
-                String typeUrl = prefix.isEmpty() ? classInfo.getTypeName()
-                    .getNamespaceURI() + "/" + classInfo.shortName : prefix + ":" + classInfo.shortName;
+            JAnnotationUse annotateExpose = target.annotate(Expose.class);
+            String prefix = beanInclusion.getPrefix();
+            String typeUrl = prefix.isEmpty() ? classInfo.getTypeName()
+                .getNamespaceURI() + "/" + classInfo.shortName : prefix + ":" + classInfo.shortName;
 
-                String propertyFragment = property == null ? "" : "#" + property;
+            String propertyFragment = property == null ? "" : "#" + property;
 
-                annotateExpose.param("value", typeUrl + propertyFragment);
-            }
+            annotateExpose.param("value", typeUrl + propertyFragment);
         }
 
     }

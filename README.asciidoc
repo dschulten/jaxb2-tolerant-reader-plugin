@@ -1,4 +1,4 @@
-= jaxb2-tolerant-reader-plugin
+= jaxb2-tolerant-reader-plugin image:https://travis-ci.org/dschulten/jaxb2-tolerant-reader-plugin.svg?branch=master["Build Status", link="https://travis-ci.org/dschulten/jaxb2-tolerant-reader-plugin"]
 :toc:
 :toc-placement: preamble
 
@@ -28,7 +28,9 @@ The plugin is activated via the -Xtolerant-reader switch.
 
 NOTE: Currently the tolerant-reader-plugin requires a patch to xjc classinfo (xjc-classinfo-patch). The patch is based upon the xjc version 2.2.11 used by the current maven-jaxb2-plugin. A https://github.com/gf-metro/jaxb/pull/30[pull request] has been submitted to gf-metro. In order to introduce the patch, add it as dependency to the maven-jaxb2-plugin as shown below.
 
-Since the tolerant-reader-plugin updates the `Outline` built from the schema, it must run before other plugins such as the jaxb2-basics plugin, so they can pick up the changes introduced by tolerant-reader-plugin. The pom.xml of the https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tree/master/tests/person[tests/person subproject] uses tolerant-reader-plugin with jaxb2-basics plugin.
+Since the tolerant-reader-plugin updates the `Outline` built from the schema, it must run before other plugins such as the jaxb2-basics plugin, so they can pick up the changes introduced by tolerant-reader-plugin. 
+
+The pom.xml of the https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tree/master/tolerant-reader-plugin/src/it/person[it/person test project] uses the tolerant-reader-plugin with jaxb2-basics plugin.
 
 ----
 
@@ -40,7 +42,7 @@ Since the tolerant-reader-plugin updates the `Outline` built from the schema, it
     <dependency>
       <groupId>de.escalon.jaxb2</groupId>
       <artifactId>xjc-classinfo-patch</artifactId>
-      <version>0.1.0</version>
+      <version>0.2.0</version>
     </dependency>
   </dependencies>
   <configuration>
@@ -67,7 +69,7 @@ Since the tolerant-reader-plugin updates the `Outline` built from the schema, it
           <plugin>
             <groupId>de.escalon.jaxb2</groupId>
             <artifactId>jaxb2-tolerant-reader</artifactId>
-            <version>0.1.0</version>
+            <version>0.2.0</version>
           </plugin>
         </plugins>
       </configuration>
@@ -90,30 +92,28 @@ Below you see an example of an external binding customization file, i.e a _bindi
   xmlns:tr="http://jaxb2-commons.dev.java.net/tolerant-reader" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
   jxb:extensionBindingPrefixes="xjc tr">
   <jxb:globalBindings>
+    <xjc:simple />
     <xjc:serializable uid="1" />
   </jxb:globalBindings>
 
   <jxb:bindings schemaLocation="Person.xsd">
-    <tr:include packageRoot="com.example">
-      <tr:bean name="Person" properties="name age shippingAddress" />
+    <tr:include packageRoot="com.example" prefix="cust">
+      <tr:bean name="Person" properties="name age homeAddress" />
       <tr:bean name="BaseAddress" properties="addr1 city" />
       <tr:bean name="USAddress" properties="state zip" />
-      <!-- bean alias with property alias -->
+      <!-- bean alias Address with postCode property alias -->
       <tr:bean name="GlobalAddress" alias="Address" properties="country">
         <tr:alias property="postalCode">postCode</tr:alias>
       </tr:bean>
-      <!-- property firstName will be included as-is,
-        property lastName will appear as givenName -->
-      <tr:bean name="Name" properties="firstName">
-        <tr:alias property="lastName">givenName</tr:alias>
+      <tr:bean name="SimpleName" properties="firstName lastName">
       </tr:bean>
     </tr:include>
   </jxb:bindings>
 </jxb:bindings>
 ----
 
-==== include element
-Add one include element as customization root.
+==== tr:include element
+Add at least one tr:include element as customization root. If you need to define beans from multiple packages, have one include element per package.
 
 ===== packageRoot attribute (optional)
 You may add a `packageRoot` attribute to an `include` element if you have to select beans from specific packages. The package root does not have to be the entire package name, it uses startsWith to match packages. That way you can be tolerant about particular versions of a schema if the schema provider uses version numbers in namespaces.
@@ -122,28 +122,35 @@ I.e. if the schema uses a target namespace `com.example.namespace.fun.v5_7`, you
 
 TIP: In situations where the schema uses versioned namespaces, apply https://jaxb.java.net/guide/Customizing_Java_packages.html[custom java packages] to further decouple your beans. If you do this, the original versioned namespace is preserved during marshalling via the package definition in _package-info.java_.
 
-==== bean element
+===== prefix attribute (optional)
+Allows to specify a prefix to be used for the target namespace URI. When the plugin detects hydra-jsonld on the classpath, it annotates the beans with `@Term(define="pers", as="http://example.com/person/")`
+
+==== tr:bean element
 Describes an expected bean. Super classes will be included automatically.
 
 ===== name attribute
 Simple name of the expected bean. 
 
+===== alias attribute
+Alias bean name to be used instead of the name.
+
 ===== properties attribute
 List of expected bean properties as space-separated strings. You have to define all properties which should be generated. Properties may be defined in super classes.
 If an included property has a complex type, the bean for that type will be included automatically.
 
-In cases where you do not simply expect an attribute, but also want to rename it, use an alias element instead.
+In cases where you do not simply expect a property, but you also want to rename it, use an alias element instead.
 
-==== alias element
-List of aliased properties to include inside a bean element, can be used in combination with the properties attribute.
-The generated property will be renamed to the value of the alias element. Specify the property you want to rename with the property attribute.
+==== tr:alias element
+Describes zero or more properties which should be generated with an alias name, one tr:alias element per property. The generated property will be renamed to the value of the alias element. The property you want to rename is given with the property attribute (see below).
+
+May be used in combination with the properties attribute of the tr:bean element.
 
 ===== property attribute
-Original property name of an alias element
+Original property name of a tr:alias element which will be renamed.
 
-=== Configuring annotation with hydra-jsonld `@Expose`
-
-Have the following *plugin* dependency in your _pom.xml_.
+=== Configuring Annotation with hydra-jsonld `@Expose`
+The @Expose annotation can be used to generate JSON-LD directly from the JAXB beans.
+In order to annotate your beans with `@Expose` have the following *plugin* dependency in your _pom.xml_.
 
 ----
 <plugin>
@@ -155,7 +162,7 @@ Have the following *plugin* dependency in your _pom.xml_.
     <dependency>
       <groupId>de.escalon.hypermedia</groupId>
       <artifactId>hydra-jsonld</artifactId>
-      <version>0.3.0</version>
+      <version>0.3.1</version>
     </dependency>
   </dependencies>
   ...
@@ -165,10 +172,11 @@ The plugin detects the presence of hydra-jsonld and annotates the beans with `@E
 ----
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Person")
-@Expose("http://example.com/person/Person")
+@Term(define = "cust", as = "http://example.com/person/")
+@Expose("cust:Person")
 public class Person {
 
-    @Expose("http://example.com/person/Person#name")
+    @Expose("cust:Person#name")
     public Name getName() {
         return name;
     }
@@ -181,7 +189,7 @@ This section is for peoply who do not want to use the plugin, but who want to bu
 
 Normally it should be sufficient to invoke mvn clean install on the plugin project.
 
-If you run the maven build of the plugin project with embedded maven (e.g. inside Eclipse), make sure you have an environment variable `MAVEN_HOME` pointing to a standalone maven installation which can be picked up by the maven invoker plugin during integration test.
+If you run the maven build of the plugin project with embedded maven (e.g. inside Eclipse), make sure you have an environment variable `M2_HOME` pointing to a standalone maven installation which can be picked up by the maven invoker plugin during integration test.
 
 === Manual execution
 As a plugin developer you may want to execute the plugin manually, but you want its output in the same place where maven puts it.
@@ -198,7 +206,7 @@ Use the _target/it/person_ project as *current working directory* of the launch 
 The sample project in _src/it_ makes use of placeholders for the maven invoker plugin. Therefore it cannot run as-is; you have to import the project created by maven-invoker-plugin in _target/it_. 
 
 * Import the parent project as Maven project
-* Execute a maven build on the parent (with standalone maven; or make sure you have a `MAVEN_HOME` environment variable) so that the invoker plugin creates a runnable project in _target/it_.
+* Execute a maven build on the parent (with standalone maven; or make sure you have a `M2_HOME` environment variable) so that the invoker plugin creates a runnable project in _target/it_.
 * Open the parent project
 * Open the module tolerant-reader-plugin
 * Navigate to _target/it/person_
@@ -208,4 +216,4 @@ The sample project in _src/it_ makes use of placeholders for the maven invoker p
 == Acknowledgements
 David Tiller, https://www.captechconsulting.com/blogs/make-a-surgical-strike-with-a-custom-xjc-plugin[Make a Surgical Strike with a Custom XJC Plugin] and http://www.captechconsulting.com/blogs/extending-xjc-functionality-with-a-custom-plugin[Extending XJC Functionality With a Custom Plugin]+
 Dr. Aleksei Valikov, whose http://stackoverflow.com/questions/32560138/tell-jaxb-binding-compiler-which-elements-to-include[answer on stackoverflow] encouraged me to write this plugin
-Nicolas Fränkel's blog entry https://blog.frankel.ch/customize-your-jaxb-bindings[Customize your JAXB bindings] shows additional ways to customize your JAXB classes, e.g. with base classes and converters.
+Nicolas Fraenkel's blog entry https://blog.frankel.ch/customize-your-jaxb-bindings[Customize your JAXB bindings] shows additional ways to customize your JAXB classes, e.g. with base classes and converters.
