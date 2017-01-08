@@ -114,7 +114,8 @@ public class MarshalUnmarshalTest {
 
     private Person createPerson(ObjectFactory objectFactory) {
         Person person = objectFactory.createPerson();
-
+        person.setPersonId("123");
+        
         SimpleName name = new SimpleName();
         name.setFirstName("John");
         name.setLastName("Doe");
