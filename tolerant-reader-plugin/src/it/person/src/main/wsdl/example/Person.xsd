@@ -72,8 +72,8 @@
       <element name="HomeAddress" type="tns:BaseAddress" maxOccurs="1" minOccurs="1" />
       <element name="ShippingAddress" type="tns:BaseAddress" maxOccurs="1" minOccurs="0" />
       <element name="Extra" type="tns:Extra" maxOccurs="1" minOccurs="0" />
-      <element name="foo" type="int" />
     </sequence>
+    <attribute name="personId" type="string" use="required"/>
   </complexType>
 
   <complexType name="Extra">

@@ -51,6 +51,7 @@ import com.sun.tools.xjc.model.CPluginCustomization;
 import com.sun.tools.xjc.model.CPropertyInfo;
 import com.sun.tools.xjc.outline.ClassOutline;
 import com.sun.tools.xjc.outline.Outline;
+import com.sun.xml.xsom.XSAttributeUse;
 import com.sun.xml.xsom.XSComplexType;
 import com.sun.xml.xsom.XSComponent;
 import com.sun.xml.xsom.XSContentType;
@@ -63,7 +64,6 @@ import com.sun.xml.xsom.XSType;
 import de.escalon.hypermedia.hydra.mapping.Expose;
 import de.escalon.hypermedia.hydra.mapping.Term;
 
-// TODO attributeDecl with use=required
 // TODO do we include required properties from beans further up in the inheritance?
 // TODO no serialVersionUID in alias class Address
 // TODO even if a base bean does not have a required element, a restricted child bean might: Fullname.middleInitial
@@ -937,16 +937,19 @@ public class TolerantReaderPlugin extends Plugin {
                 String propertyInfoName = propertyInfo.getName(false); // fooBar
 
                 XSComponent schemaComponent = propertyInfo.getSchemaComponent();
-                boolean requiredByMinOccurs = false;
+                boolean requiredElementOrAttribute = false;
                 if (schemaComponent instanceof XSParticle) {
                     XSParticle particle = (XSParticle) schemaComponent;
                     BigInteger minOccurs = particle.getMinOccurs();
                     if (minOccurs == null || minOccurs.compareTo(BigInteger.ONE) > -1) {
-                        requiredByMinOccurs = true;
+                        requiredElementOrAttribute = true;
                     }
+                } else if (schemaComponent instanceof XSAttributeUse) {
+                    XSAttributeUse attributeUse = (XSAttributeUse) schemaComponent;
+                    requiredElementOrAttribute= attributeUse.isRequired();
                 }
 
-                if (beanInclusion.includesProperty(propertyInfoName) || requiredByMinOccurs) {
+                if (beanInclusion.includesProperty(propertyInfoName) || requiredElementOrAttribute) {
                     Set<String> props = classesToKeep.get(currentClassName);
                     props.add(propertyInfoName);
                     includedPropertiesChecklist.add(propertyInfoName);
