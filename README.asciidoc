@@ -116,11 +116,9 @@ Below you see an example of an external binding customization file, i.e a _bindi
 Add at least one tr:include element as customization root. If you need to define beans from multiple packages, have one include element per package.
 
 ===== packageRoot attribute (optional)
-You may add a `packageRoot` attribute to an `include` element if you have to select beans from specific packages. The package root does not have to be the entire package name, it uses startsWith to match packages. That way you can be tolerant about particular versions of a schema if the schema provider uses version numbers in namespaces.
+You may add a `packageRoot` attribute to an `include` element if you have to select beans from specific packages. The package root does not have to be the entire package name, it uses startsWith to match packages. That way you can be tolerant about particular versions of a schema if the schema provider uses version numbers in namespaces. I.e. if the schema uses a target namespace `com.example.namespace.fun.v5_7`, you can use a packageRoot `com.example.namespace.fun` to select your beans. 
 
-I.e. if the schema uses a target namespace `com.example.namespace.fun.v5_7`, you can use a packageRoot `com.example.namespace.fun` to select your beans. 
-
-TIP: In situations where the schema uses versioned namespaces, apply https://jaxb.java.net/guide/Customizing_Java_packages.html[custom java packages] to further decouple your beans. If you do this, the original versioned namespace is preserved during marshalling via the package definition in _package-info.java_.
+TIP: In situations where the schema uses versioned namespaces, apply https://jaxb.java.net/guide/Customizing_Java_packages.html[custom java packages] to further decouple your beans. If you do this, the original versioned namespace will still be preserved during marshalling via the package definition in _package-info.java_.
 
 ===== prefix attribute (optional)
 Allows to specify a prefix to be used for the target namespace URI. When the plugin detects hydra-jsonld on the classpath, it annotates the beans with `@Term(define="pers", as="http://example.com/person/")`
@@ -135,7 +133,7 @@ Simple name of the expected bean.
 Alias bean name to be used instead of the name.
 
 ===== properties attribute
-List of expected bean properties as space-separated strings. You have to define all properties which should be generated. Properties may be defined in super classes.
+List of expected bean properties as space-separated strings. Required properties are included automatically (from 0.3.0), i.e. you only need to define properties having minOccurs=0. Properties may be defined in super classes.
 If an included property has a complex type, the bean for that type will be included automatically.
 
 In cases where you do not simply expect a property, but you also want to rename it, use an alias element instead.

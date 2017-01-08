@@ -3,6 +3,7 @@ package de.escalon.xml.xjc;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -62,6 +63,10 @@ import com.sun.xml.xsom.XSType;
 import de.escalon.hypermedia.hydra.mapping.Expose;
 import de.escalon.hypermedia.hydra.mapping.Term;
 
+// TODO attributeDecl with use=required
+// TODO do we include required properties from beans further up in the inheritance?
+// TODO no serialVersionUID in alias class Address
+// TODO even if a base bean does not have a required element, a restricted child bean might: Fullname.middleInitial
 // TODO Expose for restricted classes: should it expose the restriction base instead of the restricted type?
 // TODO expose implicitly included classes, too?
 // TODO automatically keep required fields or attributes
@@ -324,7 +329,7 @@ public class TolerantReaderPlugin extends Plugin {
             Map<String, ChangeSet> beansToRename = new HashMap<String, ChangeSet>();
 
             removeUnusedAndRenameProperties(outline, beanInclusions, classOutlines, classesToKeep);
-            createRestrictedBeans(outline, beanInclusions, classOutlines, beansToRename);
+            createRestrictedBeans(outline, beanInclusions, classOutlines, classesToKeep, beansToRename);
             createAliasBeans(outline, beanInclusions, classOutlines, beansToRename);
             applyBeanAliasesToClasses(outline, beanInclusions, classOutlines, classesToKeep, beansToRename);
             fillAliasBeanContent(outline, classesToKeep, beanInclusions, beansToRename);
@@ -606,11 +611,16 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private void createRestrictedBeans(Outline outline, BeanInclusions beanInclusions,
-            Collection<? extends ClassOutline> classOutlines, Map<String, ChangeSet> beansToRename)
+            Collection<? extends ClassOutline> classOutlines, Map<String, Set<String>> classesToKeep,
+            Map<String, ChangeSet> beansToRename)
             throws JClassAlreadyExistsException, ClassNotFoundException, IOException {
         for (ClassOutline sourceClassOutline : new ArrayList<ClassOutline>(classOutlines)) {
             CClassInfo sourceClassInfo = sourceClassOutline.target;
             JDefinedClass sourceImplClass = sourceClassOutline.implClass;
+
+            if (!classesToKeep.containsKey(sourceClassInfo.getName())) {
+                continue;
+            }
 
             XSComponent schemaComponent = sourceClassInfo.getSchemaComponent();
             if (schemaComponent instanceof XSComplexType) {
@@ -628,7 +638,6 @@ public class TolerantReaderPlugin extends Plugin {
                             XSModelGroup modelGroup = (XSModelGroup) term;
                             for (XSParticle xsParticle : modelGroup) {
                                 XSTerm elementDeclTerm = xsParticle.getTerm();
-
                                 if (elementDeclTerm.isElementDecl()) {
                                     XSElementDecl elementDecl = elementDeclTerm.asElementDecl();
                                     String name = elementDecl.getName();
@@ -704,7 +713,9 @@ public class TolerantReaderPlugin extends Plugin {
 
                 JFieldVar aliasBeanField = aliasBean.field(field.mods()
                     .getValue(), fieldType, fieldName);
-                // TODO apply restrictions: required, value restrictions
+                // TODO apply restrictions on @XmlElement: required, value restrictions
+                // TODO (although only for correctness, would have an effect on schemagen
+                // TODO from our Jaxb bean).
                 AnnotationHelper.applyAnnotations(outline, Annotatable.from(aliasBeanField), field.annotations());
 
                 for (JMethod method : methods) {
@@ -925,7 +936,17 @@ public class TolerantReaderPlugin extends Plugin {
             for (CPropertyInfo propertyInfo : propertyInfos) {
                 String propertyInfoName = propertyInfo.getName(false); // fooBar
 
-                if (beanInclusion.includesProperty(propertyInfoName)) {
+                XSComponent schemaComponent = propertyInfo.getSchemaComponent();
+                boolean requiredByMinOccurs = false;
+                if (schemaComponent instanceof XSParticle) {
+                    XSParticle particle = (XSParticle) schemaComponent;
+                    BigInteger minOccurs = particle.getMinOccurs();
+                    if (minOccurs == null || minOccurs.compareTo(BigInteger.ONE) > -1) {
+                        requiredByMinOccurs = true;
+                    }
+                }
+
+                if (beanInclusion.includesProperty(propertyInfoName) || requiredByMinOccurs) {
                     Set<String> props = classesToKeep.get(currentClassName);
                     props.add(propertyInfoName);
                     includedPropertiesChecklist.add(propertyInfoName);

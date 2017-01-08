@@ -22,6 +22,18 @@
       </restriction>
     </complexContent>
   </complexType>
+  
+  <complexType name="FullName">
+    <complexContent>
+      <restriction base="tns:Name">
+        <sequence>
+          <element name="FirstName" type="string" />
+          <element name="MiddleInitial" type="string" maxOccurs="1" minOccurs="1" />
+          <element name="LastName" type="string" />
+        </sequence>
+      </restriction>
+    </complexContent>
+  </complexType>
 
   <complexType name="BaseAddress">
     <sequence>
@@ -60,6 +72,7 @@
       <element name="HomeAddress" type="tns:BaseAddress" maxOccurs="1" minOccurs="1" />
       <element name="ShippingAddress" type="tns:BaseAddress" maxOccurs="1" minOccurs="0" />
       <element name="Extra" type="tns:Extra" maxOccurs="1" minOccurs="0" />
+      <element name="foo" type="int" />
     </sequence>
   </complexType>
 

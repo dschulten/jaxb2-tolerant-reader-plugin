@@ -71,14 +71,14 @@ import com.sun.xml.xsom.XSComponent;
 import org.xml.sax.Locator;
 
 /**
- * Mutable {@link ClassInfo} representation.
- * With patch for JAX_WS-1187.
+ * Mutable {@link ClassInfo} representation. With patch for JAX_WS-1187.
  * <p>
  * Schema parsers build these objects.
  *
  * @author Kohsuke Kawaguchi
  */
-public final class CClassInfo extends AbstractCElement implements ClassInfo<NType,NClass>, CClassInfoParent, CClass, NClass {
+public final class CClassInfo extends AbstractCElement implements ClassInfo<NType, NClass>, CClassInfoParent, CClass,
+        NClass {
 
     @XmlIDREF
     private CClass baseClass;
@@ -86,9 +86,9 @@ public final class CClassInfo extends AbstractCElement implements ClassInfo<NTyp
     /**
      * List of all subclasses, together with {@link #nextSibling}.
      *
-     * If this class has no sub-class, this field is null. Otherwise,
-     * this field points to a sub-class of this class. From there you can enumerate
-     * all the sub-classes by using {@link #nextSibling}.
+     * If this class has no sub-class, this field is null. Otherwise, this field points to a
+     * sub-class of this class. From there you can enumerate all the sub-classes by using
+     * {@link #nextSibling}.
      */
     private CClassInfo firstSubclass;
 
@@ -105,8 +105,8 @@ public final class CClassInfo extends AbstractCElement implements ClassInfo<NTyp
     /**
      * Custom {@link #getSqueezedName() squeezed name}, if any.
      */
-    private /*almost final*/ @Nullable String squeezedName;
-    
+    private /* almost final */ @Nullable String squeezedName;
+
     /**
      * If this class also gets {@link XmlRootElement}, the class name.
      */
@@ -117,10 +117,8 @@ public final class CClassInfo extends AbstractCElement implements ClassInfo<NTyp
     private final List<CPropertyInfo> properties = new ArrayList<CPropertyInfo>();
 
     /**
-     * TODO: revisit this design.
-     * we should at least do a basic encapsulation to avoid careless
-     * mistakes. Maybe we should even differ the javadoc generation
-     * by queueing runners.
+     * TODO: revisit this design. we should at least do a basic encapsulation to avoid careless
+     * mistakes. Maybe we should even differ the javadoc generation by queueing runners.
      */
     public String javadoc;
 
@@ -147,42 +145,46 @@ public final class CClassInfo extends AbstractCElement implements ClassInfo<NTyp
      */
     private boolean hasAttributeWildcard;
 
-
-    public CClassInfo(Model model,JPackage pkg, String shortName, Locator location, QName typeName, QName elementName, XSComponent source, CCustomizations customizations) {
-        this(model,model.getPackage(pkg),shortName,location,typeName,elementName,source,customizations);
+    public CClassInfo(Model model, JPackage pkg, String shortName, Locator location, QName typeName, QName elementName,
+            XSComponent source, CCustomizations customizations) {
+        this(model, model.getPackage(pkg), shortName, location, typeName, elementName, source, customizations);
     }
 
-    public CClassInfo(Model model,CClassInfoParent p, String shortName, Locator location, QName typeName, QName elementName, XSComponent source, CCustomizations customizations) {
-        super(model,source,location,customizations);
+    public CClassInfo(Model model, CClassInfoParent p, String shortName, Locator location, QName typeName,
+            QName elementName, XSComponent source, CCustomizations customizations) {
+        super(model, source, location, customizations);
         this.model = model;
         this.parent = p;
-        this.shortName = model.allocator.assignClassName(parent,shortName);
+        this.shortName = model.allocator.assignClassName(parent, shortName);
         this.typeName = typeName;
         this.elementName = elementName;
 
         Language schemaLanguage = model.options.getSchemaLanguage();
         if ((schemaLanguage != null) &&
-            (schemaLanguage.equals(Language.XMLSCHEMA) || schemaLanguage.equals(Language.WSDL))) {
-            BIFactoryMethod factoryMethod = Ring.get(BGMBuilder.class).getBindInfo(source).get(BIFactoryMethod.class);
-            if(factoryMethod!=null) {
+                (schemaLanguage.equals(Language.XMLSCHEMA) || schemaLanguage.equals(Language.WSDL))) {
+            BIFactoryMethod factoryMethod = Ring.get(BGMBuilder.class)
+                .getBindInfo(source)
+                .get(BIFactoryMethod.class);
+            if (factoryMethod != null) {
                 factoryMethod.markAsAcknowledged();
                 this.squeezedName = factoryMethod.name;
             }
         }
-        
+
         model.add(this);
     }
 
-    public CClassInfo(Model model,JCodeModel cm, String fullName, Locator location, QName typeName, QName elementName, XSComponent source, CCustomizations customizations) {
-        super(model,source,location,customizations);
+    public CClassInfo(Model model, JCodeModel cm, String fullName, Locator location, QName typeName, QName elementName,
+            XSComponent source, CCustomizations customizations) {
+        super(model, source, location, customizations);
         this.model = model;
         int idx = fullName.lastIndexOf('.');
-        if(idx<0) {
+        if (idx < 0) {
             this.parent = model.getPackage(cm.rootPackage());
-            this.shortName = model.allocator.assignClassName(parent,fullName);
+            this.shortName = model.allocator.assignClassName(parent, fullName);
         } else {
-            this.parent = model.getPackage(cm._package(fullName.substring(0,idx)));
-            this.shortName = model.allocator.assignClassName(parent,fullName.substring(idx+1));
+            this.parent = model.getPackage(cm._package(fullName.substring(0, idx)));
+            this.shortName = model.allocator.assignClassName(parent, fullName.substring(idx + 1));
         }
         this.typeName = typeName;
         this.elementName = elementName;
@@ -199,36 +201,35 @@ public final class CClassInfo extends AbstractCElement implements ClassInfo<NTyp
     }
 
     public boolean hasSubClasses() {
-        return firstSubclass!=null;
+        return firstSubclass != null;
     }
 
     /**
-     * Returns true if a new attribute wildcard property needs to be
-     * declared on this class.
+     * Returns true if a new attribute wildcard property needs to be declared on this class.
      */
     public boolean declaresAttributeWildcard() {
         return hasAttributeWildcard && !inheritsAttributeWildcard();
     }
 
     /**
-     * Returns true if this class inherits a wildcard attribute property
-     * from its ancestor classes.
+     * Returns true if this class inherits a wildcard attribute property from its ancestor classes.
      */
     public boolean inheritsAttributeWildcard() {
         if (getRefBaseClass() != null) {
-            CClassRef cref = (CClassRef)baseClass;
-            if (cref.getSchemaComponent().getForeignAttributes().size() > 0) {
+            CClassRef cref = (CClassRef) baseClass;
+            if (cref.getSchemaComponent()
+                .getForeignAttributes()
+                .size() > 0) {
                 return true;
-            }           
+            }
         } else {
-            for( CClassInfo c=getBaseClass(); c!=null; c=c.getBaseClass() ) {
-                if(c.hasAttributeWildcard)
+            for (CClassInfo c = getBaseClass(); c != null; c = c.getBaseClass()) {
+                if (c.hasAttributeWildcard)
                     return true;
             }
         }
         return false;
     }
-
 
     public NClass getClazz() {
         return this;
@@ -246,27 +247,30 @@ public final class CClassInfo extends AbstractCElement implements ClassInfo<NTyp
     /**
      * Returns the "squeezed name" of this bean token.
      * <p>
-     * The squeezed name of a bean is the concatenation of
-     * the names of its outer classes and itself.
+     * The squeezed name of a bean is the concatenation of the names of its outer classes and
+     * itself.
      * <p>
-     * Thus if the bean is "org.acme.foo.Bean", then the squeezed name is "Bean",
-     * if the bean is "org.acme.foo.Outer1.Outer2.Bean", then "Outer1Outer2Bean".
+     * Thus if the bean is "org.acme.foo.Bean", then the squeezed name is "Bean", if the bean is
+     * "org.acme.foo.Outer1.Outer2.Bean", then "Outer1Outer2Bean".
      * <p>
      * This is used by the code generator
+     * 
+     * @return squeezed name
      */
     @XmlElement
     public String getSqueezedName() {
-        if (squeezedName != null)  return squeezedName;
+        if (squeezedName != null)
+            return squeezedName;
         return calcSqueezedName.onBean(this);
     }
 
     private static final CClassInfoParent.Visitor<String> calcSqueezedName = new Visitor<String>() {
         public String onBean(CClassInfo bean) {
-            return bean.parent.accept(this)+bean.shortName;
+            return bean.parent.accept(this) + bean.shortName;
         }
 
         public String onElement(CElementInfo element) {
-            return element.parent.accept(this)+element.shortName();
+            return element.parent.accept(this) + element.shortName();
         }
 
         public String onPackage(JPackage pkg) {
@@ -290,8 +294,9 @@ public final class CClassInfo extends AbstractCElement implements ClassInfo<NTyp
      */
     public CPropertyInfo getProperty(String name) {
         // TODO: does this method need to be fast?
-        for( CPropertyInfo p : properties )
-            if(p.getName(false).equals(name))
+        for (CPropertyInfo p : properties)
+            if (p.getName(false)
+                .equals(name))
                 return p;
         return null;
     }
@@ -301,7 +306,7 @@ public final class CClassInfo extends AbstractCElement implements ClassInfo<NTyp
     }
 
     public boolean isElement() {
-        return elementName!=null;
+        return elementName != null;
     }
 
     /**
@@ -311,9 +316,9 @@ public final class CClassInfo extends AbstractCElement implements ClassInfo<NTyp
     public CNonElement getInfo() {
         return this;
     }
-    
-    public Element<NType,NClass> asElement() {
-        if(isElement())
+
+    public Element<NType, NClass> asElement() {
+        if (isElement())
             return this;
         else
             return null;
@@ -324,8 +329,7 @@ public final class CClassInfo extends AbstractCElement implements ClassInfo<NTyp
     }
 
     /**
-     * @deprecated
-     *      if you are calling this method directly, you must be doing something wrong.
+     * @deprecated if you are calling this method directly, you must be doing something wrong.
      */
     public boolean isFinal() {
         return false;
@@ -352,8 +356,10 @@ public final class CClassInfo extends AbstractCElement implements ClassInfo<NTyp
      */
     public String fullName() {
         String r = parent.fullName();
-        if(r.length()==0)   return shortName;
-        else                return r+'.'+shortName;
+        if (r.length() == 0)
+            return shortName;
+        else
+            return r + '.' + shortName;
     }
 
     public CClassInfoParent parent() {
@@ -361,8 +367,8 @@ public final class CClassInfo extends AbstractCElement implements ClassInfo<NTyp
     }
 
     public void setUserSpecifiedImplClass(String implClass) {
-        assert this.implClass==null;
-        assert implClass!=null;
+        assert this.implClass == null;
+        assert implClass != null;
         this.implClass = implClass;
     }
 
@@ -370,12 +376,15 @@ public final class CClassInfo extends AbstractCElement implements ClassInfo<NTyp
         return implClass;
     }
 
-
     /**
      * Adds a new property.
+     * 
+     * @param prop
+     *            to add
      */
     public void addProperty(CPropertyInfo prop) {
-        if(prop.ref().isEmpty())
+        if (prop.ref()
+            .isEmpty())
             // this property isn't contributing anything
             // this happens when you try to map an empty sequence to a property
             return;
@@ -384,20 +393,21 @@ public final class CClassInfo extends AbstractCElement implements ClassInfo<NTyp
     }
 
     /**
-     * This method accepts both {@link CClassInfo} (which means the base class
-     * is also generated), or {@link CClassRef} (which means the base class is
-     * already generated and simply referenced.)
+     * This method accepts both {@link CClassInfo} (which means the base class is also generated),
+     * or {@link CClassRef} (which means the base class is already generated and simply referenced.)
      *
-     * The latter is treated somewhat special --- from the rest of the model
-     * this external base class is invisible. This modeling might need more
-     * thoughts to get right.
+     * The latter is treated somewhat special --- from the rest of the model this external base
+     * class is invisible. This modeling might need more thoughts to get right.
+     * 
+     * @param base
+     *            to set
      */
     public void setBaseClass(CClass base) {
-        assert baseClass==null;
-        assert base!=null;
+        assert baseClass == null;
+        assert base != null;
         baseClass = base;
 
-        assert nextSibling==null;
+        assert nextSibling == null;
         if (base instanceof CClassInfo) {
             CClassInfo realBase = (CClassInfo) base;
             this.nextSibling = realBase.firstSubclass;
@@ -417,7 +427,7 @@ public final class CClassInfo extends AbstractCElement implements ClassInfo<NTyp
             return null;
         }
     }
-    
+
     public CClassRef getRefBaseClass() {
         if (baseClass instanceof CClassRef) {
             return (CClassRef) baseClass;
@@ -428,12 +438,15 @@ public final class CClassInfo extends AbstractCElement implements ClassInfo<NTyp
 
     /**
      * Enumerates all the sub-classes of this class.
+     * 
+     * @return subclasses
      */
     public Iterator<CClassInfo> listSubclasses() {
         return new Iterator<CClassInfo>() {
             CClassInfo cur = firstSubclass;
+
             public boolean hasNext() {
-                return cur!=null;
+                return cur != null;
             }
 
             public CClassInfo next() {
@@ -449,35 +462,41 @@ public final class CClassInfo extends AbstractCElement implements ClassInfo<NTyp
     }
 
     public CClassInfo getSubstitutionHead() {
-        CClassInfo c=getBaseClass();
-        while(c!=null && !c.isElement())
-            c=c.getBaseClass();
+        CClassInfo c = getBaseClass();
+        while (c != null && !c.isElement())
+            c = c.getBaseClass();
         return c;
     }
 
-
     /**
-     * Interfaces to be implemented.
-     * Lazily constructed.
+     * Interfaces to be implemented. Lazily constructed.
      */
     private Set<JClass> _implements = null;
 
     public void _implements(JClass c) {
-        if(_implements==null)
+        if (_implements == null)
             _implements = new HashSet<JClass>();
         _implements.add(c);
     }
 
-
     /** Constructor declarations. array of {@link Constructor}s. */
     private final List<Constructor> constructors = new ArrayList<Constructor>(1);
 
-    /** Creates a new constructor declaration and adds it. */
-    public void addConstructor( String... fieldNames ) {
+    /**
+     * Creates a new constructor declaration and adds it.
+     * 
+     * @param fieldNames
+     *            ctor params
+     */
+    public void addConstructor(String... fieldNames) {
         constructors.add(new Constructor(fieldNames));
     }
 
-    /** list all constructor declarations. */
+    /**
+     * list all constructor declarations.
+     * 
+     * @return constructors
+     */
     public Collection<? extends Constructor> getConstructors() {
         return constructors;
     }
@@ -495,7 +514,7 @@ public final class CClassInfo extends AbstractCElement implements ClassInfo<NTyp
     }
 
     public final JClass toType(Outline o, Aspect aspect) {
-        switch(aspect) {
+        switch (aspect) {
         case IMPLEMENTATION:
             return o.getClazz(this).implRef;
         case EXPOSED:
