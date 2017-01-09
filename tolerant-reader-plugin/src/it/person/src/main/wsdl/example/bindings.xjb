@@ -15,7 +15,7 @@
       <tr:bean name="GlobalAddress" alias="Address">
         <tr:alias property="postalCode">postCode</tr:alias>
       </tr:bean>
-      <tr:bean name="Name" />
+      <tr:bean name="Name" properties="middleInitial"/>
       <tr:bean name="SimpleName"/>
       <tr:bean name="FullName"/>
     </tr:include>

@@ -66,7 +66,9 @@ import de.escalon.hypermedia.hydra.mapping.Term;
 
 // TODO do we include required properties from beans further up in the inheritance?
 // TODO no serialVersionUID in alias class Address
-// TODO even if a base bean does not have a required element, a restricted child bean might: Fullname.middleInitial
+// TODO even if a base bean does not have an element, a derived restricted 
+// child bean might: Fullname.middleInitial - automatically include restricted properties 
+// on base so we can copy them, then zap them after copy or - well - keep them
 // TODO Expose for restricted classes: should it expose the restriction base instead of the restricted type?
 // TODO expose implicitly included classes, too?
 // TODO automatically keep required fields or attributes
@@ -681,6 +683,20 @@ public class TolerantReaderPlugin extends Plugin {
         Collection<JMethod> methods = sourceImplClass.methods();
         Map<String, JFieldVar> fields = sourceImplClass.fields();
 
+        Set<String> expectedPropertyNames = expectedProperties.keySet();
+        for (String expectedPropertyName : expectedPropertyNames) {
+            String privatePropertyName = StringHelper.uncapitalize(expectedPropertyName);
+            CPropertyInfo property = sourceClassInfo.getProperty(privatePropertyName);
+            if (property == null) {
+                throw new IllegalStateException("The bean " + aliasBean.fullName()
+                        + " has a schema restriction on the property " + privatePropertyName + " of its base type "
+                        + sourceClassInfo.fullName() + ", but the generated base bean has no such property. Add "
+                        + privatePropertyName
+                        + " to the properties list of the base <bean name=\"" + sourceClassInfo.shortName
+                        + "\"/> element in your bindings.xjb.");
+            }
+        }
+
         List<CPropertyInfo> properties = sourceClassInfo.getProperties();
         for (CPropertyInfo cPropertyInfo : properties) {
             if (!expectedProperties.isEmpty() && !expectedProperties.containsKey(cPropertyInfo.getName(true))) {
@@ -946,7 +962,7 @@ public class TolerantReaderPlugin extends Plugin {
                     }
                 } else if (schemaComponent instanceof XSAttributeUse) {
                     XSAttributeUse attributeUse = (XSAttributeUse) schemaComponent;
-                    requiredElementOrAttribute= attributeUse.isRequired();
+                    requiredElementOrAttribute = attributeUse.isRequired();
                 }
 
                 if (beanInclusion.includesProperty(propertyInfoName) || requiredElementOrAttribute) {
