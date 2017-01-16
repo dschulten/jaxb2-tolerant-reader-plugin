@@ -64,6 +64,9 @@ import com.sun.xml.xsom.XSType;
 import de.escalon.hypermedia.hydra.mapping.Expose;
 import de.escalon.hypermedia.hydra.mapping.Term;
 
+// TODO use getSettersAndGetters when looking for accessors
+// TODO allow multiline properties attribute list
+// TODO duplicate tr:bean names should throw
 // TODO do we include required properties from beans further up in the inheritance?
 // TODO no serialVersionUID in alias class Address
 // TODO even if a base bean does not have an element, a derived restricted 
@@ -425,9 +428,12 @@ public class TolerantReaderPlugin extends Plugin {
             JDefinedClass implClass = classOutline.implClass;
 
             // add XmlType with name and propOrder
-            JAnnotationUse annotateXmlType = implClass.annotate(XmlType.class);
-            annotateXmlType.param("name", classInfo.getTypeName()
-                .getLocalPart());
+            QName typeName = classInfo.getTypeName();
+            if (typeName != null) { // anonymous type
+                JAnnotationUse annotateXmlType = implClass.annotate(XmlType.class);
+                annotateXmlType.param("name", typeName
+                    .getLocalPart());
+            }
 
         }
     }
@@ -734,11 +740,12 @@ public class TolerantReaderPlugin extends Plugin {
                 // TODO from our Jaxb bean).
                 AnnotationHelper.applyAnnotations(outline, Annotatable.from(aliasBeanField), field.annotations());
 
-                for (JMethod method : methods) {
-                    String publicName = fieldName.substring(0, 1)
+                String publicName = fieldName.substring(0, 1)
                         .toUpperCase() + fieldName.substring(1);
-                    if (!method.name()
-                        .endsWith(publicName)) {
+                Set<String> settersAndGetters = getSettersAndGetters(publicName);
+                
+                for (JMethod method : methods) {
+                    if(!settersAndGetters.contains(method.name())) {
                         continue;
                     }
                     JType typeOrAliasType = fieldType;
@@ -780,9 +787,9 @@ public class TolerantReaderPlugin extends Plugin {
                         properties.remove(propertyInfo);
                         JFieldVar fieldVar = fields.get(propertyPrivateName);
                         implClass.removeField(fieldVar);
+                        Set<String> settersAndGetters = getSettersAndGetters(propertyPublicName);
                         for (JMethod method : methods) {
-                            if (method.name()
-                                .endsWith(propertyPublicName)) { // FooBar
+                            if (settersAndGetters.contains(method.name())) { // FooBar
                                 methodsToRemove.add(method); // no concurrent modification
                             }
                         }
@@ -799,9 +806,12 @@ public class TolerantReaderPlugin extends Plugin {
 
                                 JFieldVar fieldVar = fields.get(propertyPrivateName);
                                 fieldVar.name(propertyAlias);
+                                
+                                Set<String> settersAndGetters = getSettersAndGetters(propertyPublicName);
+                                
                                 for (JMethod method : methods) {
                                     String methodName = method.name();
-                                    if (methodName.endsWith(propertyPublicName)) { // FooBar
+                                    if (settersAndGetters.contains(methodName)) { // FooBar
                                         method.name(
                                                 methodName.replace(propertyPublicName, propertyAliasPublic));
                                         if (methodName.startsWith("get") || methodName.startsWith("is")) {
@@ -842,6 +852,15 @@ public class TolerantReaderPlugin extends Plugin {
         }
     }
 
+    private Set<String> getSettersAndGetters(String propertyPublicName) {
+        Set<String> settersAndGetters = new HashSet<String>(Arrays.asList(
+                "set" + propertyPublicName, // FooBar
+                "get" + propertyPublicName,
+                "is" + propertyPublicName,
+                "has" + propertyPublicName));
+        return settersAndGetters;
+    }
+
     private void applyExpose(String property, Annotatable target, BeanInclusions beanInclusions,
             Outline outline, CClassInfo classInfo) {
         if (HYDRA_PRESENT) {
@@ -849,14 +868,18 @@ public class TolerantReaderPlugin extends Plugin {
             if (beanInclusion == null) {
                 return;
             }
-            JAnnotationUse annotateExpose = target.annotate(Expose.class);
-            String prefix = beanInclusion.getPrefix();
-            String typeUrl = prefix.isEmpty() ? classInfo.getTypeName()
-                .getNamespaceURI() + "/" + classInfo.shortName : prefix + ":" + classInfo.shortName;
+            QName typeName = classInfo.getTypeName();
+            // type may be anonymous
+            if (typeName != null) {
+                JAnnotationUse annotateExpose = target.annotate(Expose.class);
+                String prefix = beanInclusion.getPrefix();
+                String typeUrl = prefix.isEmpty() ? typeName
+                    .getNamespaceURI() + "/" + classInfo.shortName : prefix + ":" + classInfo.shortName;
 
-            String propertyFragment = property == null ? "" : "#" + property;
+                String propertyFragment = property == null ? "" : "#" + property;
 
-            annotateExpose.param("value", typeUrl + propertyFragment);
+                annotateExpose.param("value", typeUrl + propertyFragment);
+            }
         }
 
     }
@@ -990,9 +1013,11 @@ public class TolerantReaderPlugin extends Plugin {
 
     private String findPropertyTypeToKeep(ClassOutline classOutline, CPropertyInfo propertyInfo) {
         Collection<JMethod> methods = classOutline.implClass.methods();
+        
+        Set<String> settersAndGetters = getSettersAndGetters(propertyInfo.getName(true));
+        
         for (JMethod jMethod : methods) {
-            if (jMethod.name()
-                .endsWith(propertyInfo.getName(true))) {
+            if (settersAndGetters.contains(jMethod.name())) {
                 JType propertyType = jMethod.type();
                 String propertyTypeToKeep = propertyType.fullName();
                 if (propertyType instanceof JClass) {

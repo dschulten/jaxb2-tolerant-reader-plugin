@@ -107,14 +107,13 @@
             <configuration>
               <args>
                 <arg>-Xtolerant-reader</arg>
-                <arg>-Xfluent-api</arg>
                 <arg>-XtoString</arg>
                 <arg>-Xequals</arg>
                 <arg>-XhashCode</arg>
               </args>
               <schemaDirectory>${basedir}/src/main/wsdl/services_v5</schemaDirectory>
               <produces>
-                <produce>de.allianz.namespace/**/*.java</produce>
+                <produce>de/allianz/namespace/**/*.java</produce>
               </produces>
               <episode>false</episode>
               <specVersion>2.0</specVersion>
@@ -128,12 +127,6 @@
                   <groupId>org.jvnet.jaxb2_commons</groupId>
                   <artifactId>jaxb2-basics</artifactId>
                   <version>0.9.4</version>
-                </plugin>
-                <!-- see https://java.net/projects/jaxb2-commons/pages/Fluent-api -->
-                <plugin>
-                  <groupId>org.jvnet.jaxb2_commons</groupId>
-                  <artifactId>jaxb2-fluent-api</artifactId>
-                  <version>3.0</version>
                 </plugin>
               </plugins>
             </configuration>
