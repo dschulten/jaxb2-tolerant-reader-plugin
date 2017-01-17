@@ -42,7 +42,7 @@ The pom.xml of the https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tre
     <dependency>
       <groupId>de.escalon.jaxb2</groupId>
       <artifactId>xjc-classinfo-patch</artifactId>
-      <version>0.1.0</version>
+      <version>0.2.0</version>
     </dependency>
   </dependencies>
   <configuration>
@@ -69,7 +69,7 @@ The pom.xml of the https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tre
           <plugin>
             <groupId>de.escalon.jaxb2</groupId>
             <artifactId>jaxb2-tolerant-reader</artifactId>
-            <version>0.1.0</version>
+            <version>0.2.0</version>
           </plugin>
         </plugins>
       </configuration>
@@ -92,60 +92,63 @@ Below you see an example of an external binding customization file, i.e a _bindi
   xmlns:tr="http://jaxb2-commons.dev.java.net/tolerant-reader" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
   jxb:extensionBindingPrefixes="xjc tr">
   <jxb:globalBindings>
+    <xjc:simple />
     <xjc:serializable uid="1" />
   </jxb:globalBindings>
 
   <jxb:bindings schemaLocation="Person.xsd">
-    <tr:include packageRoot="com.example">
-      <tr:bean name="Person" properties="name age shippingAddress" />
+    <tr:include packageRoot="com.example" prefix="cust">
+      <tr:bean name="Person" properties="name age homeAddress" />
       <tr:bean name="BaseAddress" properties="addr1 city" />
       <tr:bean name="USAddress" properties="state zip" />
-      <!-- bean alias with property alias -->
+      <!-- bean alias Address with postCode property alias -->
       <tr:bean name="GlobalAddress" alias="Address" properties="country">
         <tr:alias property="postalCode">postCode</tr:alias>
       </tr:bean>
-      <!-- property firstName will be included as-is,
-        property lastName will appear as givenName -->
-      <tr:bean name="Name" properties="firstName">
-        <tr:alias property="lastName">givenName</tr:alias>
+      <tr:bean name="SimpleName" properties="firstName lastName">
       </tr:bean>
     </tr:include>
   </jxb:bindings>
 </jxb:bindings>
 ----
 
-==== include element
-Add at least one include element as customization root. If you need to define beans from multiple packages, have one include element per package.
+==== tr:include element
+Add at least one tr:include element as customization root. If you need to define beans from multiple packages, have one include element per package.
 
 ===== packageRoot attribute (optional)
-You may add a `packageRoot` attribute to an `include` element if you have to select beans from specific packages. The package root does not have to be the entire package name, it uses startsWith to match packages. That way you can be tolerant about particular versions of a schema if the schema provider uses version numbers in namespaces.
+You may add a `packageRoot` attribute to an `include` element if you have to select beans from specific packages. The package root does not have to be the entire package name, it uses startsWith to match packages. That way you can be tolerant about particular versions of a schema if the schema provider uses version numbers in namespaces. I.e. if the schema uses a target namespace `com.example.namespace.fun.v5_7`, you can use a packageRoot `com.example.namespace.fun` to select your beans. 
 
-I.e. if the schema uses a target namespace `com.example.namespace.fun.v5_7`, you can use a packageRoot `com.example.namespace.fun` to select your beans. 
+TIP: In situations where the schema uses versioned namespaces, apply https://jaxb.java.net/guide/Customizing_Java_packages.html[custom java packages] to further decouple your beans. If you do this, the original versioned namespace will still be preserved during marshalling via the package definition in _package-info.java_.
 
-TIP: In situations where the schema uses versioned namespaces, apply https://jaxb.java.net/guide/Customizing_Java_packages.html[custom java packages] to further decouple your beans. If you do this, the original versioned namespace is preserved during marshalling via the package definition in _package-info.java_.
+===== prefix attribute (optional)
+Allows to specify a prefix to be used for the target namespace URI. When the plugin detects hydra-jsonld on the classpath, it annotates the beans with `@Term(define="pers", as="http://example.com/person/")`
 
-==== bean element
+==== tr:bean element
 Describes an expected bean. Super classes will be included automatically.
 
 ===== name attribute
 Simple name of the expected bean. 
 
+===== alias attribute
+Alias bean name to be used instead of the name.
+
 ===== properties attribute
-List of expected bean properties as space-separated strings. You have to define all properties which should be generated. Properties may be defined in super classes.
+List of expected bean properties as space-separated strings. Required properties are included automatically (from 0.3.0), i.e. you only need to define properties having minOccurs=0. Properties may be defined in super classes.
 If an included property has a complex type, the bean for that type will be included automatically.
 
-In cases where you do not simply expect an attribute, but also want to rename it, use an alias element instead.
+In cases where you do not simply expect a property, but you also want to rename it, use an alias element instead.
 
-==== alias element
-List of aliased properties to include inside a bean element, can be used in combination with the properties attribute.
-The generated property will be renamed to the value of the alias element. Specify the property you want to rename with the property attribute.
+==== tr:alias element
+Describes zero or more properties which should be generated with an alias name, one tr:alias element per property. The generated property will be renamed to the value of the alias element. The property you want to rename is given with the property attribute (see below).
+
+May be used in combination with the properties attribute of the tr:bean element.
 
 ===== property attribute
-Original property name of an alias element
+Original property name of a tr:alias element which will be renamed.
 
-=== Configuring annotation with hydra-jsonld `@Expose`
-
-Have the following *plugin* dependency in your _pom.xml_.
+=== Configuring Annotation with hydra-jsonld `@Expose`
+The @Expose annotation can be used to generate JSON-LD directly from the JAXB beans.
+In order to annotate your beans with `@Expose` have the following *plugin* dependency in your _pom.xml_.
 
 ----
 <plugin>
@@ -157,7 +160,7 @@ Have the following *plugin* dependency in your _pom.xml_.
     <dependency>
       <groupId>de.escalon.hypermedia</groupId>
       <artifactId>hydra-jsonld</artifactId>
-      <version>0.3.0</version>
+      <version>0.3.1</version>
     </dependency>
   </dependencies>
   ...
@@ -167,10 +170,11 @@ The plugin detects the presence of hydra-jsonld and annotates the beans with `@E
 ----
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Person")
-@Expose("http://example.com/person/Person")
+@Term(define = "cust", as = "http://example.com/person/")
+@Expose("cust:Person")
 public class Person {
 
-    @Expose("http://example.com/person/Person#name")
+    @Expose("cust:Person#name")
     public Name getName() {
         return name;
     }
@@ -210,4 +214,4 @@ The sample project in _src/it_ makes use of placeholders for the maven invoker p
 == Acknowledgements
 David Tiller, https://www.captechconsulting.com/blogs/make-a-surgical-strike-with-a-custom-xjc-plugin[Make a Surgical Strike with a Custom XJC Plugin] and http://www.captechconsulting.com/blogs/extending-xjc-functionality-with-a-custom-plugin[Extending XJC Functionality With a Custom Plugin]+
 Dr. Aleksei Valikov, whose http://stackoverflow.com/questions/32560138/tell-jaxb-binding-compiler-which-elements-to-include[answer on stackoverflow] encouraged me to write this plugin
-Nicolas Fr�nkel's blog entry https://blog.frankel.ch/customize-your-jaxb-bindings[Customize your JAXB bindings] shows additional ways to customize your JAXB classes, e.g. with base classes and converters.
+Nicolas Fraenkel's blog entry https://blog.frankel.ch/customize-your-jaxb-bindings[Customize your JAXB bindings] shows additional ways to customize your JAXB classes, e.g. with base classes and converters.

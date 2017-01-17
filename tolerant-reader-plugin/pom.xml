@@ -4,9 +4,9 @@
   <packaging>jar</packaging>
 
   <parent>
-	  <groupId>de.escalon.jaxb2</groupId>
-	  <artifactId>jaxb2-tolerant-reader-parent</artifactId>
-	  <version>0.2.1-SNAPSHOT</version>  
+    <groupId>de.escalon.jaxb2</groupId>
+    <artifactId>jaxb2-tolerant-reader-parent</artifactId>
+    <version>0.3.1-SNAPSHOT</version>
   </parent>
   <name>JAXB2 Tolerant Reader Plugin</name>
 

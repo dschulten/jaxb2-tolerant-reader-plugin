@@ -1,72 +1,86 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://example.com/person"
-	xmlns:tns="http://example.com/person" elementFormDefault="qualified">
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://example.com/person" xmlns:tns="http://example.com/person"
+  elementFormDefault="qualified">
 
-    <complexType name="Name">
-    	<sequence>
-    		<element name="FirstName" type="string" maxOccurs="1"
-    			minOccurs="1">
-    		</element>
-    		<element name="MiddleInitial" type="string" maxOccurs="1" minOccurs="0"></element>
-    		<element name="LastName" type="string" maxOccurs="1"
-    			minOccurs="1">
-    		</element>
-    	</sequence>
-    </complexType>
+  <element name="Person" type="tns:Person" />
 
-    <complexType name="BaseAddress">
-    	<sequence>
-    		<element name="Addr1" type="string" maxOccurs="1"
-    			minOccurs="1">
-    		</element>
-    		<element name="Addr2" type="string" maxOccurs="1" minOccurs="0"></element>
-    		<element name="City" type="string" maxOccurs="1" minOccurs="1"></element>
-    	</sequence>
-    </complexType>
+  <complexType name="Name">
+    <sequence>
+      <element name="FirstName" type="string" maxOccurs="1" minOccurs="1" />
+      <element name="MiddleInitial" type="string" maxOccurs="1" minOccurs="0" />
+      <element name="LastName" type="string" maxOccurs="1" minOccurs="1" />
+    </sequence>
+  </complexType>
 
-    <complexType name="USAddress">
-    	<complexContent>
-    		<extension base="tns:BaseAddress">
-    			<sequence>
-    				<element name="State" type="string" maxOccurs="1" minOccurs="1"></element>
-    				<element name="Zip" type="string" maxOccurs="1" minOccurs="1"></element>
-    			</sequence>
-    		</extension>
-    	</complexContent>
-    </complexType>
+  <complexType name="SimpleName">
+    <complexContent>
+      <restriction base="tns:Name">
+        <sequence>
+          <element name="FirstName" type="string" />
+          <element name="LastName" type="string" />
+        </sequence>
+      </restriction>
+    </complexContent>
+  </complexType>
+  
+  <complexType name="FullName">
+    <complexContent>
+      <restriction base="tns:Name">
+        <sequence>
+          <element name="FirstName" type="string" />
+          <element name="MiddleInitial" type="string" maxOccurs="1" minOccurs="1" />
+          <element name="LastName" type="string" />
+        </sequence>
+      </restriction>
+    </complexContent>
+  </complexType>
 
-    <complexType name="GlobalAddress">
-    	<complexContent>
-    		<extension base="tns:BaseAddress">
-    			<sequence>
-    				<element name="PostalCode" type="string"></element>
-    				<element name="Country" type="string"></element>
-    			</sequence>
-    		</extension>
-    	</complexContent>
-    </complexType>
+  <complexType name="BaseAddress">
+    <sequence>
+      <element name="Addr1" type="string" maxOccurs="1" minOccurs="1" />
+      <element name="Addr2" type="string" maxOccurs="1" minOccurs="0" />
+      <element name="City" type="string" maxOccurs="1" minOccurs="1" />
+    </sequence>
+  </complexType>
 
-    <complexType name="Person">
-    	<sequence>
-    		<element name="Name" type="tns:Name" maxOccurs="1"
-    			minOccurs="1">
-    		</element>
-    		<element name="age" type="int" maxOccurs="1" minOccurs="0"></element>
-    		<element name="HomeAddress" type="tns:BaseAddress"
-    			maxOccurs="1" minOccurs="1">
-    		</element>
-    		<element name="ShippingAddress" type="tns:BaseAddress"
-    			maxOccurs="1" minOccurs="0">
-    		</element>
-    		<element name="Extra" type="tns:Extra"
-    			maxOccurs="1" minOccurs="0">
-    		</element>
-    	</sequence>
-    </complexType>
-    
-    <complexType name="Extra">
-    	<sequence>
-    		<element name="UselessField1" type="int"/>
-    	</sequence>
-    	</complexType>
+  <complexType name="USAddress">
+    <complexContent>
+      <extension base="tns:BaseAddress">
+        <sequence>
+          <element name="State" type="string" maxOccurs="1" minOccurs="1" />
+          <element name="Zip" type="string" maxOccurs="1" minOccurs="1" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+
+  <complexType name="GlobalAddress">
+    <complexContent>
+      <extension base="tns:BaseAddress">
+        <sequence>
+          <element name="PostalCode" type="string" />
+          <element name="Country" type="string" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+
+  <complexType name="Person">
+    <sequence>
+      <element name="Name" type="tns:SimpleName" maxOccurs="1" minOccurs="1" />
+      <element name="age" type="int" maxOccurs="1" minOccurs="0" />
+      <element name="HomeAddress" type="tns:BaseAddress" maxOccurs="1" minOccurs="1" />
+      <element name="ShippingAddress" type="tns:BaseAddress" maxOccurs="1" minOccurs="0" />
+      <element name="Extra" type="tns:Extra" maxOccurs="1" minOccurs="0" />
+    </sequence>
+    <attribute name="personId" type="string" use="required"/>
+  </complexType>
+
+  <complexType name="Extra">
+    <sequence>
+      <element name="UselessField1" type="int" />
+    </sequence>
+  </complexType>
+
+
 </schema>

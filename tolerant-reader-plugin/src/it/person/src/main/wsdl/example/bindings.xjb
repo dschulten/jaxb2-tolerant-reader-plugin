@@ -7,19 +7,17 @@
   </jxb:globalBindings>
 
   <jxb:bindings schemaLocation="Person.xsd">
-    <tr:include packageRoot="com.example">
-      <tr:bean name="Person" properties="name age shippingAddress" />
-      <tr:bean name="BaseAddress" properties="addr1 city" />
-      <tr:bean name="USAddress" properties="state zip" />
+    <tr:include packageRoot="com.example" prefix="cust">
+      <tr:bean name="Person" properties="age" />
+      <tr:bean name="BaseAddress" />
+      <tr:bean name="USAddress"/>
       <!-- bean alias Address with postCode property alias -->
-      <tr:bean name="GlobalAddress" alias="Address" properties="country">
+      <tr:bean name="GlobalAddress" alias="Address">
         <tr:alias property="postalCode">postCode</tr:alias>
       </tr:bean>
-      <!-- property firstName will be included as-is, property lastName will appear as givenName -->
-      <!-- <tr:bean name="Name" properties="firstName"> -->
-      <!-- <tr:alias property="lastName">givenName</tr:alias> -->
-      <!-- </tr:bean> -->
-      <tr:bean name="Name" properties="firstName middleInitial lastName" adapter="com.example.NameXmlAdapter" />
+      <tr:bean name="Name" properties="middleInitial" adapter="com.example.NameXmlAdapter"/>
+      <tr:bean name="SimpleName"/>
+      <tr:bean name="FullName"/>
     </tr:include>
   </jxb:bindings>
 </jxb:bindings>
