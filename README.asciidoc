@@ -192,7 +192,7 @@ If you run the maven build of the plugin project with embedded maven (e.g. insid
 === Manual execution
 As a plugin developer you may want to execute the plugin manually, but you want its output in the same place where maven puts it.
 
-In launch and debug configurations you can execute the plugin via the `com.sun.tools.xjc.Driver` Java main class, with the tolerant-reader-plugin and the xjc-classinfo-patch on the classpath (make sure the xjc-classinfo-patch comes before tolerant-reader-plugin on the classpath in your launch configuration). 
+In launch and debug configurations you can execute the plugin via the `com.sun.tools.xjc.Driver` Java main class, with the tolerant-reader-plugin and the xjc-classinfo-patch on the classpath (make sure the xjc-classinfo-patch comes before tolerant-reader-plugin on the classpath in your launch configuration). One way to achieve this is to create a _Java Application_ launch configuration while the `jaxb2-tolerant-reader` project is selected, then switch to the *Classpath* tab, highlight *User Entries* and add the xjc-classinfo-patch project to the classpath, then move it above the tolerant-reader-plugin entry. 
 
 Build the plugin project. This is necessary to create an executable maven test project in _target/it/person_.
 
