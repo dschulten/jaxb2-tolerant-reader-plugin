@@ -26,6 +26,7 @@ import javax.xml.validation.SchemaFactory;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import com.example.person.ValueWrapper;
 import com.example.person.Address;
 import com.example.person.BaseAddress;
 import com.example.person.ObjectFactory;
@@ -122,6 +123,10 @@ public class MarshalUnmarshalTest {
         person.setName(name);
 
         person.setAge(18);
+        ValueWrapper valueWrapper = new ValueWrapper();
+        valueWrapper.setText("Workhorse");
+        valueWrapper.setValue("H");
+        person.setFunction(valueWrapper);
 
         Address globalAddress = new Address();
         globalAddress.setCity("Schwetzingen");

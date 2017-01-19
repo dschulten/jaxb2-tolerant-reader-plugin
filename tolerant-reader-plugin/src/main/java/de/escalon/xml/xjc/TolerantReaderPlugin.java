@@ -71,6 +71,9 @@ import com.sun.xml.xsom.XSType;
 import de.escalon.hypermedia.hydra.mapping.Expose;
 import de.escalon.hypermedia.hydra.mapping.Term;
 
+// TODO person.function should be a String and the adapted type should only be written in xml
+// TODO putting the adaption into the class requires both an xml transient property and the proper property
+// TODO wrong list of aliases in error message about expected bean
 // TODO use getSettersAndGetters when looking for accessors
 // TODO allow multiline properties attribute list
 // TODO duplicate tr:bean names should throw

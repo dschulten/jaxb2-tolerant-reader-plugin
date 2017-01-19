@@ -42,7 +42,7 @@ The pom.xml of the https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tre
     <dependency>
       <groupId>de.escalon.jaxb2</groupId>
       <artifactId>xjc-classinfo-patch</artifactId>
-      <version>0.2.0</version>
+      <version>0.3.0</version>
     </dependency>
   </dependencies>
   <configuration>
@@ -69,7 +69,7 @@ The pom.xml of the https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tre
           <plugin>
             <groupId>de.escalon.jaxb2</groupId>
             <artifactId>jaxb2-tolerant-reader</artifactId>
-            <version>0.2.0</version>
+            <version>0.3.0</version>
           </plugin>
         </plugins>
       </configuration>
@@ -183,7 +183,7 @@ public class Person {
 == Plugin Developers
 
 === Building the Plugin Project
-This section is for peoply who do not want to use the plugin, but who want to build the plugin themselves.
+This section is for people who do not want to use the plugin, but who want to build the plugin themselves.
 
 Normally it should be sufficient to invoke mvn clean install on the plugin project.
 
