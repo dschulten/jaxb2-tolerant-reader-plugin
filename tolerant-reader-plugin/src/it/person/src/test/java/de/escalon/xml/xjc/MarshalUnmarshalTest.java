@@ -91,20 +91,17 @@ public class MarshalUnmarshalTest {
         Unmarshaller unmarshaller = context.createUnmarshaller();
         JAXBElement<Person> personJAXBElement = unmarshaller
             .unmarshal(new StreamSource(in), Person.class);
-        assertNotNull("Person not unmarshalled", personJAXBElement.getValue());
-        assertNotNull("Name not unmarshalled", personJAXBElement.getValue()
-            .getName());
-        assertEquals("John", personJAXBElement.getValue()
-            .getName()
+        Person unmarshalledPerson = personJAXBElement.getValue();
+        assertNotNull("Person not unmarshalled", unmarshalledPerson);
+        assertNotNull("Name not unmarshalled", unmarshalledPerson.getName());
+        assertEquals("John", unmarshalledPerson.getName()
             .getFirstName());
-        assertEquals("Doe", personJAXBElement.getValue()
-            .getName()
+        assertEquals("Doe", unmarshalledPerson.getName()
             .getLastName());
-        assertEquals(18, personJAXBElement.getValue()
-            .getAge()
+        assertEquals(18, unmarshalledPerson.getAge()
             .intValue());
-        BaseAddress homeAddress = personJAXBElement.getValue()
-            .getHomeAddress();
+        assertEquals("Workhorse", unmarshalledPerson.getFunction());
+        BaseAddress homeAddress = unmarshalledPerson.getHomeAddress();
         assertNotNull("HomeAddress not unmarshalled", homeAddress);
         assertEquals("Carl Benz Str. 12", homeAddress.getAddr1());
         assertEquals("Schwetzingen", homeAddress.getCity());
@@ -116,17 +113,14 @@ public class MarshalUnmarshalTest {
     private Person createPerson(ObjectFactory objectFactory) {
         Person person = objectFactory.createPerson();
         person.setPersonId("123");
-        
+
         SimpleName name = new SimpleName();
         name.setFirstName("John");
         name.setLastName("Doe");
         person.setName(name);
 
         person.setAge(18);
-        ValueWrapper valueWrapper = new ValueWrapper();
-        valueWrapper.setText("Workhorse");
-        valueWrapper.setValue("H");
-        person.setFunction(valueWrapper);
+        person.setFunction("Workhorse");
 
         Address globalAddress = new Address();
         globalAddress.setCity("Schwetzingen");

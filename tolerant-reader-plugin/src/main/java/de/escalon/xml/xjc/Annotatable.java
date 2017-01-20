@@ -23,7 +23,6 @@ abstract class Annotatable {
     }
     
     abstract JAnnotationUse annotate(JClass annotationJClass);
-
     abstract JAnnotationUse annotate(Class<? extends Annotation> clazz);
     abstract JAnnotationUse getAnnotation(JAnnotationUse ann);
 }

@@ -3,15 +3,13 @@ package de.escalon.xml.xjc;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.math.BigInteger;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayDeque;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -187,28 +185,29 @@ public class TolerantReaderPlugin extends Plugin {
             return null;
         }
 
-        public Class<? extends XmlAdapter<?, ?>> findAdapter(JType typeToAdapt) {
-
-            try {
-                Class<? extends XmlAdapter<?, ?>> ret = null;
-                List<BeanInclusion> beanInclusionList = beanInclusions.get(typeToAdapt.name());
-                if (beanInclusionList != null) {
-                    for (BeanInclusion beanInclusion : beanInclusionList) {
-                        String xmlAdapterClassName = beanInclusion.getXmlAdapter();
-                        if (xmlAdapterClassName != null && !xmlAdapterClassName.isEmpty()) {
-                            Class<?> adapterClass = Class.forName(xmlAdapterClassName);
-                            @SuppressWarnings("unchecked")
-                            Class<? extends XmlAdapter<?, ?>> xmlAdapterClass = (Class<? extends XmlAdapter<?, ?>>) adapterClass;
-                            ret = xmlAdapterClass;
-                            break;
-                        }
-                    }
-                }
-                return ret;
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        // public Class<? extends XmlAdapter<?, ?>> findAdapter(JType typeToAdapt) {
+        //
+        // try {
+        // Class<? extends XmlAdapter<?, ?>> ret = null;
+        // List<BeanInclusion> beanInclusionList = beanInclusions.get(typeToAdapt.name());
+        // if (beanInclusionList != null) {
+        // for (BeanInclusion beanInclusion : beanInclusionList) {
+        // String xmlAdapterClassName = beanInclusion.getXmlAdapter();
+        // if (xmlAdapterClassName != null && !xmlAdapterClassName.isEmpty()) {
+        // Class<?> adapterClass = Class.forName(xmlAdapterClassName);
+        // @SuppressWarnings("unchecked")
+        // Class<? extends XmlAdapter<?, ?>> xmlAdapterClass = (Class<? extends XmlAdapter<?, ?>>)
+        // adapterClass;
+        // ret = xmlAdapterClass;
+        // break;
+        // }
+        // }
+        // }
+        // return ret;
+        // } catch (ClassNotFoundException e) {
+        // throw new RuntimeException(e);
+        // }
+        // }
 
         public Iterator<List<BeanInclusion>> iterator() {
             return beanInclusions.values()
@@ -221,10 +220,10 @@ public class TolerantReaderPlugin extends Plugin {
         private final Set<String> properties;
         private final String packageRoot;
         private final String trailingName;
-        private HashMap<String, String> aliases;
+        private Map<String, String> aliases;
         private String beanAlias;
         private String prefix;
-        private String xmlAdapter;
+        private Map<String, AdapterSpec> xmlAdapters = Collections.<String, AdapterSpec> emptyMap();
 
         public BeanInclusion(String simpleName, Set<String> properties, HashMap<String, String> propertyAliases,
                 String packageRoot, String prefix) {
@@ -252,12 +251,8 @@ public class TolerantReaderPlugin extends Plugin {
             return prefix;
         }
 
-        public String getXmlAdapter() {
-            return xmlAdapter;
-        }
-
-        public void setXmlAdapter(String xmlAdapter) {
-            this.xmlAdapter = xmlAdapter;
+        public AdapterSpec getXmlAdapter(String property) {
+            return xmlAdapters.get(property);
         }
 
         public boolean includesClass(String className) {
@@ -291,6 +286,10 @@ public class TolerantReaderPlugin extends Plugin {
                 }
             }
             return null;
+        }
+
+        public void setXmlAdapters(Map<String, AdapterSpec> xmlAdapters) {
+            this.xmlAdapters = xmlAdapters;
         }
 
     }
@@ -455,9 +454,9 @@ public class TolerantReaderPlugin extends Plugin {
             // add XmlType with name and propOrder
             QName typeName = classInfo.getTypeName();
             if (typeName != null) { // anonymous type
-            JAnnotationUse annotateXmlType = implClass.annotate(XmlType.class);
+                JAnnotationUse annotateXmlType = implClass.annotate(XmlType.class);
                 annotateXmlType.param("name", typeName
-                .getLocalPart());
+                    .getLocalPart());
             }
 
         }
@@ -498,9 +497,15 @@ public class TolerantReaderPlugin extends Plugin {
     private void applyAdaptersToFieldsAndAccessors(Outline outline, BeanInclusions beanInclusions,
             Map<String, ChangeSet> beansToRename, CClassInfo classInfo, JDefinedClass implClass)
             throws ClassNotFoundException, IOException {
+
+        BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(classInfo);
+        if (beanInclusion == null) {
+            return;
+        }
+
         Collection<JMethod> methods = implClass.methods();
         Map<String, JFieldVar> fields = implClass.fields();
-
+        JCodeModel codeModel = outline.getCodeModel();
         for (Entry<String, JFieldVar> entry : new HashMap<String, JFieldVar>(fields).entrySet()) { // concurrent
                                                                                                    // mod
             JFieldVar field = entry.getValue();
@@ -514,21 +519,21 @@ public class TolerantReaderPlugin extends Plugin {
             // the adapted field type is by definition not part of the Schema, must be available
             // at xjc compile time
 
-            Class<? extends XmlAdapter<?, ?>> adapterClass = beanInclusions.findAdapter(fieldType);
-            if(adapterClass ==  null) {
-                continue;
-            }
-            JClass adaptedFieldType = getAdaptedFieldType(outline, adapterClass, beanInclusions);
-            // TODO annotate class to adapt with @XmlJavaTypeAdapter(adapter)
+            AdapterSpec xmlAdapterSpec = beanInclusion.getXmlAdapter(fieldName);
+            if (xmlAdapterSpec != null) {
 
-            // TODO code below is duplicate of applyBeanAliasesToFieldsAndAccessors
-            if (adaptedFieldType != null) {
+                JClass adaptedFieldType = codeModel.ref(xmlAdapterSpec.adaptsToType);
+                JClass directClass = codeModel.directClass(xmlAdapterSpec.adapterClass);
+
+                // TODO code below is duplicate of applyBeanAliasesToFieldsAndAccessors
                 implClass.removeField(field);
 
                 JFieldVar adaptedField = implClass.field(field.mods()
                     .getValue(), adaptedFieldType, fieldName);
 
                 AnnotationHelper.applyAnnotations(outline, Annotatable.from(adaptedField), field.annotations());
+                adaptedField.annotate(XmlJavaTypeAdapter.class)
+                    .param("value", directClass);
 
                 JMethod getter = ClassHelper.findGetterInClass(implClass, publicName);
                 if (getter != null) {
@@ -570,10 +575,12 @@ public class TolerantReaderPlugin extends Plugin {
     private JClass getAdaptedFieldType(Outline outline, Class<? extends XmlAdapter<?, ?>> adapterClass,
             BeanInclusions beanInclusions) {
 
-        // TODO use class in bindings.xjb to define the adapted type. We can't read it from the adapter
-        // here because the adapter is not compiled yet and cannot be compiled since it needs the generated
+        // TODO use class in bindings.xjb to define the adapted type. We can't read it from the
+        // adapter
+        // here because the adapter is not compiled yet and cannot be compiled since it needs the
+        // generated
         // schema type to compile. We do have the JClass of the schema type, though.
-        
+
         JCodeModel codeModel = outline.getCodeModel();
 
         Type adapterSuperclass = adapterClass.getGenericSuperclass();
@@ -705,10 +712,10 @@ public class TolerantReaderPlugin extends Plugin {
                 JDefinedClass clazz = outline.getCodeModel()
                     ._getClass(subclassName);
                 if (clazz != null) { // not for restricted classes
-                arrayValue.param(clazz);
+                    arrayValue.param(clazz);
+                }
             }
         }
-    }
     }
 
     private void fillAliasBeanContent(Outline outline, Map<String, Set<String>> classesToKeep,
@@ -756,13 +763,13 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private void copyJavadocAndImplementsClause(CClassInfo sourceClassInfo, JDefinedClass aliasBean) {
-            aliasBean.javadoc()
-                .add(sourceClassInfo.javadoc);
-            Iterator<JClass> impls = aliasBean._implements();
-            while (impls.hasNext()) {
-                JClass iface = impls.next();
-                aliasBean._implements(iface);
-            }
+        aliasBean.javadoc()
+            .add(sourceClassInfo.javadoc);
+        Iterator<JClass> impls = aliasBean._implements();
+        while (impls.hasNext()) {
+            JClass iface = impls.next();
+            aliasBean._implements(iface);
+        }
     }
 
     private void createAliasBeans(Outline outline, BeanInclusions beanInclusions,
@@ -851,8 +858,8 @@ public class TolerantReaderPlugin extends Plugin {
 
         // TODO review parameter list:ChangeSet vs sourceClassInfo/sourceImplClass
 
-            Collection<JMethod> methods = sourceImplClass.methods();
-            Map<String, JFieldVar> fields = sourceImplClass.fields();
+        Collection<JMethod> methods = sourceImplClass.methods();
+        Map<String, JFieldVar> fields = sourceImplClass.fields();
 
         Set<String> expectedPropertyNames = expectedProperties.keySet();
         for (String expectedPropertyName : expectedPropertyNames) {
@@ -868,64 +875,64 @@ public class TolerantReaderPlugin extends Plugin {
             }
         }
 
-            List<CPropertyInfo> properties = sourceClassInfo.getProperties();
-            for (CPropertyInfo cPropertyInfo : properties) {
+        List<CPropertyInfo> properties = sourceClassInfo.getProperties();
+        for (CPropertyInfo cPropertyInfo : properties) {
             if (!expectedProperties.isEmpty() && !expectedProperties.containsKey(cPropertyInfo.getName(true))) {
                 continue;
             }
-                String sourcePropertyName = cPropertyInfo.getName(false);
+            String sourcePropertyName = cPropertyInfo.getName(false);
 
-                BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(sourceClassInfo);
-                String fieldName = sourcePropertyName;
-                if (beanInclusion != null) {
-                    String aliasFieldName = beanInclusion.getPropertyAlias(sourcePropertyName);
-                    if (aliasFieldName != null) {
-                        fieldName = aliasFieldName;
-                    }
+            BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(sourceClassInfo);
+            String fieldName = sourcePropertyName;
+            if (beanInclusion != null) {
+                String aliasFieldName = beanInclusion.getPropertyAlias(sourcePropertyName);
+                if (aliasFieldName != null) {
+                    fieldName = aliasFieldName;
                 }
-                JFieldVar field = fields.get(fieldName);
+            }
+            JFieldVar field = fields.get(fieldName);
 
-                // TODO how can we read the value of a field?
-                if ("serialVersionUID".equals(fieldName)) {
-                    aliasBean.field(field.mods()
-                        .getValue(), field.type(), fieldName, JExpr.lit(-1L));
-                } else {
-                    JType fieldType = field.type();
-                    JType aliasFieldType = getAliasFieldType(outline, beansToRename, fieldType);
-                    fieldType = aliasFieldType != null ? aliasFieldType : fieldType;
+            // TODO how can we read the value of a field?
+            if ("serialVersionUID".equals(fieldName)) {
+                aliasBean.field(field.mods()
+                    .getValue(), field.type(), fieldName, JExpr.lit(-1L));
+            } else {
+                JType fieldType = field.type();
+                JType aliasFieldType = getAliasFieldType(outline, beansToRename, fieldType);
+                fieldType = aliasFieldType != null ? aliasFieldType : fieldType;
 
                 // TODO: find property recursively in parent?
                 CPropertyInfo sourceProperty = sourceClassInfo.getProperty(sourcePropertyName);
-                    changeSet.targetClassOutline.target.addProperty(sourceProperty);
+                changeSet.targetClassOutline.target.addProperty(sourceProperty);
 
-                    JFieldVar aliasBeanField = aliasBean.field(field.mods()
-                        .getValue(), fieldType, fieldName);
+                JFieldVar aliasBeanField = aliasBean.field(field.mods()
+                    .getValue(), fieldType, fieldName);
                 // TODO apply restrictions on @XmlElement: required, value restrictions
                 // TODO (although only for correctness, would have an effect on schemagen
                 // TODO from our Jaxb bean).
-                    AnnotationHelper.applyAnnotations(outline, Annotatable.from(aliasBeanField), field.annotations());
+                AnnotationHelper.applyAnnotations(outline, Annotatable.from(aliasBeanField), field.annotations());
 
-                        String publicName = fieldName.substring(0, 1)
-                            .toUpperCase() + fieldName.substring(1);
+                String publicName = fieldName.substring(0, 1)
+                    .toUpperCase() + fieldName.substring(1);
                 Set<String> settersAndGetters = getSettersAndGetters(publicName);
-                
+
                 for (JMethod method : methods) {
-                    if(!settersAndGetters.contains(method.name())) {
-                            continue;
-                        }
-                        JType typeOrAliasType = fieldType;
-                        List<JVar> params = method.params();
-                        if (params.isEmpty()) { // getter
-                            method.type(typeOrAliasType);
-                            aliasBean.methods()
-                                .add(method);
-                        } else { // setter
-                            addSetter(outline, aliasBean, aliasBeanField, method, typeOrAliasType);
-                        }
+                    if (!settersAndGetters.contains(method.name())) {
+                        continue;
+                    }
+                    JType typeOrAliasType = fieldType;
+                    List<JVar> params = method.params();
+                    if (params.isEmpty()) { // getter
+                        method.type(typeOrAliasType);
+                        aliasBean.methods()
+                            .add(method);
+                    } else { // setter
+                        addSetter(outline, aliasBean, aliasBeanField, method, typeOrAliasType);
                     }
                 }
             }
-                        }
+        }
+    }
 
     private void removeUnusedAndRenameProperties(Outline outline, BeanInclusions beanInclusions,
             Collection<? extends ClassOutline> classOutlines, Map<String, Set<String>> classesToKeep) {
@@ -971,9 +978,9 @@ public class TolerantReaderPlugin extends Plugin {
 
                                 JFieldVar fieldVar = fields.get(propertyPrivateName);
                                 fieldVar.name(propertyAlias);
-                                
+
                                 Set<String> settersAndGetters = getSettersAndGetters(propertyPublicName);
-                                
+
                                 for (JMethod method : methods) {
                                     String methodName = method.name();
                                     if (settersAndGetters.contains(methodName)) { // FooBar
@@ -1177,9 +1184,9 @@ public class TolerantReaderPlugin extends Plugin {
 
     private String findPropertyTypeToKeep(ClassOutline classOutline, CPropertyInfo propertyInfo) {
         Collection<JMethod> methods = classOutline.implClass.methods();
-        
+
         Set<String> settersAndGetters = getSettersAndGetters(propertyInfo.getName(true));
-        
+
         for (JMethod jMethod : methods) {
             if (settersAndGetters.contains(jMethod.name())) {
                 JType propertyType = jMethod.type();
@@ -1342,18 +1349,20 @@ public class TolerantReaderPlugin extends Plugin {
                     if ("bean".equals(beanNode.getLocalName()) && beanNode instanceof Element) {
                         Element beanElement = (Element) beanNode;
                         HashSet<String> propertiesToInclude = new HashSet<String>();
-                        collectPropertiesAndAliases(beanElement, propertiesToInclude, aliases);
+                        Map<String, AdapterSpec> xmlAdapters = new HashMap<String, AdapterSpec>();
+                        collectPropertiesAndAliases(beanElement, propertiesToInclude, aliases, xmlAdapters);
                         bean = beanElement.getAttribute("name");
                         BeanInclusion beanInclusion = new BeanInclusion(bean, propertiesToInclude, aliases, packageRoot,
                                 prefix);
                         beanInclusion.setBeanAlias(beanElement.getAttribute("alias"));
-                        beanInclusion.setXmlAdapter(beanElement.getAttribute("adapter"));
+                        beanInclusion.setXmlAdapters(xmlAdapters);
                         addBeanInclusion(includedClasses, beanInclusion);
                     }
                 }
             } else {
                 HashSet<String> propertiesToInclude = new HashSet<String>();
-                collectPropertiesAndAliases(includeElement, propertiesToInclude, aliases);
+                collectPropertiesAndAliases(includeElement, propertiesToInclude, aliases, Collections
+                    .<String, AdapterSpec> emptyMap());
                 BeanInclusion beanInclusion = new BeanInclusion(bean, propertiesToInclude, aliases, packageRoot,
                         prefix);
                 beanInclusion.setBeanAlias(includeElement.getAttribute("alias"));
@@ -1373,9 +1382,21 @@ public class TolerantReaderPlugin extends Plugin {
         list.add(beanInclusion);
     }
 
-    private void collectPropertiesAndAliases(Element includeElement, HashSet<String> propertiesToInclude,
-            HashMap<String, String> aliases) {
-        NodeList childNodes = includeElement.getChildNodes();
+    private class AdapterSpec {
+        public final String adapterClass;
+        public final String adaptsToType;
+
+        public AdapterSpec(String adapterClass, String adaptsToType) {
+            super();
+            this.adapterClass = adapterClass;
+            this.adaptsToType = adaptsToType;
+        }
+
+    }
+
+    private void collectPropertiesAndAliases(Element includeOrBeanElement, HashSet<String> propertiesToInclude,
+            HashMap<String, String> aliases, Map<String, AdapterSpec> xmlAdapters) {
+        NodeList childNodes = includeOrBeanElement.getChildNodes();
         for (int i = 0; i < childNodes.getLength(); i++) {
             Node item = childNodes.item(i);
             if ("alias".equals(item.getLocalName())) {
@@ -1385,9 +1406,20 @@ public class TolerantReaderPlugin extends Plugin {
                 String propertyName = propertyAttr.getNodeValue();
                 propertiesToInclude.add(propertyName);
                 aliases.put(propertyName, aliasName);
+                Node adaptsToAttr = attributes.getNamedItem("adaptsTo");
+                Node adapterAttr = attributes.getNamedItem("adapter");
+                if (adapterAttr != null && adaptsToAttr != null) {
+                    AdapterSpec adapterSpec = new AdapterSpec(adapterAttr.getNodeValue(), adaptsToAttr
+                        .getNodeValue());
+                    xmlAdapters.put(aliasName, adapterSpec);
+                } else if (adapterAttr != null ^ adaptsToAttr != null) { // XOR
+                    String missing = (adaptsToAttr == null ? "adaptsTo" : "adapter");
+                    throw new IllegalArgumentException("Both adapter and adaptsTo are required, missing:" + missing);
+                }
             }
         }
-        String properties = includeElement.getAttribute("properties");
+
+        String properties = includeOrBeanElement.getAttribute("properties");
         if (!properties.trim()
             .isEmpty()) {
             Collections.addAll(propertiesToInclude, properties.split(" "));

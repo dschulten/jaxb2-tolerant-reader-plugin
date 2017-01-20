@@ -26,7 +26,7 @@
   <complexType name="ValueWrapper">
     <sequence>
       <element name="Text" type="string" />
-      <element name="Value" type="string" />  
+      <element name="Value" type="string" minOccurs="0"/>  
     </sequence>
   </complexType>
   
