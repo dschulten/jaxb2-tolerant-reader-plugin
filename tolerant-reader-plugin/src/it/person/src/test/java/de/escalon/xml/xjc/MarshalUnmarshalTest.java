@@ -26,11 +26,10 @@ import javax.xml.validation.SchemaFactory;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import com.example.person.ValueWrapper;
+import com.example.person.AddrBase;
 import com.example.person.Address;
-import com.example.person.BaseAddress;
-import com.example.person.ObjectFactory;
 import com.example.person.Individuum;
+import com.example.person.ObjectFactory;
 import com.example.person.SimpleName;
 
 public class MarshalUnmarshalTest {
@@ -101,7 +100,7 @@ public class MarshalUnmarshalTest {
         assertEquals(18, unmarshalledPerson.getAge()
             .intValue());
         assertEquals("Workhorse", unmarshalledPerson.getFunction());
-        BaseAddress homeAddress = unmarshalledPerson.getHomeAddress();
+        AddrBase homeAddress = unmarshalledPerson.getHomeAddress();
         assertNotNull("HomeAddress not unmarshalled", homeAddress);
         assertEquals("Carl Benz Str. 12", homeAddress.getAddr1());
         assertEquals("Schwetzingen", homeAddress.getCity());

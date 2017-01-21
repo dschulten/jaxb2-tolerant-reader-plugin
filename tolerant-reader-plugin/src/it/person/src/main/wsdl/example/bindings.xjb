@@ -13,7 +13,7 @@
           <tr:adapter class="com.example.ValueWrapperXmlAdapter" to="java.lang.String" />
         </tr:alias>
       </tr:bean>
-      <tr:bean name="BaseAddress" />
+      <tr:bean name="BaseAddress" alias="AddrBase" />
       <tr:bean name="USAddress" />
       <!-- bean alias Address with postCode property alias -->
       <tr:bean name="GlobalAddress" alias="Address">

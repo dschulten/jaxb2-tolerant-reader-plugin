@@ -28,8 +28,8 @@ import com.sun.xml.xsom.impl.util.SchemaWriter;
 import com.sun.xml.xsom.visitor.XSTermVisitor;
 import com.sun.xml.xsom.visitor.XSVisitor;
 
-import de.escalon.xml.xjc.TolerantReaderPlugin.BeanInclusion;
-import de.escalon.xml.xjc.TolerantReaderPlugin.BeanInclusions;
+import de.escalon.xml.xjc.BeanInclusionHelper.BeanInclusion;
+import de.escalon.xml.xjc.BeanInclusionHelper.BeanInclusions;
 
 /**
  * Access original schema to find out the correct property order.

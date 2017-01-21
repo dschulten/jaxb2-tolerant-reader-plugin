@@ -24,12 +24,9 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 
-import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
@@ -53,7 +50,6 @@ import com.sun.tools.xjc.Options;
 import com.sun.tools.xjc.Plugin;
 import com.sun.tools.xjc.model.CClassInfo;
 import com.sun.tools.xjc.model.CCustomizations;
-import com.sun.tools.xjc.model.CPluginCustomization;
 import com.sun.tools.xjc.model.CPropertyInfo;
 import com.sun.tools.xjc.outline.ClassOutline;
 import com.sun.tools.xjc.outline.Outline;
@@ -69,9 +65,14 @@ import com.sun.xml.xsom.XSType;
 
 import de.escalon.hypermedia.hydra.mapping.Expose;
 import de.escalon.hypermedia.hydra.mapping.Term;
+import de.escalon.xml.xjc.BeanInclusionHelper.AdapterSpec;
+import de.escalon.xml.xjc.BeanInclusionHelper.BeanInclusion;
+import de.escalon.xml.xjc.BeanInclusionHelper.BeanInclusions;
 
+// TODO add computed fields
 // TODO add Javadoc to setters
-// TODO alias properties on parent classes
+// TODO alias properties on parent classes loses with method
+// TODO serialVersionUID not copied in alias beans
 // TODO person.function should be a String and the adapted type should only be written in xml
 // TODO putting the adaption into the class requires both an xml transient property and the proper property
 // TODO wrong list of aliases in error message about expected bean
@@ -113,7 +114,7 @@ public class TolerantReaderPlugin extends Plugin {
     private static final Set<String> IGNORED_ANNOTATIONS = new HashSet<String>(
             Arrays.asList(XmlSeeAlso.class.getName(), XmlAccessorType.class.getName()));
 
-    private static final String NAMESPACE_URI = "http://jaxb2-commons.dev.java.net/tolerant-reader";
+    static final String NAMESPACE_URI = "http://jaxb2-commons.dev.java.net/tolerant-reader";
 
     /**
      * Name of Option to enable this plugin
@@ -122,10 +123,13 @@ public class TolerantReaderPlugin extends Plugin {
 
     private static final boolean HYDRA_PRESENT = ClassHelper.isPresent("de.escalon.hypermedia.hydra.mapping.Expose");
 
+    private BeanInclusionHelper beanInclusionHelper;
+
     /**
      * Creates a new <code>DefaultValuePlugin</code> instance.
      */
     public TolerantReaderPlugin() {
+        beanInclusionHelper = new BeanInclusionHelper();
     }
 
     /**
@@ -171,139 +175,35 @@ public class TolerantReaderPlugin extends Plugin {
         return true;
     }
 
-    class BeanInclusions implements Iterable<List<BeanInclusion>> {
-        Map<String, List<BeanInclusion>> beanInclusions;
-
-        public BeanInclusions(Map<String, List<BeanInclusion>> beanInclusions) {
-            this.beanInclusions = beanInclusions;
-        }
-
-        public BeanInclusion getBeanInclusion(CClassInfo classInfo) {
-            List<BeanInclusion> beanInclusionList = beanInclusions.get(classInfo.shortName);
-            if (beanInclusionList != null) {
-                for (BeanInclusion beanInclusion : beanInclusionList) {
-                    if (beanInclusion.includesClass(classInfo.getName())) {
-                        return beanInclusion;
-                    }
-                }
-            }
-            return null;
-        }
-
-        // public Class<? extends XmlAdapter<?, ?>> findAdapter(JType typeToAdapt) {
-        //
-        // try {
-        // Class<? extends XmlAdapter<?, ?>> ret = null;
-        // List<BeanInclusion> beanInclusionList = beanInclusions.get(typeToAdapt.name());
-        // if (beanInclusionList != null) {
-        // for (BeanInclusion beanInclusion : beanInclusionList) {
-        // String xmlAdapterClassName = beanInclusion.getXmlAdapter();
-        // if (xmlAdapterClassName != null && !xmlAdapterClassName.isEmpty()) {
-        // Class<?> adapterClass = Class.forName(xmlAdapterClassName);
-        // @SuppressWarnings("unchecked")
-        // Class<? extends XmlAdapter<?, ?>> xmlAdapterClass = (Class<? extends XmlAdapter<?, ?>>)
-        // adapterClass;
-        // ret = xmlAdapterClass;
-        // break;
-        // }
-        // }
-        // }
-        // return ret;
-        // } catch (ClassNotFoundException e) {
-        // throw new RuntimeException(e);
-        // }
-        // }
-
-        public Iterator<List<BeanInclusion>> iterator() {
-            return beanInclusions.values()
-                .iterator();
-        }
-    }
-
-    class BeanInclusion {
-        private final String simpleName;
-        private final Set<String> properties;
-        private final String packageRoot;
-        private final String trailingName;
-        private Map<String, String> aliases;
-        private String beanAlias;
-        private String prefix;
-        private Map<String, AdapterSpec> xmlAdapters = Collections.<String, AdapterSpec> emptyMap();
-
-        public BeanInclusion(String simpleName, Set<String> properties, HashMap<String, String> propertyAliases,
-                String packageRoot, String prefix) {
-            this.simpleName = simpleName;
-            this.aliases = propertyAliases;
-            this.prefix = prefix;
-            this.trailingName = "." + simpleName;
-            this.properties = properties;
-            this.packageRoot = packageRoot;
-        }
-
-        public String getPropertyAlias(String property) {
-            return aliases.get(property);
-        }
-
-        public void setBeanAlias(String beanAlias) {
-            this.beanAlias = beanAlias;
-        }
-
-        public String getBeanAlias() {
-            return beanAlias;
-        }
-
-        public String getPrefix() {
-            return prefix;
-        }
-
-        public AdapterSpec getXmlAdapter(String property) {
-            return xmlAdapters.get(property);
-        }
-
-        public boolean includesClass(String className) {
-            return className.endsWith(trailingName) && (packageRoot == null ? true : className.startsWith(packageRoot));
-        }
-
-        public boolean includesProperty(String propertyName) {
-            return properties.contains(propertyName);
-        }
-
-        @Override
-        public String toString() {
-            return (packageRoot.isEmpty() ? packageRoot : packageRoot + ".") + simpleName + " " + properties.toString()
-                    + " aliases " + aliases.toString();
-        }
-
-        public boolean isSatisfiedByProperties(List<CPropertyInfo> propertyInfos) {
-            for (String propertyName : properties) {
-                CPropertyInfo found = findPropertyInfo(propertyInfos, propertyName);
-                if (found == null) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        private CPropertyInfo findPropertyInfo(List<CPropertyInfo> propertyInfos, String propertyName) {
-            for (CPropertyInfo cPropertyInfo : propertyInfos) {
-                if (propertyName.equals(cPropertyInfo.getName(false))) { // fooBar
-                    return cPropertyInfo;
-                }
-            }
-            return null;
-        }
-
-        public void setXmlAdapters(Map<String, AdapterSpec> xmlAdapters) {
-            this.xmlAdapters = xmlAdapters;
-        }
-
-    }
+    // public Class<? extends XmlAdapter<?, ?>> findAdapter(JType typeToAdapt) {
+    //
+    // try {
+    // Class<? extends XmlAdapter<?, ?>> ret = null;
+    // List<BeanInclusion> beanInclusionList = beanInclusions.get(typeToAdapt.name());
+    // if (beanInclusionList != null) {
+    // for (BeanInclusion beanInclusion : beanInclusionList) {
+    // String xmlAdapterClassName = beanInclusion.getXmlAdapter();
+    // if (xmlAdapterClassName != null && !xmlAdapterClassName.isEmpty()) {
+    // Class<?> adapterClass = Class.forName(xmlAdapterClassName);
+    // @SuppressWarnings("unchecked")
+    // Class<? extends XmlAdapter<?, ?>> xmlAdapterClass = (Class<? extends XmlAdapter<?, ?>>)
+    // adapterClass;
+    // ret = xmlAdapterClass;
+    // break;
+    // }
+    // }
+    // }
+    // return ret;
+    // } catch (ClassNotFoundException e) {
+    // throw new RuntimeException(e);
+    // }
+    // }
 
     private void processSchemaTags(Outline outline) {
         CCustomizations customizations = outline.getModel()
             .getCustomizations();
 
-        BeanInclusions beanInclusions = getBeanInclusions(customizations);
+        BeanInclusions beanInclusions = beanInclusionHelper.getBeanInclusions(customizations);
 
         Collection<? extends ClassOutline> classOutlines = outline.getClasses();
 
@@ -480,9 +380,16 @@ public class TolerantReaderPlugin extends Plugin {
         for (ClassOutline classOutline : classOutlines) {
             CClassInfo classInfo = classOutline.target;
             JDefinedClass implClass = classOutline.implClass;
-            addXmlSeeAlso(outline, classesToKeep, beansToRename, classInfo, implClass);
             applyAdaptersToFieldsAndAccessors(outline, beanInclusions, beansToRename, classInfo, implClass);
             applyBeanAliasesToFieldsAndAccessors(outline, beanInclusions, beansToRename, classInfo, implClass);
+
+            JClass superClass = implClass._extends();
+            ChangeSet changeSet = beansToRename.get(superClass.fullName());
+            if (changeSet != null) {
+                implClass._extends(changeSet.definedClass);
+                classInfo.setBaseClass(changeSet.targetClassOutline.target);
+            }
+            addXmlSeeAlso(outline, classesToKeep, beansToRename, classInfo, implClass);
         }
     }
 
@@ -880,6 +787,13 @@ public class TolerantReaderPlugin extends Plugin {
             }
         }
 
+        JFieldVar serialVersionUidField = fields.get("serialVersionUID");
+        // TODO how can we read the value of a field?
+        if (serialVersionUidField != null) {
+            aliasBean.field(serialVersionUidField.mods()
+                .getValue(), serialVersionUidField.type(), serialVersionUidField.name(), JExpr.lit(-1L));
+        }
+
         List<CPropertyInfo> properties = sourceClassInfo.getProperties();
         for (CPropertyInfo cPropertyInfo : properties) {
             if (!expectedProperties.isEmpty() && !expectedProperties.containsKey(cPropertyInfo.getName(true))) {
@@ -897,43 +811,37 @@ public class TolerantReaderPlugin extends Plugin {
             }
             JFieldVar field = fields.get(fieldName);
 
-            // TODO how can we read the value of a field?
-            if ("serialVersionUID".equals(fieldName)) {
-                aliasBean.field(field.mods()
-                    .getValue(), field.type(), fieldName, JExpr.lit(-1L));
-            } else {
-                JType fieldType = field.type();
-                JType aliasFieldType = getAliasFieldType(outline, beansToRename, fieldType);
-                fieldType = aliasFieldType != null ? aliasFieldType : fieldType;
+            JType fieldType = field.type();
+            JType aliasFieldType = getAliasFieldType(outline, beansToRename, fieldType);
+            fieldType = aliasFieldType != null ? aliasFieldType : fieldType;
 
-                // TODO: find property recursively in parent?
-                CPropertyInfo sourceProperty = sourceClassInfo.getProperty(sourcePropertyName);
-                changeSet.targetClassOutline.target.addProperty(sourceProperty);
+            // TODO: find property recursively in parent?
+            CPropertyInfo sourceProperty = sourceClassInfo.getProperty(sourcePropertyName);
+            changeSet.targetClassOutline.target.addProperty(sourceProperty);
 
-                JFieldVar aliasBeanField = aliasBean.field(field.mods()
-                    .getValue(), fieldType, fieldName);
-                // TODO apply restrictions on @XmlElement: required, value restrictions
-                // TODO (although only for correctness, would have an effect on schemagen
-                // TODO from our Jaxb bean).
-                AnnotationHelper.applyAnnotations(outline, Annotatable.from(aliasBeanField), field.annotations());
+            JFieldVar aliasBeanField = aliasBean.field(field.mods()
+                .getValue(), fieldType, fieldName);
+            // TODO apply restrictions on @XmlElement: required, value restrictions
+            // TODO (although only for correctness, would have an effect on schemagen
+            // TODO from our Jaxb bean).
+            AnnotationHelper.applyAnnotations(outline, Annotatable.from(aliasBeanField), field.annotations());
 
-                String publicName = fieldName.substring(0, 1)
-                    .toUpperCase() + fieldName.substring(1);
-                Set<String> settersAndGetters = getSettersAndGetters(publicName);
+            String publicName = fieldName.substring(0, 1)
+                .toUpperCase() + fieldName.substring(1);
+            Set<String> settersAndGetters = getSettersAndGetters(publicName);
 
-                for (JMethod method : methods) {
-                    if (!settersAndGetters.contains(method.name())) {
-                        continue;
-                    }
-                    JType typeOrAliasType = fieldType;
-                    List<JVar> params = method.params();
-                    if (params.isEmpty()) { // getter
-                        method.type(typeOrAliasType);
-                        aliasBean.methods()
-                            .add(method);
-                    } else { // setter
-                        addSetter(outline, aliasBean, aliasBeanField, method, typeOrAliasType);
-                    }
+            for (JMethod method : methods) {
+                if (!settersAndGetters.contains(method.name())) {
+                    continue;
+                }
+                JType typeOrAliasType = fieldType;
+                List<JVar> params = method.params();
+                if (params.isEmpty()) { // getter
+                    method.type(typeOrAliasType);
+                    aliasBean.methods()
+                        .add(method);
+                } else { // setter
+                    addSetter(outline, aliasBean, aliasBeanField, method, typeOrAliasType);
                 }
             }
         }
@@ -1029,6 +937,7 @@ public class TolerantReaderPlugin extends Plugin {
         }
     }
 
+    // TODO consider to replace by ClassHelper.findGetterInClass/findSetterInClass
     private Set<String> getSettersAndGetters(String propertyPublicName) {
         Set<String> settersAndGetters = new HashSet<String>(Arrays.asList(
                 "set" + propertyPublicName, // FooBar
@@ -1275,9 +1184,9 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private ChangeSet replaceClass(Outline outline, JPackage targetPackage, String newClassName,
-            ClassOutline replaces) {
+            ClassOutline toReplace) {
 
-        ChangeSet changeSet = defineNewClassFrom(outline, targetPackage, newClassName, replaces);
+        ChangeSet changeSet = defineNewClassFrom(outline, targetPackage, newClassName, toReplace);
 
         // add to ObjectFactory
         addToObjectFactory(outline, changeSet.definedClass);
@@ -1285,8 +1194,8 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private ChangeSet defineNewClassFrom(Outline outline, JPackage targetPackage, String newClassName,
-            ClassOutline replaces) {
-        CClassInfo oldClassInfo = replaces.target;
+            ClassOutline toReplace) {
+        CClassInfo oldClassInfo = toReplace.target;
         Locator locator = oldClassInfo.getLocator();
         QName typeName = oldClassInfo.getTypeName();
         QName elementName = oldClassInfo.getElementName();
@@ -1298,8 +1207,16 @@ public class TolerantReaderPlugin extends Plugin {
                 typeName, elementName, schemaSource, customizations);
         // getClazz also adds classInfo to outline:
         ClassOutline newClassOutline = outline.getClazz(newClassInfo);
+
+        Iterator<JClass> oldClassImplements = toReplace.implClass._implements();
+        while (oldClassImplements.hasNext()) {
+            JClass iface = oldClassImplements.next();
+            newClassOutline.target._implements(iface);
+            newClassOutline.implClass._implements(iface);
+        }
+
         JDefinedClass newBean = newClassOutline.implClass;
-        ChangeSet changeSet = new ChangeSet(replaces, newClassOutline, newBean);
+        ChangeSet changeSet = new ChangeSet(toReplace, newClassOutline, newBean);
         return changeSet;
     }
 
@@ -1338,125 +1255,6 @@ public class TolerantReaderPlugin extends Plugin {
         }
     }
 
-    private BeanInclusions getBeanInclusions(CCustomizations ccs) {
-        Map<String, List<BeanInclusion>> includedClasses = new HashMap<String, List<BeanInclusion>>();
-        for (CPluginCustomization pluginCustomization : findMyCustomizations(ccs, "include")) {
-            pluginCustomization.markAsAcknowledged();
-            Element includeElement = pluginCustomization.element;
-            HashMap<String, String> aliases = new HashMap<String, String>();
-            String packageRoot = includeElement.getAttribute("packageRoot");
-            String prefix = includeElement.getAttribute("prefix");
-            String bean = includeElement.getAttribute("bean");
-            if (bean == null || bean.isEmpty()) {
-                NodeList childNodes = includeElement.getChildNodes();
-                for (int i = 0; i < childNodes.getLength(); i++) {
-                    Node beanNode = childNodes.item(i);
-                    if ("bean".equals(beanNode.getLocalName()) && beanNode instanceof Element) {
-                        Element beanElement = (Element) beanNode;
-                        HashSet<String> propertiesToInclude = new HashSet<String>();
-                        Map<String, AdapterSpec> xmlAdapters = new HashMap<String, AdapterSpec>();
-                        collectPropertiesAndAliases(beanElement, propertiesToInclude, aliases, xmlAdapters);
-                        bean = beanElement.getAttribute("name");
-                        BeanInclusion beanInclusion = new BeanInclusion(bean, propertiesToInclude, aliases, packageRoot,
-                                prefix);
-                        beanInclusion.setBeanAlias(beanElement.getAttribute("alias"));
-                        beanInclusion.setXmlAdapters(xmlAdapters);
-                        addBeanInclusion(includedClasses, beanInclusion);
-                    }
-                }
-            } else {
-                HashSet<String> propertiesToInclude = new HashSet<String>();
-                collectPropertiesAndAliases(includeElement, propertiesToInclude, aliases, Collections
-                    .<String, AdapterSpec> emptyMap());
-                BeanInclusion beanInclusion = new BeanInclusion(bean, propertiesToInclude, aliases, packageRoot,
-                        prefix);
-                beanInclusion.setBeanAlias(includeElement.getAttribute("alias"));
-                addBeanInclusion(includedClasses, beanInclusion);
-            }
-
-        }
-        return new BeanInclusions(includedClasses);
-    }
-
-    private void addBeanInclusion(Map<String, List<BeanInclusion>> includedClasses, BeanInclusion beanInclusion) {
-        List<BeanInclusion> list = includedClasses.get(beanInclusion.simpleName);
-        if (list == null) {
-            list = new ArrayList<BeanInclusion>();
-            includedClasses.put(beanInclusion.simpleName, list);
-        }
-        list.add(beanInclusion);
-    }
-
-    private class AdapterSpec {
-        public final String adapterClass;
-        public final String adaptsToType;
-
-        public AdapterSpec(String adapterClass, String adaptsToType) {
-            super();
-            this.adapterClass = adapterClass;
-            this.adaptsToType = adaptsToType;
-        }
-
-    }
-
-    private void collectPropertiesAndAliases(Element includeOrBeanElement, HashSet<String> propertiesToInclude,
-            HashMap<String, String> aliases, Map<String, AdapterSpec> xmlAdapters) {
-        NodeList childNodes = includeOrBeanElement.getChildNodes();
-        for (int i = 0; i < childNodes.getLength(); i++) {
-            Node item = childNodes.item(i);
-            if ("alias".equals(item.getLocalName())) {
-                NamedNodeMap attributes = item.getAttributes();
-                Node propertyAttr = attributes.getNamedItem("property");
-                String propertyName = propertyAttr.getNodeValue();
-                if (propertyName.isEmpty()) {
-                    throw new IllegalStateException("Found alias element without property attribute");
-                }
-
-                String aliasName = item.getTextContent();
-                if (aliasName.isEmpty()) {
-                    Node aliasAttr = attributes.getNamedItem("alias");
-                    if (aliasAttr != null) {
-                        aliasName = aliasAttr.getNodeValue();
-                    }
-                }
-                if (aliasName.isEmpty()) {
-                    throw new IllegalStateException("Found alias property=\"" + propertyName
-                            + "\" element without alias attribute or alias content");
-                }
-                propertiesToInclude.add(propertyName);
-                aliases.put(propertyName, aliasName);
-                NodeList aliasChildNodes = item.getChildNodes();
-                for (int j = 0; j < aliasChildNodes.getLength(); j++) {
-                    Node aliasChild = aliasChildNodes.item(j);
-                    if ("adapter".equals(aliasChild.getLocalName())) {
-                        NamedNodeMap adapterAttributes = aliasChild.getAttributes();
-                        Node classAttr = adapterAttributes.getNamedItem("class");
-                        Node toAttr = adapterAttributes.getNamedItem("to");
-                        if (classAttr != null) {
-                            String adaptsTo = "java.lang.String";
-                            if (toAttr != null && !toAttr.getNodeValue().isEmpty()) {
-                                adaptsTo = toAttr.getNodeValue();
-                            }
-                            AdapterSpec adapterSpec = new AdapterSpec(classAttr.getNodeValue(), adaptsTo);
-                            xmlAdapters.put(aliasName, adapterSpec);
-                        } else {
-                            throw new IllegalArgumentException("Found adapter element for alias property=\""
-                                    + propertyName + "\" without class attribute");
-                        }
-                    }
-
-                }
-
-            }
-        }
-
-        String properties = includeOrBeanElement.getAttribute("properties");
-        if (!properties.trim()
-            .isEmpty()) {
-            Collections.addAll(propertiesToInclude, properties.split(" "));
-        }
-    }
-
     @SuppressWarnings("unused")
     private void dump(CCustomizations cc) {
         for (int i = 0; i < cc.size(); i++) {
@@ -1472,17 +1270,4 @@ public class TolerantReaderPlugin extends Plugin {
         }
     }
 
-    private CCustomizations findMyCustomizations(CCustomizations cc, String name) {
-        CCustomizations list = new CCustomizations();
-        for (CPluginCustomization cpc : cc) {
-            Element e = cpc.element;
-            if (NAMESPACE_URI.equals(e.getNamespaceURI()) && e.getLocalName()
-                .equals(name)) {
-                list.add(cpc);
-            }
-        }
-
-        return list;
-
-    }
 }

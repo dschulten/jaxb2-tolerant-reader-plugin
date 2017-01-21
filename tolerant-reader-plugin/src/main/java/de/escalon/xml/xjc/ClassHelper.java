@@ -24,6 +24,5 @@ public class ClassHelper {
         return (getter = implClass.getMethod("get" + publicName, new JType[0])) != null ? getter
                 : implClass.getMethod("is" + publicName, new JType[0]);
     }
-
     
 }
