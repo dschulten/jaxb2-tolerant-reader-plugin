@@ -30,7 +30,7 @@ import com.example.person.ValueWrapper;
 import com.example.person.Address;
 import com.example.person.BaseAddress;
 import com.example.person.ObjectFactory;
-import com.example.person.Person;
+import com.example.person.Individuum;
 import com.example.person.SimpleName;
 
 public class MarshalUnmarshalTest {
@@ -39,7 +39,7 @@ public class MarshalUnmarshalTest {
     public void testToString() {
 
         ObjectFactory objectFactory = new ObjectFactory();
-        Person person = createPerson(objectFactory);
+        Individuum person = createPerson(objectFactory);
         // check toString both for renamed properties and renamed classes
         assertThat(person.toString(), allOf(
                 containsString("firstName=John"), containsString("lastName=Doe"),
@@ -52,8 +52,8 @@ public class MarshalUnmarshalTest {
     public void testEquals() {
 
         ObjectFactory objectFactory = new ObjectFactory();
-        Person person1 = createPerson(objectFactory);
-        Person person2 = createPerson(objectFactory);
+        Individuum person1 = createPerson(objectFactory);
+        Individuum person2 = createPerson(objectFactory);
 
         assertTrue("both persons must be equal", person1.equals(person2));
         assertTrue("both persons must be equal", person2.equals(person1));
@@ -73,10 +73,10 @@ public class MarshalUnmarshalTest {
 
         ObjectFactory objectFactory = new ObjectFactory();
 
-        Person person = createPerson(objectFactory);
+        Individuum person = createPerson(objectFactory);
 
-        JAXBElement<Person> jaxbElement = new JAXBElement<Person>(new QName("http://example.com/person", "Person"),
-                Person.class, person);
+        JAXBElement<Individuum> jaxbElement = new JAXBElement<Individuum>(new QName("http://example.com/person", "Person"),
+                Individuum.class, person);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         marshaller.marshal(jaxbElement, out);
@@ -89,9 +89,9 @@ public class MarshalUnmarshalTest {
         ByteArrayInputStream in = new ByteArrayInputStream(outBytes);
 
         Unmarshaller unmarshaller = context.createUnmarshaller();
-        JAXBElement<Person> personJAXBElement = unmarshaller
-            .unmarshal(new StreamSource(in), Person.class);
-        Person unmarshalledPerson = personJAXBElement.getValue();
+        JAXBElement<Individuum> personJAXBElement = unmarshaller
+            .unmarshal(new StreamSource(in), Individuum.class);
+        Individuum unmarshalledPerson = personJAXBElement.getValue();
         assertNotNull("Person not unmarshalled", unmarshalledPerson);
         assertNotNull("Name not unmarshalled", unmarshalledPerson.getName());
         assertEquals("John", unmarshalledPerson.getName()
@@ -110,8 +110,8 @@ public class MarshalUnmarshalTest {
         assertEquals("Germany", ((Address) homeAddress).getCountry());
     }
 
-    private Person createPerson(ObjectFactory objectFactory) {
-        Person person = objectFactory.createPerson();
+    private Individuum createPerson(ObjectFactory objectFactory) {
+        Individuum person = objectFactory.createIndividuum();
         person.setPersonId("123");
 
         SimpleName name = new SimpleName();

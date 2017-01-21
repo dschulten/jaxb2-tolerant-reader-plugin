@@ -24,6 +24,7 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -69,11 +70,14 @@ import com.sun.xml.xsom.XSType;
 import de.escalon.hypermedia.hydra.mapping.Expose;
 import de.escalon.hypermedia.hydra.mapping.Term;
 
+// TODO add Javadoc to setters
+// TODO alias properties on parent classes
 // TODO person.function should be a String and the adapted type should only be written in xml
 // TODO putting the adaption into the class requires both an xml transient property and the proper property
 // TODO wrong list of aliases in error message about expected bean
-// TODO use getSettersAndGetters when looking for accessors
+// TODO use getSettersAndGetters when looking for accessors, from ClassHelper
 // TODO allow multiline properties attribute list
+// TODO improve error message when alias element is empty (string index -1)
 // TODO duplicate tr:bean names should throw
 // TODO do we include required properties from beans further up in the inheritance?
 // TODO no serialVersionUID in alias class Address
@@ -146,7 +150,8 @@ public class TolerantReaderPlugin extends Plugin {
     @Override
     public boolean isCustomizationTagName(String nsUri, String localName) {
         return NAMESPACE_URI.equals(nsUri)
-                && ("include".equals(localName) || "alias".equals(localName) || "bean".equals(localName));
+                && ("include".equals(localName) || "alias".equals(localName) || "bean".equals(localName)
+                        || "adapter".equals(localName));
     }
 
     @Override
@@ -1400,22 +1405,48 @@ public class TolerantReaderPlugin extends Plugin {
         for (int i = 0; i < childNodes.getLength(); i++) {
             Node item = childNodes.item(i);
             if ("alias".equals(item.getLocalName())) {
-                String aliasName = item.getTextContent();
                 NamedNodeMap attributes = item.getAttributes();
                 Node propertyAttr = attributes.getNamedItem("property");
                 String propertyName = propertyAttr.getNodeValue();
+                if (propertyName.isEmpty()) {
+                    throw new IllegalStateException("Found alias element without property attribute");
+                }
+
+                String aliasName = item.getTextContent();
+                if (aliasName.isEmpty()) {
+                    Node aliasAttr = attributes.getNamedItem("alias");
+                    if (aliasAttr != null) {
+                        aliasName = aliasAttr.getNodeValue();
+                    }
+                }
+                if (aliasName.isEmpty()) {
+                    throw new IllegalStateException("Found alias property=\"" + propertyName
+                            + "\" element without alias attribute or alias content");
+                }
                 propertiesToInclude.add(propertyName);
                 aliases.put(propertyName, aliasName);
-                Node adaptsToAttr = attributes.getNamedItem("adaptsTo");
-                Node adapterAttr = attributes.getNamedItem("adapter");
-                if (adapterAttr != null && adaptsToAttr != null) {
-                    AdapterSpec adapterSpec = new AdapterSpec(adapterAttr.getNodeValue(), adaptsToAttr
-                        .getNodeValue());
-                    xmlAdapters.put(aliasName, adapterSpec);
-                } else if (adapterAttr != null ^ adaptsToAttr != null) { // XOR
-                    String missing = (adaptsToAttr == null ? "adaptsTo" : "adapter");
-                    throw new IllegalArgumentException("Both adapter and adaptsTo are required, missing:" + missing);
+                NodeList aliasChildNodes = item.getChildNodes();
+                for (int j = 0; j < aliasChildNodes.getLength(); j++) {
+                    Node aliasChild = aliasChildNodes.item(j);
+                    if ("adapter".equals(aliasChild.getLocalName())) {
+                        NamedNodeMap adapterAttributes = aliasChild.getAttributes();
+                        Node classAttr = adapterAttributes.getNamedItem("class");
+                        Node toAttr = adapterAttributes.getNamedItem("to");
+                        if (classAttr != null) {
+                            String adaptsTo = "java.lang.String";
+                            if (toAttr != null && !toAttr.getNodeValue().isEmpty()) {
+                                adaptsTo = toAttr.getNodeValue();
+                            }
+                            AdapterSpec adapterSpec = new AdapterSpec(classAttr.getNodeValue(), adaptsTo);
+                            xmlAdapters.put(aliasName, adapterSpec);
+                        } else {
+                            throw new IllegalArgumentException("Found adapter element for alias property=\""
+                                    + propertyName + "\" without class attribute");
+                        }
+                    }
+
                 }
+
             }
         }
 

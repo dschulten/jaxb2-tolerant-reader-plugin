@@ -50,7 +50,7 @@ public class AnnotationHelper {
 
                 if (isClassLiteral(valueString)) {
                     annotation.param(annotationParamName,
-                            OutlineHelper.getJDefinedClassFromOutline(outline, StringHelper.chopFromLastDot(
+                            OutlineHelper.getJClassFromOutline(outline, StringHelper.chopFromLastDot(
                                     valueString)));
                 } else if (isEnumLiteral(valueString)) {
                     annotation.param(annotationParamName,
@@ -65,7 +65,7 @@ public class AnnotationHelper {
                         if (isNonEmptyString(annotationArrayValue)) {
                             paramArray.param(StringHelper.removeStartAndEnd(annotationArrayValue));
                         } else if (isClassLiteral(annotationArrayValue)) {
-                            paramArray.param(OutlineHelper.getJDefinedClassFromOutline(outline,
+                            paramArray.param(OutlineHelper.getJClassFromOutline(outline,
                                     StringHelper.chopFromLastDot(annotationArrayValue)));
                         } else if (isEnumLiteral(annotationArrayValue)) {
                             paramArray.param(getEnumValue(annotationArrayValue));

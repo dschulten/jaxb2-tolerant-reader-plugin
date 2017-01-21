@@ -5,15 +5,13 @@
     <xjc:simple />
     <xjc:serializable uid="1" />
   </jxb:globalBindings>
-  
-  <jxb:bindings scd="/type::person:ValueWrapper">
-    <jxb:class ref="com.example.person.ValueWrapper"/>
-  </jxb:bindings>
 
   <jxb:bindings schemaLocation="Person.xsd">
     <tr:include packageRoot="com.example" prefix="cust">
-      <tr:bean name="Person" properties="age">
-        <tr:alias property="role" adapter="com.example.ValueWrapperXmlAdapter" adaptsTo="java.lang.String">function</tr:alias>
+      <tr:bean name="Person" alias="Individuum" properties="age">
+        <tr:alias property="role" alias="function">
+          <tr:adapter class="com.example.ValueWrapperXmlAdapter" to="java.lang.String" />
+        </tr:alias>
       </tr:bean>
       <tr:bean name="BaseAddress" />
       <tr:bean name="USAddress" />
@@ -21,7 +19,7 @@
       <tr:bean name="GlobalAddress" alias="Address">
         <tr:alias property="postalCode">postCode</tr:alias>
       </tr:bean>
-      <tr:bean name="Name" properties="middleInitial" />      
+      <tr:bean name="Name" properties="middleInitial" />
       <tr:bean name="SimpleName" />
       <tr:bean name="FullName" />
     </tr:include>
