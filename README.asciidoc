@@ -26,7 +26,7 @@ Finally, the plugin annotates the generated beans with the `@Expose` annotation 
 To set up the plugin for a maven build, use the maven-jaxb2-plugin. In the maven plugin configuration add the jaxb2-tolerant-reader xjc plugin and make sure you enable xjc extension mode, as shown below. 
 The plugin is activated via the -Xtolerant-reader switch.
 
-NOTE: Currently the tolerant-reader-plugin requires a patch to xjc classinfo (xjc-classinfo-patch). The patch is based upon the xjc version 2.2.11 used by the current maven-jaxb2-plugin. A https://github.com/gf-metro/jaxb/pull/30[pull request] has been submitted to gf-metro. In order to introduce the patch, add it as dependency to the maven-jaxb2-plugin as shown below.
+IMPORTANT: Currently the tolerant-reader-plugin requires a patch to xjc classinfo (xjc-classinfo-patch). The patch is based upon the xjc version 2.2.11 used by the current maven-jaxb2-plugin. A https://github.com/gf-metro/jaxb/pull/30[pull request] has been submitted to gf-metro. In order to introduce the patch, add it as dependency to the maven-jaxb2-plugin as shown below.
 
 Since the tolerant-reader-plugin updates the `Outline` built from the schema, it must run before other plugins such as the jaxb2-basics plugin, so they can pick up the changes introduced by tolerant-reader-plugin. 
 
@@ -87,6 +87,7 @@ For this, you define a binding file with an `include` element on the schema leve
 The configuration of the tolerant-reader-plugin uses the http://docs.oracle.com/cd/E17802_01/webservices/webservices/docs/1.5/tutorial/doc/JAXBUsing4.html[standard customization options] of the xml-to-java compiler xjc. 
 Below you see an example of an external binding customization file, i.e a _bindings.xjb_ file which you put into your schemadirectory. In the sample binding below we use the extension binding prefix `tr` for the tolerant-reader plugin namespace.
 
+[source,xml]
 ----
 <jxb:bindings version="2.1" xmlns:jxb="http://java.sun.com/xml/ns/jaxb" xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:tr="http://jaxb2-commons.dev.java.net/tolerant-reader" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
@@ -139,15 +140,38 @@ If an included property has a complex type, the bean for that type will be inclu
 In cases where you do not simply expect a property, but you also want to rename it, use an alias element instead.
 
 ==== tr:alias element
-Describes zero or more properties which should be generated with an alias name, one tr:alias element per property. The generated property will be renamed to the value of the alias element. The property you want to rename is given with the property attribute (see below).
+Describes zero or more properties which should be generated with an alias name, one tr:alias element per property. The generated property will be renamed either to the content of the alias element or to the value of the alias attribute of the alias element. The property you want to rename is given with the property attribute (see below).
 
 May be used in combination with the properties attribute of the tr:bean element.
 
 ===== property attribute
 Original property name of a tr:alias element which will be renamed.
 
-===== tr:adapter and tr:adaptsTo (optional)
-Adapter specification that should be used to adapt a field. Will annotate the property with an `@Xml  
+===== alias attribute
+A tr:alias element can define the alias name to be used as content of the element:
+
+[source,xml]
+----
+<tr:alias property="foo">bar</tr:alias>
+----
+
+As an alternative, it is also valid to define the alias name with an alias attribute:
+
+[source,xml]
+----
+<tr:alias property="foo" alias="bar" />
+----
+
+==== tr:adapter element (optional)
+Adapter specification to adapt a field, for use inside of a tr:alias element. Will annotate the property with an `@XmlJavaTypeAdapter` annotation. If an adapter is applied, the alias name must be given with an alias attribute, not as content of the tr:alias element.
+
+===== class attribute
+Fully qualified class name of the `XmlAdapter` implementation to apply to the field.
+
+===== to attribute
+Fully qualified class name of the type to which the adapter adapts the field. By default, this is `java.lang.String`. 
+
+NOTE: The TolerantReaderPlugin cannot determine this type automatically because at the time of schema compilation the class of an `XmlAdapter` implementation cannot be available, since the `XmlAdapter` implementation requires the JAXB type.   
 
 === Configuring Annotation with hydra-jsonld `@Expose`
 The @Expose annotation can be used to generate JSON-LD directly from the JAXB beans.
