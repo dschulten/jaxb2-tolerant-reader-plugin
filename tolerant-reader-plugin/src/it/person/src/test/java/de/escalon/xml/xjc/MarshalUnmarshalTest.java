@@ -74,7 +74,8 @@ public class MarshalUnmarshalTest {
 
         Individuum person = createPerson(objectFactory);
 
-        JAXBElement<Individuum> jaxbElement = new JAXBElement<Individuum>(new QName("http://example.com/person", "Person"),
+        JAXBElement<Individuum> jaxbElement = new JAXBElement<Individuum>(new QName("http://example.com/person",
+                "Person"),
                 Individuum.class, person);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -121,11 +122,12 @@ public class MarshalUnmarshalTest {
         person.setAge(18);
         person.setFunction("Workhorse");
 
-        Address globalAddress = new Address();
-        globalAddress.setCity("Schwetzingen");
-        globalAddress.setAddr1("Carl Benz Str. 12");
-        globalAddress.setCountry("Germany");
-        globalAddress.setPostCode("12121");
+        // ensure builder methods are generated for alias bean
+        Address globalAddress = objectFactory.createAddress()
+            .withCity("Schwetzingen")
+            .withAddr1("Carl Benz Str. 12")
+            .withCountry("Germany")
+            .withPostCode("12121");
 
         person.setHomeAddress(globalAddress);
         return person;
