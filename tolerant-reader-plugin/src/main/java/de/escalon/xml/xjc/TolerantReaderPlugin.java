@@ -49,6 +49,7 @@ import com.sun.codemodel.JVar;
 import com.sun.tools.xjc.Options;
 import com.sun.tools.xjc.Plugin;
 import com.sun.tools.xjc.model.CClassInfo;
+import com.sun.tools.xjc.model.CClassRef;
 import com.sun.tools.xjc.model.CCustomizations;
 import com.sun.tools.xjc.model.CPropertyInfo;
 import com.sun.tools.xjc.outline.ClassOutline;
@@ -637,10 +638,17 @@ public class TolerantReaderPlugin extends Plugin {
             ClassOutline sourceClassOutline = changeSet.sourceClassOutline;
             CClassInfo sourceClassInfo = sourceClassOutline.target;
             JDefinedClass sourceImplClass = sourceClassOutline.implClass;
+            ClassOutline targetClassOutline = changeSet.targetClassOutline;
             JDefinedClass aliasBean = changeSet.definedClass;
 
             // copy class content
+            
+            // extend both JDefinedClass and ClassOutline of alias bean
             aliasBean._extends(sourceImplClass._extends());
+            CClassInfo baseClass = sourceClassOutline.target.getBaseClass();
+            targetClassOutline.target.setBaseClass(baseClass != null ? baseClass
+                    : sourceClassOutline.target.getRefBaseClass());
+            // javadoc
             copyJavadocAndImplementsClause(sourceClassInfo, aliasBean);
 
             copyProperties(outline, beanInclusions, beansToRename, sourceClassInfo, sourceImplClass, changeSet,
@@ -693,7 +701,7 @@ public class TolerantReaderPlugin extends Plugin {
             CClassInfo classInfo = classOutline.target;
             JDefinedClass implClass = classOutline.implClass;
 
-            String aliasBeanName = getBeanAlias(classInfo, beanInclusions);
+            String aliasBeanName = getBeanAliasName(classInfo, beanInclusions);
             if (!aliasBeanName.isEmpty()) {
                 JPackage parent = implClass.getPackage();
                 ChangeSet changeSet = replaceClass(outline, parent, aliasBeanName, classOutline);
@@ -1012,7 +1020,7 @@ public class TolerantReaderPlugin extends Plugin {
         }
     }
 
-    private String getBeanAlias(CClassInfo classInfo, BeanInclusions beanInclusions) {
+    private String getBeanAliasName(CClassInfo classInfo, BeanInclusions beanInclusions) {
         BeanInclusion beanInclusionForClassInfo = beanInclusions.getBeanInclusion(classInfo);
 
         String aliasBeanName = "";
