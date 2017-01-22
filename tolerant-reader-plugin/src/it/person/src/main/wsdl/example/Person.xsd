@@ -6,9 +6,9 @@
 
   <complexType name="Name">
     <sequence>
-      <element name="FirstName" type="string" maxOccurs="1" minOccurs="1" />
+      <element name="FirstName" type="string" maxOccurs="1" minOccurs="0" />
       <element name="MiddleInitial" type="string" maxOccurs="1" minOccurs="0" />
-      <element name="LastName" type="string" maxOccurs="1" minOccurs="1" />
+      <element name="LastName" type="string" maxOccurs="1" minOccurs="0" />
     </sequence>
   </complexType>
 
@@ -74,7 +74,7 @@
 
   <complexType name="Person">
     <sequence>
-      <element name="Name" type="tns:SimpleName" maxOccurs="1" minOccurs="1" />
+      <element name="Name" type="tns:Name" maxOccurs="1" minOccurs="0" />
       <element name="age" type="int" maxOccurs="1" minOccurs="0" />
       <element name="HomeAddress" type="tns:BaseAddress" maxOccurs="1" minOccurs="1" />
       <element name="ShippingAddress" type="tns:BaseAddress" maxOccurs="1" minOccurs="0" />

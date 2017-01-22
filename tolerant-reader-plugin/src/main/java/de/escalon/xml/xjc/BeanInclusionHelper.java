@@ -55,6 +55,7 @@ public class BeanInclusionHelper {
         private String beanAlias;
         private String prefix;
         private Map<String, AdapterSpec> xmlAdapters = Collections.<String, AdapterSpec> emptyMap();
+        private Map<String, ExpressionSpec> expressions = Collections.<String, ExpressionSpec> emptyMap();;
 
         public BeanInclusion(String simpleName, Set<String> properties, HashMap<String, String> propertyAliases,
                 String packageRoot, String prefix) {
@@ -123,6 +124,14 @@ public class BeanInclusionHelper {
             this.xmlAdapters = xmlAdapters;
         }
 
+        public void setExpressions(Map<String, ExpressionSpec> expressions) {
+            this.expressions = expressions;
+        }
+
+        public Map<String, ExpressionSpec> getExpressions() {
+            return expressions;
+        }
+
     }
 
     class AdapterSpec {
@@ -133,6 +142,16 @@ public class BeanInclusionHelper {
             super();
             this.adapterClass = adapterClass;
             this.adaptsToType = adaptsToType;
+        }
+
+    }
+
+    class ExpressionSpec {
+
+        public final String expression;
+
+        public ExpressionSpec(String expression) {
+            this.expression = expression;
         }
 
     }
@@ -154,19 +173,23 @@ public class BeanInclusionHelper {
                         Element beanElement = (Element) beanNode;
                         HashSet<String> propertiesToInclude = new HashSet<String>();
                         Map<String, AdapterSpec> xmlAdapters = new HashMap<String, AdapterSpec>();
-                        collectPropertiesAndAliases(beanElement, propertiesToInclude, aliases, xmlAdapters);
+                        Map<String, ExpressionSpec> expressions = new HashMap<String, ExpressionSpec>();
+                        collectPropertiesAliasesAdaptersAndExpressions(beanElement, propertiesToInclude, aliases, xmlAdapters,
+                                expressions);
                         bean = beanElement.getAttribute("name");
                         BeanInclusion beanInclusion = new BeanInclusion(bean, propertiesToInclude, aliases, packageRoot,
                                 prefix);
                         beanInclusion.setBeanAlias(beanElement.getAttribute("alias"));
                         beanInclusion.setXmlAdapters(xmlAdapters);
+                        beanInclusion.setExpressions(expressions);
                         addBeanInclusion(includedClasses, beanInclusion);
                     }
                 }
-            } else {
+            } else { // plain tr:include bean="Foo" statement
                 HashSet<String> propertiesToInclude = new HashSet<String>();
-                collectPropertiesAndAliases(includeElement, propertiesToInclude, aliases, Collections
-                    .<String, AdapterSpec> emptyMap());
+                collectPropertiesAliasesAdaptersAndExpressions(includeElement, propertiesToInclude, aliases, Collections
+                    .<String, AdapterSpec> emptyMap(), Collections
+                        .<String, ExpressionSpec> emptyMap());
                 BeanInclusion beanInclusion = new BeanInclusion(bean, propertiesToInclude, aliases, packageRoot,
                         prefix);
                 beanInclusion.setBeanAlias(includeElement.getAttribute("alias"));
@@ -191,55 +214,72 @@ public class BeanInclusionHelper {
 
     }
 
-    private void collectPropertiesAndAliases(Element includeOrBeanElement, HashSet<String> propertiesToInclude,
-            HashMap<String, String> aliases, Map<String, AdapterSpec> xmlAdapters) {
+    private void collectPropertiesAliasesAdaptersAndExpressions(Element includeOrBeanElement, HashSet<String> propertiesToInclude,
+            HashMap<String, String> aliases, Map<String, AdapterSpec> xmlAdapters,
+            Map<String, ExpressionSpec> expressions) {
         NodeList childNodes = includeOrBeanElement.getChildNodes();
         for (int i = 0; i < childNodes.getLength(); i++) {
             Node item = childNodes.item(i);
             if ("alias".equals(item.getLocalName())) {
                 NamedNodeMap attributes = item.getAttributes();
                 Node propertyAttr = attributes.getNamedItem("property");
-                String propertyName = propertyAttr.getNodeValue();
-                if (propertyName.isEmpty()) {
-                    throw new IllegalStateException("Found alias element without property attribute");
+                Node expressionAttr = attributes.getNamedItem("expression");
+                if (propertyAttr == null && expressionAttr == null) {
+                    throw new IllegalStateException(
+                            "Found tr:alias element having neither a property nor an expression attribute");
                 }
-
-                String aliasName = item.getTextContent();
-                if (aliasName.isEmpty()) {
-                    Node aliasAttr = attributes.getNamedItem("alias");
-                    if (aliasAttr != null) {
-                        aliasName = aliasAttr.getNodeValue();
+                if (propertyAttr != null && expressionAttr != null) {
+                    throw new IllegalStateException(
+                            "Found tr:alias element having both a property and an expression attribute. Only one of them is allowed.");
+                }
+                if (propertyAttr != null) {
+                    String propertyName = propertyAttr.getNodeValue();
+                    if (propertyName.isEmpty()) {
+                        throw new IllegalStateException("Found tr:alias element having an empty property attribute");
                     }
-                }
-                if (aliasName.isEmpty()) {
-                    throw new IllegalStateException("Found alias property=\"" + propertyName
-                            + "\" element without alias attribute or alias content");
-                }
-                propertiesToInclude.add(propertyName);
-                aliases.put(propertyName, aliasName);
-                NodeList aliasChildNodes = item.getChildNodes();
-                for (int j = 0; j < aliasChildNodes.getLength(); j++) {
-                    Node aliasChild = aliasChildNodes.item(j);
-                    if ("adapter".equals(aliasChild.getLocalName())) {
-                        NamedNodeMap adapterAttributes = aliasChild.getAttributes();
-                        Node classAttr = adapterAttributes.getNamedItem("class");
-                        Node toAttr = adapterAttributes.getNamedItem("to");
-                        if (classAttr != null) {
-                            String adaptsTo = "java.lang.String";
-                            if (toAttr != null && !toAttr.getNodeValue()
-                                .isEmpty()) {
-                                adaptsTo = toAttr.getNodeValue();
+                    String aliasName = getAliasName(item, attributes);
+                    if (aliasName.isEmpty()) {
+                        throw new IllegalStateException("Found tr:alias property=\"" + propertyName
+                                + "\" element without alias attribute or text content representing the alias name");
+                    }
+                    propertiesToInclude.add(propertyName);
+                    aliases.put(propertyName, aliasName);
+                    NodeList aliasChildNodes = item.getChildNodes();
+                    for (int j = 0; j < aliasChildNodes.getLength(); j++) {
+                        Node aliasChild = aliasChildNodes.item(j);
+                        if ("adapter".equals(aliasChild.getLocalName())) {
+                            NamedNodeMap adapterAttributes = aliasChild.getAttributes();
+                            Node classAttr = adapterAttributes.getNamedItem("class");
+                            Node toAttr = adapterAttributes.getNamedItem("to");
+                            if (classAttr != null) {
+                                String adaptsTo = "java.lang.String";
+                                if (toAttr != null && !toAttr.getNodeValue()
+                                    .isEmpty()) {
+                                    adaptsTo = toAttr.getNodeValue();
+                                }
+                                AdapterSpec adapterSpec = new AdapterSpec(classAttr.getNodeValue(), adaptsTo);
+                                xmlAdapters.put(aliasName, adapterSpec);
+                            } else {
+                                throw new IllegalArgumentException("Found tr:adapter element for tr:alias property=\""
+                                        + propertyName + "\" without class attribute");
                             }
-                            AdapterSpec adapterSpec = new AdapterSpec(classAttr.getNodeValue(), adaptsTo);
-                            xmlAdapters.put(aliasName, adapterSpec);
-                        } else {
-                            throw new IllegalArgumentException("Found adapter element for alias property=\""
-                                    + propertyName + "\" without class attribute");
                         }
+
                     }
 
+                } else if (expressionAttr != null) {
+                    String expression = expressionAttr.getNodeValue();
+                    if (expression.isEmpty()) {
+                        throw new IllegalStateException("Found tr:alias element having an empty expression attribute");
+                    }
+                    String aliasName = getAliasName(item, attributes);
+                    if (aliasName.isEmpty()) {
+                        throw new IllegalStateException("Found tr:alias expression=\"" + expression
+                                + "\" element without alias attribute or text content representing the alias name");
+                    }
+                    ExpressionSpec expressionSpec = new ExpressionSpec(expression);
+                    expressions.put(aliasName, expressionSpec);
                 }
-
             }
         }
 
@@ -248,6 +288,17 @@ public class BeanInclusionHelper {
             .isEmpty()) {
             Collections.addAll(propertiesToInclude, properties.split(" "));
         }
+    }
+
+    private String getAliasName(Node item, NamedNodeMap attributes) {
+        String aliasName = item.getTextContent();
+        if (aliasName.isEmpty()) {
+            Node aliasAttr = attributes.getNamedItem("alias");
+            if (aliasAttr != null) {
+                aliasName = aliasAttr.getNodeValue();
+            }
+        }
+        return aliasName;
     }
 
     private void addBeanInclusion(Map<String, List<BeanInclusion>> includedClasses, BeanInclusion beanInclusion) {

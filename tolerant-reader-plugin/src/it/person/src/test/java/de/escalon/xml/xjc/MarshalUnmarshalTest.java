@@ -29,8 +29,8 @@ import org.xml.sax.SAXException;
 import com.example.person.AddrBase;
 import com.example.person.Address;
 import com.example.person.Individuum;
+import com.example.person.Name;
 import com.example.person.ObjectFactory;
-import com.example.person.SimpleName;
 
 public class MarshalUnmarshalTest {
 
@@ -93,6 +93,7 @@ public class MarshalUnmarshalTest {
             .unmarshal(new StreamSource(in), Individuum.class);
         Individuum unmarshalledPerson = personJAXBElement.getValue();
         assertNotNull("Person not unmarshalled", unmarshalledPerson);
+        assertEquals("John Doe", unmarshalledPerson.getDisplayName());
         assertNotNull("Name not unmarshalled", unmarshalledPerson.getName());
         assertEquals("John", unmarshalledPerson.getName()
             .getFirstName());
@@ -110,11 +111,23 @@ public class MarshalUnmarshalTest {
         assertEquals("Germany", ((Address) homeAddress).getCountry());
     }
 
+    @Test
+    public void testBuilderMethods() {
+        ObjectFactory objectFactory = new ObjectFactory();
+        // ensure builder methods are generated for alias bean
+        Address globalAddress = objectFactory.createAddress()
+            .withCity("Schwetzingen")
+            .withAddr1("Carl Benz Str. 12")
+            .withCountry("Germany")
+            .withPostCode("12121");
+        assertNotNull(globalAddress);
+    }
+
     private Individuum createPerson(ObjectFactory objectFactory) {
         Individuum person = objectFactory.createIndividuum();
         person.setPersonId("123");
 
-        SimpleName name = new SimpleName();
+        Name name = new Name();
         name.setFirstName("John");
         name.setLastName("Doe");
         person.setName(name);
@@ -122,12 +135,11 @@ public class MarshalUnmarshalTest {
         person.setAge(18);
         person.setFunction("Workhorse");
 
-        // ensure builder methods are generated for alias bean
-        Address globalAddress = objectFactory.createAddress()
-            .withCity("Schwetzingen")
-            .withAddr1("Carl Benz Str. 12")
-            .withCountry("Germany")
-            .withPostCode("12121");
+        Address globalAddress = new Address();
+        globalAddress.setCity("Schwetzingen");
+        globalAddress.setAddr1("Carl Benz Str. 12");
+        globalAddress.setCountry("Germany");
+        globalAddress.setPostCode("12121");
 
         person.setHomeAddress(globalAddress);
         return person;

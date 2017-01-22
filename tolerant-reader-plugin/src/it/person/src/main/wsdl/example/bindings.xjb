@@ -8,10 +8,13 @@
 
   <jxb:bindings schemaLocation="Person.xsd">
     <tr:include packageRoot="com.example" prefix="cust">
-      <tr:bean name="Person" alias="Individuum" properties="age">
+      <tr:bean name="Person" alias="Individuum" properties="age name">
         <tr:alias property="role" alias="function">
           <tr:adapter class="com.example.ValueWrapperXmlAdapter" to="java.lang.String" />
         </tr:alias>
+        <!-- Pure Java: (name.firstName == null ? &quot;&quot; : name.firstName) + (name.firstName != null &amp;&amp; name.lastName != null ? &quot; &quot; : &quot;&quot;) + (name.lastName == null? &quot;&quot; : name.lastName) -->
+        <tr:alias
+          expression="((not empty bean.name.firstName ? bean.name.firstName : '') += ' ' += (not empty bean.name.lastName ? bean.name.lastName : '')).trim()">displayName</tr:alias>
       </tr:bean>
       <tr:bean name="BaseAddress" alias="AddrBase" />
       <tr:bean name="USAddress" />
@@ -19,7 +22,7 @@
       <tr:bean name="GlobalAddress" alias="Address">
         <tr:alias property="postalCode">postCode</tr:alias>
       </tr:bean>
-      <tr:bean name="Name" properties="middleInitial" />
+      <tr:bean name="Name" properties="firstName middleInitial lastName" />
       <tr:bean name="SimpleName" />
       <tr:bean name="FullName" />
     </tr:include>
