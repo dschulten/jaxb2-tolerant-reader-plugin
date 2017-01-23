@@ -251,7 +251,7 @@ The generated code for javax.el 3.0 always addresses the current jaxb bean by th
 </tr:alias>      
 ----
 
-If you include no EL dependencies, you can still write Java expressions, which requires you to use `&quot;` for Strings and handle null properly:
+If you include no EL dependencies, you can still write Java expressions, which requires you to use the xml entity for double quotes, and you explicitly have to handle `null`.
 
 [source,xml]
 ----
