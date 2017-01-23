@@ -40,6 +40,7 @@ import com.sun.codemodel.JClass;
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
+import com.sun.codemodel.JDocComment;
 import com.sun.codemodel.JExpr;
 import com.sun.codemodel.JFieldVar;
 import com.sun.codemodel.JFormatter;
@@ -1087,6 +1088,8 @@ public class TolerantReaderPlugin extends Plugin {
                 .fullName())) {
             JMethod aliasedMethod = bean.method(originalSetter.mods()
                 .getValue(), outline.getCodeModel().VOID, originalSetter.name());
+            JDocComment originalJavadoc = originalSetter.javadoc();
+            aliasedMethod.javadoc().append(originalJavadoc);
             aliasedMethod.body()
                 .assign(JExpr._this()
                     .ref(fieldVar), aliasedMethod.param(fieldTypeForNewSetter, fieldVar.name()));
