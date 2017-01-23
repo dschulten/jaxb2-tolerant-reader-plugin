@@ -32,8 +32,8 @@ Since the tolerant-reader-plugin updates the `Outline` built from the schema, it
 
 The pom.xml of the https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tree/master/tolerant-reader-plugin/src/it/person[it/person test project] uses the tolerant-reader-plugin with jaxb2-basics plugin.
 
+[source,xml]
 ----
-
 <plugin>
   <groupId>org.jvnet.jaxb2.maven2</groupId>
   <artifactId>maven-jaxb2-plugin</artifactId>
@@ -267,6 +267,7 @@ If you include no EL dependencies, you can still write Java expressions, which r
 The `@Expose` annotation can be applied automatically to generate JSON-LD directly from the JAXB beans.
 In order to annotate your beans with `@Expose` have the following *plugin* dependency in your _pom.xml_.
 
+[source,xml]
 ----
 <plugin>
   <groupId>org.jvnet.jaxb2.maven2</groupId>
@@ -284,6 +285,7 @@ In order to annotate your beans with `@Expose` have the following *plugin* depen
 ----
 The plugin detects the presence of hydra-jsonld and annotates the beans with `@Expose`. Sample Person:
 
+[source,java]
 ----
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Person")
