@@ -13,8 +13,9 @@
           <tr:adapter class="com.example.ValueWrapperXmlAdapter" to="java.lang.String" />
         </tr:alias>
         <!-- Pure Java: (name.firstName == null ? &quot;&quot; : name.firstName) + (name.firstName != null &amp;&amp; name.lastName != null ? &quot; &quot; : &quot;&quot;) + (name.lastName == null? &quot;&quot; : name.lastName) -->
+        <!-- No streams EL 3.0: ((not empty bean.name.firstName ? bean.name.firstName : '') += ' ' += (not empty bean.name.lastName ? bean.name.lastName : '')).trim()-->        
         <tr:alias
-          expression="((not empty bean.name.firstName ? bean.name.firstName : '') += ' ' += (not empty bean.name.lastName ? bean.name.lastName : '')).trim()">displayName</tr:alias>
+          expression="[bean.name.firstName, bean.name.lastName].stream().reduce('', (a, b) -> (a += ' ' += b).trim())">displayName</tr:alias>
       </tr:bean>
       <tr:bean name="BaseAddress" alias="AddrBase" />
       <tr:bean name="USAddress" />
