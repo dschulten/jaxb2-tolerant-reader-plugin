@@ -42,7 +42,7 @@ The pom.xml of the https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tre
     <dependency>
       <groupId>de.escalon.jaxb2</groupId>
       <artifactId>xjc-classinfo-patch</artifactId>
-      <version>0.3.0</version>
+      <version>0.4.1</version>
     </dependency>
   </dependencies>
   <configuration>
@@ -69,7 +69,7 @@ The pom.xml of the https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tre
           <plugin>
             <groupId>de.escalon.jaxb2</groupId>
             <artifactId>jaxb2-tolerant-reader</artifactId>
-            <version>0.3.0</version>
+            <version>0.4.1</version>
           </plugin>
         </plugins>
       </configuration>
@@ -91,7 +91,7 @@ Below you see an example of an external binding customization file, i.e a _bindi
 ----
 <jxb:bindings version="2.1" xmlns:jxb="http://java.sun.com/xml/ns/jaxb" xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:tr="http://jaxb2-commons.dev.java.net/tolerant-reader" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
-  jxb:extensionBindingPrefixes="xjc tr">
+  xmlns:person="http://example.com/person" jxb:extensionBindingPrefixes="xjc tr">
   <jxb:globalBindings>
     <xjc:simple />
     <xjc:serializable uid="1" />
@@ -99,15 +99,24 @@ Below you see an example of an external binding customization file, i.e a _bindi
 
   <jxb:bindings schemaLocation="Person.xsd">
     <tr:include packageRoot="com.example" prefix="cust">
-      <tr:bean name="Person" properties="name age homeAddress" />
-      <tr:bean name="BaseAddress" properties="addr1 city" />
-      <tr:bean name="USAddress" properties="state zip" />
+      <tr:bean name="Person" alias="Individuum" properties="age name">
+        <tr:alias property="role" alias="function">
+          <tr:adapter class="com.example.ValueWrapperXmlAdapter"
+            to="java.lang.String" />
+        </tr:alias>
+        <tr:alias alias="displayName">
+          <tr:compute to="java.lang.String"
+             expr="T(org.apache.commons.lang3.StringUtils).trimToNull(
+                 (name?.firstName?:'')  + ' ' + (name?.lastName?:''))" />
+        </tr:alias>
+      </tr:bean>
+      <tr:bean name="BaseAddress" alias="AddrBase" />
+      <tr:bean name="USAddress" />
       <!-- bean alias Address with postCode property alias -->
-      <tr:bean name="GlobalAddress" alias="Address" properties="country">
+      <tr:bean name="GlobalAddress" alias="Address">
         <tr:alias property="postalCode">postCode</tr:alias>
       </tr:bean>
-      <tr:bean name="SimpleName" properties="firstName lastName">
-      </tr:bean>
+      <tr:bean name="Name" properties="firstName middleInitial lastName" />
     </tr:include>
   </jxb:bindings>
 </jxb:bindings>
@@ -133,19 +142,21 @@ Simple name of the expected bean.
 ===== alias attribute
 Alias bean name to be used instead of the name.
 
-===== properties attribute
-List of expected bean properties as space-separated strings. Required properties are included automatically (from 0.3.0), i.e. you only need to define properties having minOccurs=0. Properties may be defined in super classes.
+===== properties attribute (optional)
+List of expected bean properties as space-separated strings. Required properties are included automatically, i.e. you only need to define properties having minOccurs=0.
 If an included property has a complex type, the bean for that type will be included automatically.
 
 In cases where you do not simply expect a property, but you also want to rename it, use an alias element instead.
 
 ==== tr:alias element
-Describes zero or more properties which should be generated with an alias name, one tr:alias element per property. The generated property will be renamed either to the content of the alias element or to the value of the alias attribute of the alias element. The property you want to rename is given with the property attribute (see below).
+Describes a property which should be generated with an alias name, one tr:alias element per property. The generated property will be renamed either to the content of the alias element, or to the value of the alias attribute of the tr:alias element. See the explanation of the alias attribute below for examples. 
 
-May be used in combination with the properties attribute of the tr:bean element.
+The property you want to rename is given with the property attribute (see below).
+
+May be used in combination with the properties attribute of the tr:bean element, i.e. you may have some properties you expect with their original name and some other, aliased properties.
 
 ===== property attribute
-Original property name of a tr:alias element which will be renamed.
+Original property name of a tr:alias element which will be renamed. Must be omitted when defining a computed property.
 
 ===== alias attribute
 A tr:alias element can define the alias name to be used as content of the element:
@@ -155,7 +166,7 @@ A tr:alias element can define the alias name to be used as content of the elemen
 <tr:alias property="foo">bar</tr:alias>
 ----
 
-As an alternative, it is also valid to define the alias name with an alias attribute:
+As an alternative, it is also valid to define the alias name with an alias attribute. Must be used with tr:adapter and tr:compute.
 
 [source,xml]
 ----
@@ -163,7 +174,17 @@ As an alternative, it is also valid to define the alias name with an alias attri
 ----
 
 ==== tr:adapter element (optional)
-Adapter specification to adapt a field, for use inside of a tr:alias element. Will annotate the property with an `@XmlJavaTypeAdapter` annotation. If an adapter is applied, the alias name must be given with an alias attribute, not as content of the tr:alias element.
+Adapter specification to adapt a field, for use inside of a tr:alias element. Will annotate the property with an `@XmlJavaTypeAdapter` annotation. If an adapter is applied, the alias name must be given with an `alias` attribute, not as content of the tr:alias element. 
+
+In the example below, a `ValueWrapperXmlAdapter` adapts the field `role` of complex type `ValueWrapper` to a simple String by extracting the wrapped value.
+
+[source,xml]
+----
+<tr:alias property="role" alias="function">
+  <tr:adapter class="com.example.ValueWrapperXmlAdapter"
+    to="java.lang.String" />
+</tr:alias>
+----
 
 ===== class attribute
 Fully qualified class name of the `XmlAdapter` implementation to apply to the field.
@@ -171,7 +192,72 @@ Fully qualified class name of the `XmlAdapter` implementation to apply to the fi
 ===== to attribute
 Fully qualified class name of the type to which the adapter adapts the field. By default, this is `java.lang.String`. 
 
-NOTE: The TolerantReaderPlugin cannot determine this type automatically because at the time of schema compilation the class of an `XmlAdapter` implementation cannot be available, since the `XmlAdapter` implementation requires the JAXB type.   
+NOTE: The TolerantReaderPlugin cannot determine this type automatically for adapters. At the time of schema compilation the class of an `XmlAdapter` implementation cannot be available, since the `XmlAdapter` implementation requires the JAXB type for compilation.   
+
+
+==== tr:compute element (optional)
+Specifies a computed field which will be generated as `@XmlTransient`, for use inside of a tr:alias element.
+A computed field requires you to provide an expression inside the `expr` attribute and if the expression does not evaluate to String, the type to which the expression evaluates in the `to` attribute. Consider the examples in the supported expression languages below.
+
+The expression can be written with SpringEL, javax.el 3.0 or as plain java expression. 
+
+Include SpringEL as *plugin* dependency of the maven-jaxb2-plugin to use SpringEL: 
+
+[source,xml]
+----
+<!-- inside plugin configuration -->
+<dependency>
+  <groupId>org.springframework</groupId>
+  <artifactId>spring-expression</artifactId>
+  <version>4.3.5.RELEASE</version>
+</dependency>
+----
+
+That allows you to use expressions with Spring EL's safe navigation `?.` and Elvis `?:` operators, and you have access to static utilities, too:
+
+[source,xml]
+----
+<tr:alias alias="displayName">
+  <tr:compute to="java.lang.String"
+     expr="T(org.apache.commons.lang3.StringUtils).trimToNull(
+         (name?.firstName?:'')  + ' ' + (name?.lastName?:''))" />
+</tr:alias>
+----
+
+You can also use javax.el 3.0 (starting from Java 1.7) if you add it as dependency to the maven-jaxb2-plugin: 
+
+[source,xml]
+----
+<!-- inside plugin configuration -->
+<dependency>
+  <groupId>org.glassfish</groupId>
+  <artifactId>javax.el</artifactId>
+  <version>3.0.0</version>
+</dependency>
+----
+
+The generated code for javax.el 3.0 always addresses the current jaxb bean by the name `bean`:
+
+[source,xml]
+----
+<tr:alias alias="displayName">
+  <tr:compute to="java.lang.String"
+    expr="((not empty bean.name.firstName ? bean.name.firstName : '') 
+      += ' ' += (not empty bean.name.lastName ? bean.name.lastName : '')).trim()"
+</tr:alias>      
+----
+
+If you include no EL dependencies, you can still write Java expressions, which requires you to use `&quot;` for Strings and handle null properly:
+
+[source,xml]
+----
+<tr:alias alias="displayName">
+  <tr:compute to="java.lang.String"
+    expr="(name.firstName == null ? &quot;&quot; : name.firstName) 
+      + (name.firstName != null &amp;&amp; name.lastName  != null ? &quot; &quot; : &quot;&quot;) 
+      + (name.lastName == null? &quot;&quot; : name.lastName)
+</tr:alias>  
+----
 
 === Configuring Annotation with hydra-jsonld `@Expose`
 The @Expose annotation can be used to generate JSON-LD directly from the JAXB beans.
