@@ -263,7 +263,7 @@ If you include no EL dependencies, you can still write Java expressions, which r
 </tr:alias>  
 ----
 
-=== Configuring Annotation with hydra-jsonld `@Expose`
+=== Configuring Annotation for hydra-jsonld
 The @Expose annotation can be used to generate JSON-LD directly from the JAXB beans.
 In order to annotate your beans with `@Expose` have the following *plugin* dependency in your _pom.xml_.
 
@@ -287,11 +287,11 @@ The plugin detects the presence of hydra-jsonld and annotates the beans with `@E
 ----
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Person")
-@Term(define = "cust", as = "http://example.com/person/")
+@Term(define = "cust", as = "http://example.com/person#")
 @Expose("cust:Person")
 public class Person {
 
-    @Expose("cust:Person#name")
+    @Expose("cust:Person.name")
     public Name getName() {
         return name;
     }
