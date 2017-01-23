@@ -159,7 +159,7 @@ public class TolerantReaderPlugin extends Plugin {
     @Override
     public boolean isCustomizationTagName(String nsUri, String localName) {
         return NAMESPACE_URI.equals(nsUri) && ("include".equals(localName) || "alias".equals(localName)
-                || "bean".equals(localName) || "adapter".equals(localName));
+                || "bean".equals(localName) || "adapter".equals(localName) || "compute".equals(localName));
     }
 
     @Override
@@ -318,7 +318,7 @@ public class TolerantReaderPlugin extends Plugin {
             for (Entry<String, ExpressionSpec> entry : entrySet) {
                 // TODO add transient getter, also requires fields referenced by expression
                 JMethod computedMethod = implClass.method(JMod.PUBLIC,
-                        OutlineHelper.getJClassFromOutline(outline, "java.lang.String"),
+                        OutlineHelper.getJClassFromOutline(outline, entry.getValue().computesToType),
                         "get" + StringHelper.capitalize(entry.getKey()));
                 JBlock body = computedMethod.body();
                 if (ClassHelper.isPresent("javax.el.ELProcessor")) {
@@ -331,7 +331,7 @@ public class TolerantReaderPlugin extends Plugin {
                     JVar ret = body.decl(codeModel.ref("java.lang.Object"), "ret", JExpr.invoke(elpVar, "eval")
                         .arg(JExpr.lit(entry.getValue().expression)));
 
-                    body._return(JExpr.cast(codeModel.ref("java.lang.String"), ret));
+                    body._return(JExpr.cast(codeModel.ref(entry.getValue().computesToType), ret));
                 } else if (ClassHelper.isPresent("org.springframework.expression.ExpressionParser")) {
                     // required Type references
                     JType parserIface = codeModel._ref(org.springframework.expression.ExpressionParser.class);
@@ -355,7 +355,7 @@ public class TolerantReaderPlugin extends Plugin {
                     JVar ret = body.decl(codeModel._ref(java.lang.Object.class), "ret", JExpr.invoke(expVar, "getValue")
                         .arg(contextVar));
                     // return (String) ret;
-                    body._return(JExpr.cast(codeModel.ref("java.lang.String"), ret));
+                    body._return(JExpr.cast(codeModel.ref(entry.getValue().computesToType), ret));
                 } else {
                     body._return(JExpr.direct(entry.getValue().expression));
                 }

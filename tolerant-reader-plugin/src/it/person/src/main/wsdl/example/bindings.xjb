@@ -17,7 +17,10 @@
         <!-- No streams EL 3.0: ((not empty bean.name.firstName ? bean.name.firstName : '') += ' ' += (not empty bean.name.lastName 
           ? bean.name.lastName : '')).trim() -->
         <!-- Streams EL 3.0: [bean.name.firstName, bean.name.lastName].stream().reduce('', (a, b) -> (a += ' ' += b).trim()) -->
-        <tr:alias expression="T(org.apache.commons.lang3.StringUtils).trimToNull((name?.firstName?:'') + ' ' + (name?.lastName?:''))">displayName</tr:alias>
+        <tr:alias alias="displayName">
+          <tr:compute to="java.lang.String"
+            expr="T(org.apache.commons.lang3.StringUtils).trimToNull((name?.firstName?:'') + ' ' + (name?.lastName?:''))" />
+        </tr:alias>
       </tr:bean>
       <tr:bean name="BaseAddress" alias="AddrBase" />
       <tr:bean name="USAddress" />
