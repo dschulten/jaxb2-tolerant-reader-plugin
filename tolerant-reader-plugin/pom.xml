@@ -32,6 +32,12 @@
       <optional>true</optional>
     </dependency>
     <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-expression</artifactId>
+      <version>4.3.5.RELEASE</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
       <groupId>de.escalon.hypermedia</groupId>
       <artifactId>hydra-jsonld</artifactId>
       <version>0.3.0</version>
