@@ -303,7 +303,7 @@ public class TolerantReaderPlugin extends Plugin {
         for (ClassOutline classOutline : classOutlines) {
             BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(classOutline.target);
             if (beanInclusion == null) {
-                return;
+                continue;
             }
             Set<Entry<String, ExpressionSpec>> entrySet = beanInclusion.getExpressions()
                 .entrySet();
@@ -383,10 +383,12 @@ public class TolerantReaderPlugin extends Plugin {
             }
             String prefix = beanInclusion.getPrefix();
             if (!prefix.isEmpty()) {
-                JAnnotationUse annotateExpose = target.annotate(Term.class);
                 QName typeName = classInfo.getTypeName();
-                annotateExpose.param("define", prefix);
-                annotateExpose.param("as", typeName.getNamespaceURI() + "#");
+                if (typeName != null) { // anonymous type
+                    JAnnotationUse annotateExpose = target.annotate(Term.class);
+                    annotateExpose.param("define", prefix);
+                    annotateExpose.param("as", typeName.getNamespaceURI() + "#");
+                }
             }
 
         }
@@ -1089,7 +1091,8 @@ public class TolerantReaderPlugin extends Plugin {
             JMethod aliasedMethod = bean.method(originalSetter.mods()
                 .getValue(), outline.getCodeModel().VOID, originalSetter.name());
             JDocComment originalJavadoc = originalSetter.javadoc();
-            aliasedMethod.javadoc().append(originalJavadoc);
+            aliasedMethod.javadoc()
+                .append(originalJavadoc);
             aliasedMethod.body()
                 .assign(JExpr._this()
                     .ref(fieldVar), aliasedMethod.param(fieldTypeForNewSetter, fieldVar.name()));

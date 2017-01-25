@@ -154,7 +154,6 @@ public class BeanInclusionHelper {
         public ExpressionSpec(String expression, String computesToType) {
             this.expression = expression;
             this.computesToType = computesToType;
-
         }
 
     }
@@ -276,17 +275,18 @@ public class BeanInclusionHelper {
                                     + propertyName + "\" without class attribute");
                         }
                     } else if ("compute".equals(aliasChild.getLocalName())) {
+                        
                         NamedNodeMap adapterAttributes = aliasChild.getAttributes();
                         Node exprAttr = adapterAttributes.getNamedItem("expr");
                         Node toAttr = adapterAttributes.getNamedItem("to");
                         if (exprAttr != null) {
-                            String adaptsTo = "java.lang.String";
+                            String computesTo = "java.lang.String";
                             if (toAttr != null && !toAttr.getNodeValue()
                                 .isEmpty()) {
-                                adaptsTo = toAttr.getNodeValue();
+                                computesTo = toAttr.getNodeValue();
                             }
-                            ExpressionSpec adapterSpec = new ExpressionSpec(exprAttr.getNodeValue(), adaptsTo);
-                            expressions.put(aliasName, adapterSpec);
+                            ExpressionSpec expressionSpec = new ExpressionSpec(exprAttr.getNodeValue(), computesTo);
+                            expressions.put(aliasName, expressionSpec);
                         } else {
                             throw new IllegalArgumentException("Found tr:compute element without expr attribute");
                         }
