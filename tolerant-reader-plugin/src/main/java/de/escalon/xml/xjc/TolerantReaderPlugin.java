@@ -321,18 +321,7 @@ public class TolerantReaderPlugin extends Plugin {
                         OutlineHelper.getJClassFromOutline(outline, entry.getValue().computesToType),
                         "get" + StringHelper.capitalize(entry.getKey()));
                 JBlock body = computedMethod.body();
-                if (ClassHelper.isPresent("javax.el.ELProcessor")) {
-                    JType elp = codeModel._ref(javax.el.ELProcessor.class);
-                    JVar elpVar = body.decl(elp, "elp", JExpr._new(elp));
-                    JInvocation invokeDefineBean = body.invoke(elpVar, "defineBean");
-                    invokeDefineBean.arg("bean")
-                        .arg(JExpr._this());
-
-                    JVar ret = body.decl(codeModel.ref("java.lang.Object"), "ret", JExpr.invoke(elpVar, "eval")
-                        .arg(JExpr.lit(entry.getValue().expression)));
-
-                    body._return(JExpr.cast(codeModel.ref(entry.getValue().computesToType), ret));
-                } else if (ClassHelper.isPresent("org.springframework.expression.ExpressionParser")) {
+                if (ClassHelper.isPresent("org.springframework.expression.ExpressionParser")) {
                     // required Type references
                     JType parserIface = codeModel._ref(org.springframework.expression.ExpressionParser.class);
                     JType expressionIface = codeModel._ref(org.springframework.expression.Expression.class);
@@ -355,6 +344,17 @@ public class TolerantReaderPlugin extends Plugin {
                     JVar ret = body.decl(codeModel._ref(java.lang.Object.class), "ret", JExpr.invoke(expVar, "getValue")
                         .arg(contextVar));
                     // return (String) ret;
+                    body._return(JExpr.cast(codeModel.ref(entry.getValue().computesToType), ret));
+                } else if (ClassHelper.isPresent("javax.el.ELProcessor")) {
+                    JType elp = codeModel._ref(javax.el.ELProcessor.class);
+                    JVar elpVar = body.decl(elp, "elp", JExpr._new(elp));
+                    JInvocation invokeDefineBean = body.invoke(elpVar, "defineBean");
+                    invokeDefineBean.arg("bean")
+                        .arg(JExpr._this());
+
+                    JVar ret = body.decl(codeModel.ref("java.lang.Object"), "ret", JExpr.invoke(elpVar, "eval")
+                        .arg(JExpr.lit(entry.getValue().expression)));
+
                     body._return(JExpr.cast(codeModel.ref(entry.getValue().computesToType), ret));
                 } else {
                     body._return(JExpr.direct(entry.getValue().expression));

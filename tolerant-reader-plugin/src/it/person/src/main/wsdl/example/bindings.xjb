@@ -7,14 +7,22 @@
   </jxb:globalBindings>
 
   <jxb:bindings schemaLocation="Person.xsd">
+    <!-- <jaxb:bindings node="/xs:schema/xs:complexType[@name='CT_ZustellPerson']/xs:complexContent/xs:extension/xs:attribute[@name='Adresse']"> -->
+    <jxb:bindings scd="/type::person:Person/@friend">
+      <jxb:property>
+        <jxb:baseType name="com.example.person.Individuum" />
+      </jxb:property>
+    </jxb:bindings>
+
     <tr:include packageRoot="com.example" prefix="cust">
       <tr:bean name="Person" alias="Individuum" properties="age name">
+        <tr:alias property="friend" alias="buddy" />
         <tr:alias property="role" alias="function">
           <tr:adapter class="com.example.ValueWrapperXmlAdapter" to="java.lang.String" />
         </tr:alias>
-        <!-- Pure Java: (name.firstName == null ? &quot;&quot; : name.firstName) + (name.firstName != null &amp;&amp; name.lastName 
+        <!-- Pure Java: (name.firstName == null ? &quot;&quot; : name.firstName) + (name.firstName != null &amp;&amp; name.lastName
           != null ? &quot; &quot; : &quot;&quot;) + (name.lastName == null? &quot;&quot; : name.lastName) -->
-        <!-- No streams EL 3.0: ((not empty bean.name.firstName ? bean.name.firstName : '') += ' ' += (not empty bean.name.lastName 
+        <!-- No streams EL 3.0: ((not empty bean.name.firstName ? bean.name.firstName : '') += ' ' += (not empty bean.name.lastName
           ? bean.name.lastName : '')).trim() -->
         <!-- Streams EL 3.0: [bean.name.firstName, bean.name.lastName].stream().reduce('', (a, b) -> (a += ' ' += b).trim()) -->
         <tr:alias alias="displayName">

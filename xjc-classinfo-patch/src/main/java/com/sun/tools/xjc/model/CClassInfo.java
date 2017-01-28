@@ -71,11 +71,12 @@ import com.sun.xml.xsom.XSComponent;
 import org.xml.sax.Locator;
 
 /**
- * Mutable {@link ClassInfo} representation. With patch for JAX_WS-1187.
+ * Mutable {@link ClassInfo} representation. With patch for JAX_WS-1187/JAXB-1114
  * <p>
  * Schema parsers build these objects.
  *
  * @author Kohsuke Kawaguchi
+ * @see <a href="https://java.net/jira/browse/JAXB-1114">JAXB-1114</a>
  */
 public final class CClassInfo extends AbstractCElement implements ClassInfo<NType, NClass>, CClassInfoParent, CClass,
         NClass {

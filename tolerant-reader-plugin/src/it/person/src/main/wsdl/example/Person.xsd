@@ -81,7 +81,8 @@
       <element name="Extra" type="tns:Extra" maxOccurs="1" minOccurs="0" />
       <element name="Role" type="tns:ValueWrapper" minOccurs="1" maxOccurs="1"/>
     </sequence>
-    <attribute name="personId" type="string" use="required"/>
+    <attribute name="personId" type="ID" use="required"/>
+    <attribute name="friend" type="IDREF"/>
   </complexType>
 
   <complexType name="Extra">

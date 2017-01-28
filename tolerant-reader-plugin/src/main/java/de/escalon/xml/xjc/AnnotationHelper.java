@@ -31,8 +31,11 @@ public class AnnotationHelper {
                 .fullName())) {
                 continue;
             }
-            Map<String, JAnnotationValue> sourceAnnotationMembers = jAnnotationUse
-                .getAnnotationMembers();
+            JAnnotationUse annotation = annotationTarget.getAnnotation(jAnnotationUse);
+            if (annotation == null) {
+                annotation = annotationTarget.annotate(jAnnotationUse.getAnnotationClass());
+            }
+            Map<String, JAnnotationValue> sourceAnnotationMembers = getAnnotationMembers(jAnnotationUse);
             for (Entry<String, JAnnotationValue> entry : sourceAnnotationMembers.entrySet()) {
                 String annotationParamName = entry.getKey();
                 JAnnotationValue annotationParamValue = entry.getValue();
@@ -43,10 +46,6 @@ public class AnnotationHelper {
                 writer.flush();
                 String valueString = new String(bos.toByteArray());
 
-                JAnnotationUse annotation = annotationTarget.getAnnotation(jAnnotationUse);
-                if (annotation == null) {
-                    annotation = annotationTarget.annotate(jAnnotationUse.getAnnotationClass());
-                }
 
                 if (isClassLiteral(valueString)) {
                     annotation.param(annotationParamName,
@@ -96,6 +95,22 @@ public class AnnotationHelper {
                 }
             }
         }
+    }
+
+    /**
+     * Workaround for <a href="https://java.net/jira/browse/JAXB-1119">JAXB-1119: JAnnotationUse.getAnnotationMembers throws if annotation has no members</a>.
+     * @param jAnnotationUse to get members from
+     * @return members or empty map
+     */
+    private static Map<String, JAnnotationValue> getAnnotationMembers(JAnnotationUse jAnnotationUse) {
+        Map<String, JAnnotationValue> sourceAnnotationMembers;
+        try {
+            sourceAnnotationMembers = jAnnotationUse
+                .getAnnotationMembers();
+        } catch (NullPointerException ex) {
+            sourceAnnotationMembers = Collections.emptyMap();
+        }
+        return sourceAnnotationMembers;
     }
 
     private static int createIntegerLiteral(String valueString) {
