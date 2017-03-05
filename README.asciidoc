@@ -103,6 +103,22 @@ Below you see an example of an external binding customization file, i.e a _bindi
 
   <jxb:bindings schemaLocation="Person.xsd">
     <tr:include packageRoot="com.example" prefix="cust">
+
+      <!-- bean with required properties only -->
+      <tr:bean name="USAddress" />
+
+      <!-- bean alias name (e.g. to translate bean names) -->
+      <tr:bean name="BaseAddress" alias="AddrBase" />
+
+      <!-- bean with required and some optional properties -->
+      <tr:bean name="Name" properties="firstName middleInitial lastName" />
+
+      <!-- bean with property alias -->
+      <tr:bean name="GlobalAddress" alias="Address">
+        <tr:alias property="postalCode">postCode</tr:alias>
+      </tr:bean>
+
+      <!-- bean with an adapted and a computed property -->
       <tr:bean name="Person" alias="Individuum" properties="age name">
         <tr:alias property="role" alias="function">
           <tr:adapter class="com.example.ValueWrapperXmlAdapter"
@@ -114,13 +130,7 @@ Below you see an example of an external binding customization file, i.e a _bindi
                  (name?.firstName?:'')  + ' ' + (name?.lastName?:''))" />
         </tr:alias>
       </tr:bean>
-      <tr:bean name="BaseAddress" alias="AddrBase" />
-      <tr:bean name="USAddress" />
-      <!-- bean alias Address with postCode property alias -->
-      <tr:bean name="GlobalAddress" alias="Address">
-        <tr:alias property="postalCode">postCode</tr:alias>
-      </tr:bean>
-      <tr:bean name="Name" properties="firstName middleInitial lastName" />
+
     </tr:include>
   </jxb:bindings>
 </jxb:bindings>
@@ -132,13 +142,13 @@ Add at least one tr:include element as customization root. If you need to define
 ===== packageRoot attribute (optional)
 You may add a `packageRoot` attribute to an `include` element if you have to select beans from specific packages. The package root does not have to be the entire package name, it uses startsWith to match packages. That way you can be tolerant about particular versions of a schema if the schema provider uses version numbers in namespaces. I.e. if the schema uses a target namespace `com.example.namespace.fun.v5_7`, you can use a packageRoot `com.example.namespace.fun` to select your beans. 
 
-TIP: In situations where the schema uses versioned namespaces, apply https://jaxb.java.net/guide/Customizing_Java_packages.html[custom java packages] to further decouple your beans. If you do this, the original versioned namespace will still be preserved during marshalling via the package definition in _package-info.java_.
+TIP: In situations where the schema uses versioned namespaces, apply https://jaxb.java.net/guide/Customizing_Java_packages.html[custom java packages] to avoid having to fix lots of import statements for every version change. If you do this, the original versioned namespace will still be preserved during marshalling via the package definition in _package-info.java_.
 
 ===== prefix attribute (optional)
-Allows to specify a prefix to be used for the target namespace URI. When the plugin detects hydra-jsonld on the classpath, it annotates the beans with `@Term(define="pers", as="http://example.com/person/")`
+Allows to specify a prefix to be used for the target namespace URI when used with hydra-jsonld. When the plugin detects hydra-jsonld on the classpath, it annotates the beans with `@Term(define="pers", as="http://example.com/person/")`
 
 ==== tr:bean element
-Describes an expected bean. Super classes will be included automatically.
+Describes an expected bean. Super classes will be included automatically. If an expected bean is not defined by the schema, an error is thrown. This allows you to detect and fix breaking changes early.
 
 ===== name attribute
 Simple name of the expected bean. 
@@ -147,10 +157,10 @@ Simple name of the expected bean.
 Alias bean name to be used instead of the name.
 
 ===== properties attribute (optional)
-List of expected bean properties as space-separated strings. Required properties are included automatically, i.e. you only need to define properties having minOccurs=0.
+List of expected bean properties as space-separated strings. Required properties are included automatically, i.e. you only need to define elements having minOccurs=0 and attributes without required=true.
 If an included property has a complex type, the bean for that type will be included automatically.
 
-In cases where you do not simply expect a property, but you also want to rename it, use an alias element instead.
+In cases where you do not simply expect a property, but you also want to rename it, use a tr:alias element instead.
 
 ==== tr:alias element
 Describes a property which should be generated with an alias name, one tr:alias element per property. The generated property will be renamed either to the content of the alias element, or to the value of the alias attribute of the tr:alias element. See the explanation of the alias attribute below for examples. 
