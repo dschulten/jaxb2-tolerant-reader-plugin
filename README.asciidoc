@@ -342,6 +342,9 @@ The sample project in _src/it_ makes use of placeholders for the maven invoker p
 * Right click the _person_ folder and select "Import as Project"
 * Right click the newly imported project and select "Run As - Maven build"
 
+== References
+* https://jaxb.java.net/nonav/2.2.1/docs/vendorCustomizations.html[JAXB Vendor Customizations]
+
 == Acknowledgements
 
 * David Tiller, https://www.captechconsulting.com/blogs/make-a-surgical-strike-with-a-custom-xjc-plugin[Make a Surgical Strike with a Custom XJC Plugin] and http://www.captechconsulting.com/blogs/extending-xjc-functionality-with-a-custom-plugin[Extending XJC Functionality With a Custom Plugin]
