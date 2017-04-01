@@ -313,7 +313,9 @@ As a plugin developer you may want to execute the plugin manually, but you want 
 
 In launch and debug configurations you can execute the plugin via the `com.sun.tools.xjc.Driver` Java main class, with the tolerant-reader-plugin and the xjc-classinfo-patch on the classpath (make sure the xjc-classinfo-patch comes before tolerant-reader-plugin on the classpath in your launch configuration). 
 
-One way to achieve this in Eclipse is to create a _Java Application_ launch configuration while the `jaxb2-tolerant-reader` project is selected, so that it becomes the launch configuration's project. Then switch to the *Classpath* tab, highlight *User Entries* and add the `xjc-classinfo-patch` project to the classpath. Finally, hit *Up* to move it above the `jaxb2-tolerant-reader` entry. 
+One way to achieve this in Eclipse is to create a _Java Application_ launch configuration while the `jaxb2-tolerant-reader` project is selected, so that it becomes the launch configuration's project. Then switch to the *Classpath* tab, highlight *User Entries* and add the `xjc-classinfo-patch` project to the classpath. Finally, hit *Up* to move it above the `jaxb2-tolerant-reader` entry.
+
+In Idea, create a run configuration as described above and configure it to *Use classpath of module: tolerant-reader-plugin*. In order to adjust the classpath to apply the xjc-classinfo-patch, choose *Open Module Settings* for the tolerant-reader-plugin module while it is highlighted (hit F4). On the *Dependencies* tab, hit the green + icon on the right hand side and choose *Module Dependency...* to add xjc-classinfo-patch. Then select xjc-classinfo-patch in the dependencies list and hit the up arrow icon until it is at the top of all dependencies.
 
 Build the plugin project. This is necessary to create an executable maven test project in _target/it/person_.
 
