@@ -16,11 +16,11 @@
     <tr:include packageRoot="com.example" prefix="cust">
       <tr:bean name="Person" alias="Individuum" properties="age name">
         <tr:alias property="friend" alias="buddy" />
-        <tr:alias property="interest" alias="interest" >
-          <tr:adapter class="com.example.FirstInListAdapter" to="java.lang.String"/>
-        </tr:alias>
-        <tr:alias property="role" alias="function">
-          <tr:adapter class="com.example.ValueWrapperXmlAdapter" to="java.lang.Integer" />
+        <!--<tr:alias property="interest" alias="interest" >-->
+          <!--<tr:adapter class="com.example.FirstInListAdapter" to="java.lang.Integer"/>-->
+        <!--</tr:alias>-->
+        <tr:alias property="role" alias="role">
+          <tr:adapter class="com.example.ValueWrapperXmlAdapter" to="java.lang.String" />
         </tr:alias>
         <!-- Pure Java: (name.firstName == null ? &quot;&quot; : name.firstName) + (name.firstName != null &amp;&amp; name.lastName
           != null ? &quot; &quot; : &quot;&quot;) + (name.lastName == null? &quot;&quot; : name.lastName) -->

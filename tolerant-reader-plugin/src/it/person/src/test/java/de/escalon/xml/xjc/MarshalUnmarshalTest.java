@@ -101,7 +101,7 @@ public class MarshalUnmarshalTest {
             .getLastName());
         assertEquals(18, unmarshalledPerson.getAge()
             .intValue());
-        assertEquals("Workhorse", unmarshalledPerson.getFunction());
+        assertEquals("Workhorse", unmarshalledPerson.getRole());
         AddrBase homeAddress = unmarshalledPerson.getHomeAddress();
         assertNotNull("HomeAddress not unmarshalled", homeAddress);
         assertEquals("Carl Benz Str. 12", homeAddress.getAddr1());
@@ -133,7 +133,7 @@ public class MarshalUnmarshalTest {
         person.setName(name);
 
         person.setAge(18);
-        person.setFunction("Workhorse");
+        person.setRole("Workhorse");
 
         Address globalAddress = new Address();
         globalAddress.setCity("Schwetzingen");
