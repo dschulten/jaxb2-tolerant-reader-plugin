@@ -758,7 +758,7 @@ public class TolerantReaderPlugin extends Plugin {
             }
 
             Collection<JAnnotationUse> annotations = sourceImplClass.annotations();
-            // XmlSeeAlso is handled by ourselves
+            // XmlSeeAlso is handled by ourselves, hence ignore here:
             AnnotationHelper.applyAnnotations(outline, Annotatable.from(aliasBean), annotations, IGNORED_ANNOTATIONS);
 
         }
@@ -973,32 +973,35 @@ public class TolerantReaderPlugin extends Plugin {
                         if (beanInclusion != null) {
                             String propertyAlias = beanInclusion.getPropertyAlias(propertyPrivateName);
                             if (propertyAlias != null) {
-                                String propertyAliasPublic = propertyAlias.substring(0, 1)
-                                    .toUpperCase() + propertyAlias.substring(1);
+                                if (!propertyAlias.equals(propertyPrivateName)) {
+                                    String propertyAliasPublic = propertyAlias.substring(0, 1)
+                                        .toUpperCase() + propertyAlias.substring(1);
 
-                                JFieldVar fieldVar = fields.get(propertyPrivateName);
-                                fieldVar.name(propertyAlias);
+                                    JFieldVar fieldVar = fields.get(propertyPrivateName);
+                                    fieldVar.name(propertyAlias);
 
-                                Set<String> settersAndGetters = getSettersAndGetters(propertyPublicName);
+                                    Set<String> settersAndGetters = getSettersAndGetters(propertyPublicName);
 
-                                for (JMethod method : methods) {
-                                    String methodName = method.name();
-                                    if (settersAndGetters.contains(methodName)) { // FooBar
-                                        method.name(methodName.replace(propertyPublicName, propertyAliasPublic));
-                                        if (methodName.startsWith("get") || methodName.startsWith("is")) {
-                                            applyExpose(propertyInfo.getName(false), Annotatable.from(method),
-                                                    beanInclusions, outline, classInfo);
+                                    for (JMethod method : methods) {
+                                        String methodName = method.name();
+                                        if (settersAndGetters.contains(methodName)) { // FooBar
+                                            method.name(methodName.replace(propertyPublicName, propertyAliasPublic));
+                                            if (methodName.startsWith("get") || methodName.startsWith("is")) {
+                                                applyExpose(propertyInfo.getName(false), Annotatable.from(method),
+                                                        beanInclusions, outline, classInfo);
+                                            }
                                         }
                                     }
-                                }
 
-                                if (!(propertyPrivateName.equals(propertyAlias))) {
-                                    propertyInfo.setName(true, StringHelper.capitalize(propertyAlias));
-                                    propertyInfo.setName(false, propertyAlias);
+                                    if (!(propertyPrivateName.equals(propertyAlias))) {
+                                        propertyInfo.setName(true, StringHelper.capitalize(propertyAlias));
+                                        propertyInfo.setName(false, propertyAlias);
+                                    }
                                 }
                             } else {
                                 applyExpose(propertyInfo.getName(false),
-                                        Annotatable.from(ClassHelper.findGetterInClass(implClass, propertyPublicName)),
+                                        Annotatable.from(ClassHelper.findGetterInClass(implClass,
+                                                propertyPublicName)),
                                         beanInclusions, outline, classInfo);
                             }
 
