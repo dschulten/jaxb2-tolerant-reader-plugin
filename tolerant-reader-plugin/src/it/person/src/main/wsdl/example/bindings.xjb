@@ -1,6 +1,6 @@
 <jxb:bindings version="2.1" xmlns:jxb="http://java.sun.com/xml/ns/jaxb" xmlns:xs="http://www.w3.org/2001/XMLSchema"
-  xmlns:tr="http://jaxb2-commons.dev.java.net/tolerant-reader" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
-  xmlns:person="http://example.com/person" jxb:extensionBindingPrefixes="xjc tr">
+              xmlns:tr="http://jaxb2-commons.dev.java.net/tolerant-reader" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+              xmlns:person="http://example.com/person" jxb:extensionBindingPrefixes="xjc tr">
   <jxb:globalBindings>
     <xjc:serializable uid="1" />
   </jxb:globalBindings>
@@ -15,9 +15,10 @@
 
     <tr:include packageRoot="com.example" prefix="cust">
       <tr:bean name="Person" alias="Individuum" properties="age name">
+        <tr:alias property="homeAddress" alias="invoiceAddress" />
         <tr:alias property="friend" alias="buddy" />
         <!--<tr:alias property="interest" alias="interest" >-->
-          <!--<tr:adapter class="com.example.FirstInListAdapter" to="java.lang.Integer"/>-->
+        <!--<tr:adapter class="com.example.FirstInListAdapter" to="java.lang.Integer"/>-->
         <!--</tr:alias>-->
         <tr:alias property="role" alias="role">
           <tr:adapter class="com.example.ValueWrapperXmlAdapter" to="java.lang.String" />
@@ -29,7 +30,7 @@
         <!-- Streams EL 3.0: [bean.name.firstName, bean.name.lastName].stream().reduce('', (a, b) -> (a += ' ' += b).trim()) -->
         <tr:alias alias="displayName">
           <tr:compute to="java.lang.String"
-            expr="T(org.apache.commons.lang3.StringUtils).trimToNull((name?.firstName?:'') + ' ' + (name?.lastName?:''))" />
+                      expr="T(org.apache.commons.lang3.StringUtils).trimToNull((name?.firstName?:'') + ' ' + (name?.lastName?:''))" />
         </tr:alias>
       </tr:bean>
       <tr:bean name="BaseAddress" alias="AddrBase" />

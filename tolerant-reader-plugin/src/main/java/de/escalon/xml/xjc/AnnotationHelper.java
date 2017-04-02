@@ -17,12 +17,29 @@ import com.sun.tools.xjc.outline.Outline;
 
 public class AnnotationHelper {
 
+    /**
+     * Applies given annotations to annotationTarget.
+     * @param outline context
+     * @param annotationTarget to annotate
+     * @param annotations to apply to target
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     public static void applyAnnotations(Outline outline, Annotatable annotationTarget,
             Collection<JAnnotationUse> annotations) throws IOException, ClassNotFoundException {
         AnnotationHelper.applyAnnotations(outline, annotationTarget, annotations, Collections
             .<String> emptySet());
     }
 
+    /**
+     * Applies given annotations to annotationTarget, respecting excludedAnnotations.
+     * @param outline context
+     * @param annotationTarget to annotate
+     * @param annotations to apply to target
+     * @param excludedAnnotations not to apply
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     public static void applyAnnotations(Outline outline, Annotatable annotationTarget,
             Collection<JAnnotationUse> annotations, Set<String> excludedAnnotations) throws IOException,
             ClassNotFoundException {

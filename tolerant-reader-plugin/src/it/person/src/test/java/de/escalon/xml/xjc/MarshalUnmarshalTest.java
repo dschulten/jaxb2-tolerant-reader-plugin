@@ -43,7 +43,7 @@ public class MarshalUnmarshalTest {
         assertThat(person.toString(), allOf(
                 containsString("firstName=John"), containsString("lastName=Doe"),
                 containsString("age=18"),
-                containsString("homeAddress=com.example.person.Address"),
+                containsString("invoiceAddress=com.example.person.Address"),
                 containsString("postCode=12121")));
     }
 
@@ -90,19 +90,19 @@ public class MarshalUnmarshalTest {
 
         Unmarshaller unmarshaller = context.createUnmarshaller();
         JAXBElement<Individuum> personJAXBElement = unmarshaller
-            .unmarshal(new StreamSource(in), Individuum.class);
+                .unmarshal(new StreamSource(in), Individuum.class);
         Individuum unmarshalledPerson = personJAXBElement.getValue();
         assertNotNull("Person not unmarshalled", unmarshalledPerson);
         assertEquals("John Doe", unmarshalledPerson.getDisplayName());
         assertNotNull("Name not unmarshalled", unmarshalledPerson.getName());
         assertEquals("John", unmarshalledPerson.getName()
-            .getFirstName());
+                .getFirstName());
         assertEquals("Doe", unmarshalledPerson.getName()
-            .getLastName());
+                .getLastName());
         assertEquals(18, unmarshalledPerson.getAge()
-            .intValue());
+                .intValue());
         assertEquals("Workhorse", unmarshalledPerson.getRole());
-        AddrBase homeAddress = unmarshalledPerson.getHomeAddress();
+        AddrBase homeAddress = unmarshalledPerson.getInvoiceAddress();
         assertNotNull("HomeAddress not unmarshalled", homeAddress);
         assertEquals("Carl Benz Str. 12", homeAddress.getAddr1());
         assertEquals("Schwetzingen", homeAddress.getCity());
@@ -116,10 +116,10 @@ public class MarshalUnmarshalTest {
         ObjectFactory objectFactory = new ObjectFactory();
         // ensure builder methods are generated for alias bean
         Address globalAddress = objectFactory.createAddress()
-            .withCity("Schwetzingen")
-            .withAddr1("Carl Benz Str. 12")
-            .withCountry("Germany")
-            .withPostCode("12121");
+                .withCity("Schwetzingen")
+                .withAddr1("Carl Benz Str. 12")
+                .withCountry("Germany")
+                .withPostCode("12121");
         assertNotNull(globalAddress);
     }
 
@@ -141,7 +141,7 @@ public class MarshalUnmarshalTest {
         globalAddress.setCountry("Germany");
         globalAddress.setPostCode("12121");
 
-        person.setHomeAddress(globalAddress);
+        person.setInvoiceAddress(globalAddress);
         return person;
     }
 
