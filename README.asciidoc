@@ -11,7 +11,7 @@ Furthermore, the schema might evolve in incompatible ways for reasons which are 
 
 The client on the other hand uses only a tiny fraction of the types from the schema. As a developer, I do not want to bother with an enormous tree of classes I don't understand and I want no changes to affect my code base which are irrelevant to my client.
 
-The goal of this plugin is to handle this situation by applying ideas of http://martinfowler.com/bliki/TolerantReader.html[TolerantReader] to JAXB. In an attempt to eat the cake and have it, too, I want to generate beans from the schema, but I want to be able to depend only on the data I care about, and most importantly, I still want to avoid the http://www.alwaysagileconsulting.com/articles/application-antipattern-serialisation/[serialization antipattern] of enterprise integration.
+The goal of this plugin is to handle this situation by applying ideas of http://martinfowler.com/bliki/TolerantReader.html[TolerantReader] to JAXB. In an attempt to eat the cake and have it, too, I want to generate beans from the schema, but I want to be able to depend only on the data I care about, and most importantly, I still want to avoid the http://www.alwaysagileconsulting.com/articles/application-antipattern-serialisation/[serialization antipattern] of enterprise integration by being able to decouple structurally.
 
 I want to use the incoming xml as a _business document_ defined in terms of a schema by creating a Java bean from it, but not by deserializing it as a remote binary object. I want to decouple my Java bean from the evolution of the schema as much as possible, thus at least partially avoiding the http://blog.iancartwright.com/2006/11/dangers-of-serialization.html[dangers of serialization].
 
@@ -84,6 +84,8 @@ For this, you define a binding file with an `include` element on the schema leve
 
 If the service provider renames a property or introduces an otherwise incompatible structural change, I want to keep my representation of the data intact. To cope with situations like that, it is possible to rename properties and to use XmlAdapters or computed fields as a mechanism to handle a structural change.
 
+Schemas which use version numbers in namespaces are a particular challenge. See <<packageRoot>> for possibilities to avoid versioned package names for your beans.
+
 
 === Example bindings file
 The configuration of the tolerant-reader-plugin uses the http://docs.oracle.com/cd/E17802_01/webservices/webservices/docs/1.5/tutorial/doc/JAXBUsing4.html[standard customization options] of the xml-to-java compiler xjc. 
@@ -141,6 +143,7 @@ Below you see an example of an external binding customization file, i.e a _bindi
 ==== tr:include element
 Add at least one tr:include element as customization root. If you need to define beans from multiple packages, have one include element per package.
 
+[[packageRoot]]
 ===== packageRoot attribute (optional)
 You may add a `packageRoot` attribute to an `include` element if you have to select beans from specific packages. The package root does not have to be the entire package name, it uses startsWith to match packages. That way you can be tolerant about particular versions of a schema if the schema provider uses version numbers in namespaces. I.e. if the schema uses a target namespace `com.example.namespace.fun.v5_7`, you can use a packageRoot `com.example.namespace.fun` to select your beans. 
 
