@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Iterator;
 
 import javax.xml.namespace.NamespaceContext;
+import javax.xml.parsers.SAXParserFactory;
 
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -26,10 +27,10 @@ public class SchemaComponentDesignatorTest {
         @Override
         public Iterator getPrefixes(String namespaceURI) {
             if (namespaceURI.isEmpty()) {
-                return Collections.emptyIterator();
+                return Collections.emptyList().iterator();
             } else {
-                return Arrays.asList("person")
-                    .iterator();
+                return Collections.singletonList("person")
+                        .iterator();
             }
         }
 
@@ -55,7 +56,7 @@ public class SchemaComponentDesignatorTest {
     @Test
     public void testSCD() throws ParseException, IOException, SAXException {
 
-        XSOMParser parser = new XSOMParser();
+        XSOMParser parser = new XSOMParser(SAXParserFactory.newInstance());
 
         String userDir = System.getProperty("user.dir");
         parser.parse(new File(userDir
