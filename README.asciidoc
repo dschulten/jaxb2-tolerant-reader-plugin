@@ -206,12 +206,12 @@ Fully qualified class name of the `XmlAdapter` implementation to apply to the fi
 ===== to attribute
 Fully qualified class name of the type to which the adapter adapts the field. By default, this is `java.lang.String`. 
 
-NOTE: The TolerantReaderPlugin cannot determine this type automatically for adapters. At the time of schema compilation the class of an `XmlAdapter` implementation cannot be available, since the `XmlAdapter` implementation requires the JAXB type for compilation.   
+NOTE: The TolerantReaderPlugin cannot determine this type automatically for adapters from the adapter class. At the time of schema compilation the class of an `XmlAdapter` implementation cannot be available, since the `XmlAdapter` implementation requires the JAXB type for compilation.
 
 
 ==== tr:compute element (optional)
-Specifies a computed field which will be generated as `@XmlTransient`, for use inside of a tr:alias element.
-A computed field requires you to provide an expression inside the `expr` attribute and if the expression does not evaluate to String, the type to which the expression evaluates in the `to` attribute. Consider the examples in the supported expression languages below.
+Specifies a computed field which will be generated as `@XmlTransient`, for use inside of a `tr:alias` element.
+A computed field requires you to provide an expression inside the `expr` attribute; furthermore, if the expression does not evaluate to `String`, the type to which the expression evaluates in the `to` attribute. Consider the examples in the supported expression languages below.
 
 The expression can be written with SpringEL, javax.el 3.0 or as plain java expression. 
 
@@ -261,7 +261,7 @@ The generated code for javax.el 3.0 always addresses the current jaxb bean by th
 </tr:alias>      
 ----
 
-If you include no EL dependencies, you can still write Java expressions, which requires you to use the xml entity for double quotes, and you explicitly have to handle `null`.
+If you include no EL dependencies, you can still write Java expressions, which requires you to use the xml entities for double quotes, ampersand etc., and you have to handle `null` explicitly.
 
 [source,xml]
 ----
