@@ -78,9 +78,11 @@ The pom.xml of the https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tre
 </plugin>
 ----
 
-== Configuration: Include Required Data Only
+== Configuration: Include Required Data Only and Decouple Structurally
 The idea is to require only the Java beans and bean attributes your client really needs and be tolerant about the rest.
 For this, you define a binding file with an `include` element on the schema level where you describe beans that should be generated.
+
+If the service provider renames a property or introduces an otherwise incompatible structural change, I want to keep my representation of the data intact. To cope with situations like that, it is possible to rename properties and to use XmlAdapters or computed fields as a mechanism to handle a structural change.
 
 
 === Example bindings file
@@ -274,7 +276,7 @@ If you include no EL dependencies, you can still write Java expressions, which r
 ----
 
 === Configuring Annotation for hydra-jsonld
-The `@Expose` annotation can be applied automatically to generate JSON-LD directly from the JAXB beans.
+The `@Expose` annotation of hydra-jsonld can be applied automatically to generate JSON-LD directly from the JAXB beans.
 In order to annotate your beans with `@Expose` have the following *plugin* dependency in your _pom.xml_.
 
 [source,xml]
