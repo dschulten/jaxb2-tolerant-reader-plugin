@@ -157,7 +157,6 @@ public class BeanInclusionHelper {
         for (CPluginCustomization pluginCustomization : findMyCustomizations(ccs, "include")) {
             pluginCustomization.markAsAcknowledged();
             Element includeElement = pluginCustomization.element;
-            HashMap<String, String> aliases = new HashMap<String, String>();
             String packageRoot = includeElement.getAttribute("packageRoot");
             String prefix = includeElement.getAttribute("prefix");
             String bean = includeElement.getAttribute("bean");
@@ -167,6 +166,7 @@ public class BeanInclusionHelper {
                     Node beanNode = childNodes.item(i);
                     if ("bean".equals(beanNode.getLocalName()) && beanNode instanceof Element) {
                         Element beanElement = (Element) beanNode;
+                        HashMap<String, String> aliases = new HashMap<String, String>();
                         HashSet<String> propertiesToInclude = new HashSet<String>();
                         Map<String, AdapterSpec> xmlAdapters = new HashMap<String, AdapterSpec>();
                         Map<String, ExpressionSpec> expressions = new HashMap<String, ExpressionSpec>();
@@ -183,6 +183,7 @@ public class BeanInclusionHelper {
                 }
             } else { // plain tr:include bean="Foo" statement
                 HashSet<String> propertiesToInclude = new HashSet<String>();
+                HashMap<String, String> aliases = new HashMap<String, String>();
                 collectPropertiesAliasesAdaptersAndExpressions(bean, includeElement, propertiesToInclude, aliases,
                         Collections.<String, AdapterSpec> emptyMap(), Collections.<String, ExpressionSpec> emptyMap());
                 BeanInclusion beanInclusion = new BeanInclusion(bean, propertiesToInclude, aliases, packageRoot,
@@ -218,16 +219,7 @@ public class BeanInclusionHelper {
             if ("alias".equals(item.getLocalName())) {
                 NamedNodeMap attributes = item.getAttributes();
                 Node propertyAttr = attributes.getNamedItem("property");
-                // TODO check: either property= or expression= are required
-                // if (propertyAttr == null && expressionAttr == null) {
-                // throw new IllegalStateException(
-                // "Found tr:alias element having neither a property nor an expression attribute");
-                // }
-                // if (propertyAttr != null && expressionAttr != null) {
-                // throw new IllegalStateException(
-                // "Found tr:alias element having both a property and an expression attribute. Only
-                // one of them is allowed.");
-                // }
+
                 String aliasName = getAliasName(item, attributes);
                 if (aliasName.isEmpty()) {
                     throw new IllegalStateException(
@@ -238,9 +230,6 @@ public class BeanInclusionHelper {
                 if (propertyAttr != null) {
                     propertyName = propertyAttr.getNodeValue();
                     if (!propertyName.isEmpty()) {
-                        // throw new IllegalStateException("Found tr:alias element having an empty
-                        // property attribute");
-                        // }
                         propertiesToInclude.add(propertyName);
                         aliases.put(propertyName, aliasName);
                     }
@@ -290,7 +279,6 @@ public class BeanInclusionHelper {
                         }
                     }
                 }
-                // }
             }
         }
         String properties = includeOrBeanElement.getAttribute("properties");
