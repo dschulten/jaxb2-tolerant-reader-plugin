@@ -359,7 +359,7 @@ The sample project in _src/it_ makes use of placeholders for the maven invoker p
 * http://www.xfront.com/Versioning.pdf[XML Schema Versioning] by XFront
 * https://www.subbu.org/blog/2005/03/xml-versioning-vs-extensibility[XML Versioning vs Extensibility]
 * https://www.subbu.org/blog/2005/03/versioning-xml-schemas[Versioning XML Schemas]
-* https://www.subbu.org/blog/2005/03/processing-versioned-xml-documents[Processing Versioned XML Documents]
+* https://www.subbu.org/blog/2005/03/processing-versioned-xml-documents[Processing Versioned XML Documents] discusses possibilities to let multiple versions of instance documents look like the version supported by the consumer of an instance document.
 
 == Acknowledgements
 
