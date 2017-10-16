@@ -457,8 +457,8 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private void removeBeansWhichHaveAliases(Outline outline, Map<String, ChangeSet> beansToRename) {
-        for (String renamedBean : beansToRename.keySet()) {
-            removeClass(outline, renamedBean);
+        for (Entry<String, ChangeSet> renamedBean : beansToRename.entrySet()) {
+            removeClass(outline, renamedBean.getValue().sourceClassOutline.target);
         }
     }
 
@@ -920,7 +920,7 @@ public class TolerantReaderPlugin extends Plugin {
             String className = classInfo.getName();
 
             if (!classesToKeep.containsKey(className)) {
-                removeClass(outline, className);
+                removeClass(outline, classInfo);
             } else {
                 // remove/rename fields, setters and getters
                 JDefinedClass implClass = classOutline.implClass;
@@ -1206,55 +1206,51 @@ public class TolerantReaderPlugin extends Plugin {
         return null;
     }
 
-    private void removeClass(Outline outline, String fullName) {
+    private void removeClass(Outline outline, CClassInfo classInfo) {
+        String fullName = classInfo.getName();
+        JPackage ownerPackage = classInfo.getOwnerPackage();
         JDefinedClass clazz = OutlineHelper.getJDefinedClassFromOutline(outline, fullName);
-        if (clazz != null) { // anonymous type
-            clazz._package()
-                .remove(clazz);
+        if (clazz != null) { // no nested types
+            ownerPackage.remove(clazz);
+        }
 
-            // Zap createXXX method from ObjectFactory
-            String removedClassName = clazz.fullName();
-            String factoryName = clazz._package()
-                .name() + ".ObjectFactory";
-            JDefinedClass objFactory = OutlineHelper.getJDefinedClassFromOutline(outline, factoryName);
-            if (objFactory != null) {
-                Collection<JMethod> methods = objFactory.methods();
-                Iterator<JMethod> methodIterator = methods.iterator();
-                List<JMethod> methodsToRemove = new ArrayList<JMethod>();
-                while (methodIterator.hasNext()) {
-                    JMethod method = methodIterator.next();
-                    String toRemoveCandidate = method.type()
-                        .fullName();
-                    if (toRemoveCandidate.equals(removedClassName)
-                            || toRemoveCandidate.equals("javax.xml.bind.JAXBElement<" + removedClassName + ">")
-                            || hasXmlElementDeclScope(method, removedClassName)) {
-                        methodsToRemove.add(method);
-                    }
+        // Zap createXXX method from ObjectFactory
+        String factoryName = ownerPackage.name() + ".ObjectFactory";
+        JDefinedClass objFactory = OutlineHelper.getJDefinedClassFromOutline(outline, factoryName);
+        if (objFactory != null) {
+            Collection<JMethod> methods = objFactory.methods();
+            Iterator<JMethod> methodIterator = methods.iterator();
+            List<JMethod> methodsToRemove = new ArrayList<JMethod>();
+            while (methodIterator.hasNext()) {
+                JMethod method = methodIterator.next();
+                String toRemoveCandidate = method.type()
+                    .fullName();
+                if (toRemoveCandidate.equals(fullName)
+                        || toRemoveCandidate.equals("javax.xml.bind.JAXBElement<" + fullName + ">")
+                        || hasXmlElementDeclScope(method, fullName)) {
+                    methodsToRemove.add(method);
                 }
-                methods.removeAll(methodsToRemove);
-                if (methods.isEmpty()) {
-                    clazz._package()
-                        .remove(objFactory);
+            }
+            methods.removeAll(methodsToRemove);
+            if (methods.isEmpty()) {
+                ownerPackage.remove(objFactory);
 
-                    // delete the entire package, if empty
-                    if (!clazz._package()
-                        .classes()
-                        .hasNext()) {
-                        Iterator<JPackage> pkgs = clazz._package()
-                            .owner()
-                            .packages();
-                        while (pkgs.hasNext()) {
-                            JPackage jPackage = (JPackage) pkgs.next();
-                            if (jPackage.name()
-                                .equals(clazz.getPackage()
-                                    .name())) {
-                                pkgs.remove();
-                            }
+                // delete the entire package, if empty
+                if (!ownerPackage.classes()
+                    .hasNext()) {
+                    Iterator<JPackage> pkgs = ownerPackage.owner()
+                        .packages();
+                    while (pkgs.hasNext()) {
+                        JPackage jPackage = (JPackage) pkgs.next();
+                        if (jPackage.name()
+                            .equals(ownerPackage.name())) {
+                            pkgs.remove();
                         }
                     }
                 }
             }
         }
+
     }
 
     private ChangeSet replaceClass(Outline outline, JPackage targetPackage, String newClassName,
