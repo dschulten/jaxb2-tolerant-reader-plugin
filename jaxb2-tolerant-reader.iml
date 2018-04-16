@@ -12,27 +12,5 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: org.glassfish.jaxb:jaxb-xjc:2.2.11" level="project" />
-    <orderEntry type="library" name="Maven: org.glassfish.jaxb:jaxb-core:2.2.11" level="project" />
-    <orderEntry type="library" name="Maven: javax.xml.bind:jaxb-api:2.2.12-b140109.1041" level="project" />
-    <orderEntry type="library" name="Maven: org.glassfish.jaxb:txw2:2.2.11" level="project" />
-    <orderEntry type="library" name="Maven: com.sun.istack:istack-commons-runtime:2.21" level="project" />
-    <orderEntry type="library" name="Maven: com.sun.xsom:xsom:20140925" level="project" />
-    <orderEntry type="library" name="Maven: relaxngDatatype:relaxngDatatype:20020414" level="project" />
-    <orderEntry type="library" name="Maven: org.glassfish.jaxb:codemodel:2.2.11" level="project" />
-    <orderEntry type="library" name="Maven: com.sun.xml.bind.external:rngom:2.2.11" level="project" />
-    <orderEntry type="library" name="Maven: com.sun.xml.dtd-parser:dtd-parser:1.1" level="project" />
-    <orderEntry type="library" name="Maven: com.sun.istack:istack-commons-tools:2.21" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.ant:ant:1.7.0" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.ant:ant-launcher:1.7.0" level="project" />
-    <orderEntry type="module-library">
-      <library name="Maven: com.sun:tools:1.6">
-        <CLASSES>
-          <root url="jar://C:/Program Files/Java/jdk1.8.0/lib/tools.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
   </component>
 </module>
