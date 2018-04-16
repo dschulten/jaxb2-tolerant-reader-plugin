@@ -42,7 +42,7 @@ The pom.xml of the https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tre
     <dependency>
       <groupId>de.escalon.jaxb2</groupId>
       <artifactId>xjc-classinfo-patch</artifactId>
-      <version>0.4.6</version>
+      <version>0.4.9</version>
     </dependency>
   </dependencies>
   <configuration>
@@ -69,7 +69,7 @@ The pom.xml of the https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tre
           <plugin>
             <groupId>de.escalon.jaxb2</groupId>
             <artifactId>jaxb2-tolerant-reader</artifactId>
-            <version>0.4.6</version>
+            <version>0.4.9</version>
           </plugin>
         </plugins>
       </configuration>
@@ -162,6 +162,8 @@ Simple name of the expected bean.
 
 ===== alias attribute
 Alias bean name to be used instead of the name.
+
+NOTE: Aliasing also removes abstract modifiers from base classes during renaming, so that unknown incoming subtypes of such base classes can be unmarshalled safely, rather than breaking the unmarshalling process. Without that, an unknown subtype of an abstract base class in a new schema version would break the client.
 
 ===== properties attribute (optional)
 List of expected bean properties as space-separated strings. Required properties are included automatically, i.e. you only need to define elements having minOccurs=0 and attributes without required=true.
