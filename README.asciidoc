@@ -355,10 +355,11 @@ The sample project in _src/it_ makes use of placeholders for the maven invoker p
 .Useful JAXB Resources
 * https://jaxb.java.net/nonav/2.2.1/docs/vendorCustomizations.html[JAXB Vendor Customizations]
 
-.XML Versioning
+.XML Versioning and Extensibility
+* https://www.xml.com/pub/au/129[Papers on XML Versioning and Extensibility] by David Orchard
 * http://www.xfront.com/Versioning.pdf[XML Schema Versioning] by XFront
-* https://www.subbu.org/blog/2005/03/xml-versioning-vs-extensibility[XML Versioning vs Extensibility]
-* https://www.subbu.org/blog/2005/03/versioning-xml-schemas[Versioning XML Schemas]
+* https://www.subbu.org/blog/2005/03/xml-versioning-vs-extensibility[XML Versioning vs Extensibility] Subbu Allamaraju: "My conclusion is that extensibility and versioning are two different beasts and require different solutions"
+* https://www.subbu.org/blog/2005/03/versioning-xml-schemas[Versioning XML Schemas] "Once you publish an interface, it is set in stone, and you should not introduce incompatible changes"
 * https://www.subbu.org/blog/2005/03/processing-versioned-xml-documents[Processing Versioned XML Documents] discusses possibilities to let multiple versions of instance documents look like the version supported by the consumer of an instance document.
 
 == Acknowledgements
