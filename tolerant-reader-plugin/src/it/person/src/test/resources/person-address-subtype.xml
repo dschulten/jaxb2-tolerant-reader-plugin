@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Person xmlns="http://example.com/person" personId="ID_123">
+    <Name>
+        <FirstName>John</FirstName>
+        <LastName>Doe</LastName>
+    </Name>
+    <age>18</age>
+    <HomeAddress xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="UnknownAddress">
+        <Addr1>Carl Benz Str. 12</Addr1>
+        <City>Schwetzingen</City>
+        <PostalCode>12121</PostalCode>
+        <Country>Germany</Country>
+    </HomeAddress>
+    <OtherAddress xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="GlobalAddress">
+        <Addr1>Carl Benz Str. 12</Addr1>
+        <City>Schwetzingen</City>
+        <PostalCode>12121</PostalCode>
+        <Country>Germany</Country>
+    </OtherAddress>
+    <OtherAddress xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="UnknownAddress">
+        <Addr1>Carl Benz Str. 12</Addr1>
+        <City>Schwetzingen</City>
+        <PostalCode>12121</PostalCode>
+        <Country>Germany</Country>
+    </OtherAddress>
+    <Role>
+        <Text>Workhorse</Text>
+    </Role>
+</Person>

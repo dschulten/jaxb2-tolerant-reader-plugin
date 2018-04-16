@@ -22,14 +22,14 @@
       </restriction>
     </complexContent>
   </complexType>
-  
+
   <complexType name="ValueWrapper">
     <sequence>
-      <element name="Text" type="string" />
-      <element name="Value" type="string" minOccurs="0"/>  
+      <element name="Text" type="string" minOccurs="0"/>
+      <element name="Value" type="string" minOccurs="0" />
     </sequence>
   </complexType>
-  
+
   <complexType name="FullName">
     <complexContent>
       <restriction base="tns:Name">
@@ -42,7 +42,7 @@
     </complexContent>
   </complexType>
 
-  <complexType name="BaseAddress">
+  <complexType name="BaseAddress" abstract="true">
     <sequence>
       <element name="Addr1" type="string" maxOccurs="1" minOccurs="1" />
       <element name="Addr2" type="string" maxOccurs="1" minOccurs="0" />
@@ -78,12 +78,15 @@
       <element name="age" type="int" maxOccurs="1" minOccurs="0" />
       <element name="HomeAddress" type="tns:BaseAddress" maxOccurs="1" minOccurs="1" />
       <element name="ShippingAddress" type="tns:BaseAddress" maxOccurs="1" minOccurs="0" />
+      <element name="OtherAddress" type="tns:BaseAddress" maxOccurs="unbounded" minOccurs="0" />
+      
       <element name="Extra" type="tns:Extra" maxOccurs="1" minOccurs="0" />
-      <element name="Role" type="tns:ValueWrapper" minOccurs="1" maxOccurs="1"/>
-      <element name="Interest" type="int" minOccurs="0" maxOccurs="unbounded"/>
+      <element name="Role" type="tns:ValueWrapper" minOccurs="1" maxOccurs="1" />
+      <element name="Interest" type="int" minOccurs="0" maxOccurs="unbounded" />  
+<!--       <element name="Hobbies" type="tns:ValueWrapper" minOccurs="0" maxOccurs="unbounded" /> -->
     </sequence>
-    <attribute name="personId" type="ID" use="required"/>
-    <attribute name="friend" type="IDREF"/>
+    <attribute name="personId" type="ID" use="required" />
+    <attribute name="friend" type="IDREF" />
   </complexType>
 
   <complexType name="Extra">
@@ -91,6 +94,5 @@
       <element name="UselessField1" type="int" />
     </sequence>
   </complexType>
-
 
 </schema>
