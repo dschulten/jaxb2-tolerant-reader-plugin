@@ -80,6 +80,7 @@ public class MarshalUnmarshalTest {
         ObjectFactory objectFactory = new ObjectFactory();
 
         Individuum person = createPerson(objectFactory);
+        assertEquals(new Integer(12), person.getMyProperty());
 
         JAXBElement<Individuum> jaxbElement = new JAXBElement<Individuum>(new QName("http://example.com/person",
                 "Person"),
@@ -184,6 +185,7 @@ public class MarshalUnmarshalTest {
         otherAddress.add(globalAddress);
 
         person.setInvoiceAddress(globalAddress);
+        person.setMyProperty(12);
         return person;
     }
 

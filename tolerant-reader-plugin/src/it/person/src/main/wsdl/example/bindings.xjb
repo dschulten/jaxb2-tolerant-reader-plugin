@@ -35,9 +35,12 @@
           <tr:compute to="java.lang.String"
                       expr="T(org.apache.commons.lang3.StringUtils).trimToNull((name?.firstName?:'') + ' ' + (name?.lastName?:''))" />
         </tr:alias>
+        <tr:add property="myProperty" class="java.lang.Integer"/>
       </tr:bean>
       <tr:bean name="BaseAddress" alias="AddrBase" />
-      <tr:bean name="USAddress" />
+      <tr:bean name="USAddress">
+        <tr:add property="goVote" class="boolean"/>
+      </tr:bean>
       <!-- bean alias Address with postCode property alias -->
       <tr:bean name="GlobalAddress" alias="Address">
         <tr:alias property="postalCode">postCode</tr:alias>

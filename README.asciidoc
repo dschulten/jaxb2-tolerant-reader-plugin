@@ -132,6 +132,7 @@ Below you see an example of an external binding customization file, i.e a _bindi
              expr="T(org.apache.commons.lang3.StringUtils).trimToNull(
                  (name?.firstName?:'')  + ' ' + (name?.lastName?:''))" />
         </tr:alias>
+        <tr:add property="myProperty" class="java.lang.Integer"/>
       </tr:bean>
 
     </tr:include>
@@ -152,7 +153,7 @@ Note that each version of a schema with versioned `targetNamespace` requires you
 The section <<References>> lists some blog entries on XML versioning.
 
 ===== prefix attribute (optional)
-Allows to specify a prefix to be used for the target namespace URI when used with hydra-jsonld. When the plugin detects hydra-jsonld on the classpath, it annotates the beans with `@Term(define="pers", as="http://example.com/person/")`
+Allows to specify a prefix to be used for the target namespace URI when used with hydra-jsonld. When the plugin detects hydra-jsonld on the classpath, it annotates the beans with `@Term(define = "cust", as = "http://example.com/person#")`, i.e. `cust` represents the target namespace of the schema.
 
 ==== tr:bean element
 Describes an expected bean. Super classes will be included automatically. If an expected bean is not defined by the schema, an error is thrown. This allows you to detect and fix breaking changes early.
@@ -161,7 +162,7 @@ Describes an expected bean. Super classes will be included automatically. If an 
 Simple name of the expected bean. 
 
 ===== alias attribute
-Alias bean name to be used instead of the name.
+Alias bean name to be used instead of the original bean name.
 
 NOTE: Aliasing also removes abstract modifiers from base classes during renaming, so that unknown incoming subtypes of such base classes can be unmarshalled safely, rather than breaking the unmarshalling process. Without that, an unknown subtype of an abstract base class in a new schema version would break the client.
 
@@ -281,6 +282,14 @@ If you include no EL dependencies, you can still write Java expressions, which r
       + (name.lastName == null? &quot;&quot; : name.lastName)
 </tr:alias>  
 ----
+==== tr:add element (optional)
+Allows to define additional custom bean properties which will be generated as `@XmlTransient`.
+
+===== property attribute
+Name of the bean property that should be added.
+
+===== class attribute
+Fully qualified class name defining the type of the added property.
 
 === Configuring Annotation for hydra-jsonld
 The `@Expose` annotation of hydra-jsonld can be applied automatically to generate JSON-LD directly from the JAXB beans.
@@ -334,7 +343,7 @@ In launch and debug configurations you can execute the plugin via the `com.sun.t
 
 One way to achieve this in Eclipse is to create a _Java Application_ launch configuration for `com.sun.tools.xjc.Driver` while the `jaxb2-tolerant-reader` project is selected, so that it becomes the launch configuration's project. Then switch to the *Classpath* tab, highlight *User Entries* and add the `xjc-classinfo-patch` project to the classpath. Finally, hit *Up* to move it above the `jaxb2-tolerant-reader` entry.
 
-In Idea, create a run configuration for `com.sun.tools.xjc.Driver` and configure it to *Use classpath of module: tolerant-reader-plugin*. In order to adjust the classpath to apply the xjc-classinfo-patch, choose *Open Module Settings* for the tolerant-reader-plugin module while it is highlighted (hit F4). On the *Dependencies* tab, hit the green + icon on the right hand side and choose *Module Dependency...* to add xjc-classinfo-patch. Then select xjc-classinfo-patch in the dependencies list and hit the up arrow icon until it is at the top of all dependencies.
+In Idea, create a run configuration for `com.sun.tools.xjc.Driver` and configure it to *Use classpath of module: jaxb2-tolerant-reader*. In order to adjust the classpath to apply the xjc-classinfo-patch, choose *Open Module Settings* for the jaxb2-tolerant-reader module while it is highlighted (hit F4). On the *Dependencies* tab, hit the + icon on the right hand side and choose *Module Dependency...* to add xjc-classinfo-patch. Then select xjc-classinfo-patch in the dependencies list and hit the up arrow icon until it is at the top of all dependencies.
 
 Build the plugin project with Maven. This is necessary to create an executable maven test project in _target/it/person_.
 
