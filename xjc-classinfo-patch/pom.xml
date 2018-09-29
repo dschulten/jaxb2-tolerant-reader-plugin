@@ -5,7 +5,7 @@
   <parent>
 	  <groupId>de.escalon.jaxb2</groupId>
 	  <artifactId>jaxb2-tolerant-reader-parent</artifactId>
-	  <version>0.4.10</version>  
+	  <version>0.5.1-SNAPSHOT</version>  
   </parent>
   <name>JAXB2 Tolerant Reader Plugin xjc patch</name>
   <description>Patch for CClassInfo constructor which takes FQCN parameter, see JAX_WS-1187 and https://java.net/jira/browse/JAXB-1114</description>
