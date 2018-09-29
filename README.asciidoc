@@ -42,7 +42,7 @@ The pom.xml of the https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tre
     <dependency>
       <groupId>de.escalon.jaxb2</groupId>
       <artifactId>xjc-classinfo-patch</artifactId>
-      <version>0.4.9</version>
+      <version>0.5.1</version>
     </dependency>
   </dependencies>
   <configuration>
@@ -69,7 +69,7 @@ The pom.xml of the https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tre
           <plugin>
             <groupId>de.escalon.jaxb2</groupId>
             <artifactId>jaxb2-tolerant-reader</artifactId>
-            <version>0.4.9</version>
+            <version>0.5.1</version>
           </plugin>
         </plugins>
       </configuration>
