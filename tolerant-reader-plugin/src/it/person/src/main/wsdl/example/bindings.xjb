@@ -6,7 +6,6 @@
   </jxb:globalBindings>
 
   <jxb:bindings schemaLocation="Person.xsd">
-    <!-- <jaxb:bindings node="/xs:schema/xs:complexType[@name='CT_ZustellPerson']/xs:complexContent/xs:extension/xs:attribute[@name='Adresse']"> -->
     <jxb:bindings scd="/type::person:Person/@friend">
       <jxb:property>
         <jxb:baseType name="com.example.person.Individuum" />
@@ -14,12 +13,16 @@
     </jxb:bindings>
 
     <tr:include packageRoot="com.example" prefix="cust">
-      <tr:bean name="Person" alias="Individuum" properties="age name">
+      <tr:bean name="Person" alias="Individuum" properties="age name otherAddress">
         <tr:alias property="homeAddress" alias="invoiceAddress" />
         <tr:alias property="friend" alias="buddy" />
         <!--<tr:alias property="interest" alias="interest" >-->
         <!--<tr:adapter class="com.example.FirstInListAdapter" to="java.lang.Integer"/>-->
         <!--</tr:alias>-->
+        <!-- <tr:alias property="hobbies" alias="hobbies">
+          <tr:adapter class="com.example.ValueWrapperListXmlAdapter"
+                      to="com.example.Hobbies" />
+        </tr:alias> -->
         <tr:alias property="role" alias="role">
           <tr:adapter class="com.example.ValueWrapperXmlAdapter" to="java.lang.String" />
         </tr:alias>
@@ -32,9 +35,12 @@
           <tr:compute to="java.lang.String"
                       expr="T(org.apache.commons.lang3.StringUtils).trimToNull((name?.firstName?:'') + ' ' + (name?.lastName?:''))" />
         </tr:alias>
+        <tr:add property="myProperty" type="java.lang.Integer"/>
       </tr:bean>
       <tr:bean name="BaseAddress" alias="AddrBase" />
-      <tr:bean name="USAddress" />
+      <tr:bean name="USAddress">
+        <tr:add property="goVote" type="boolean"/>
+      </tr:bean>
       <!-- bean alias Address with postCode property alias -->
       <tr:bean name="GlobalAddress" alias="Address">
         <tr:alias property="postalCode">postCode</tr:alias>
@@ -42,6 +48,7 @@
       <tr:bean name="Name" properties="firstName middleInitial lastName" />
       <tr:bean name="SimpleName" />
       <tr:bean name="FullName" />
+      <tr:bean name="ValueWrapper" properties="text"/>
     </tr:include>
   </jxb:bindings>
 </jxb:bindings>

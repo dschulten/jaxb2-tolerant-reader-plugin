@@ -22,8 +22,8 @@ public class AnnotationHelper {
      * @param outline context
      * @param annotationTarget to annotate
      * @param annotations to apply to target
-     * @throws IOException
-     * @throws ClassNotFoundException
+     * @throws IOException on failure
+     * @throws ClassNotFoundException on failure
      */
     public static void applyAnnotations(Outline outline, Annotatable annotationTarget,
             Collection<JAnnotationUse> annotations) throws IOException, ClassNotFoundException {
@@ -37,8 +37,8 @@ public class AnnotationHelper {
      * @param annotationTarget to annotate
      * @param annotations to apply to target
      * @param excludedAnnotations not to apply
-     * @throws IOException
-     * @throws ClassNotFoundException
+     * @throws IOException on failure
+     * @throws ClassNotFoundException on failure
      */
     public static void applyAnnotations(Outline outline, Annotatable annotationTarget,
             Collection<JAnnotationUse> annotations, Set<String> excludedAnnotations) throws IOException,

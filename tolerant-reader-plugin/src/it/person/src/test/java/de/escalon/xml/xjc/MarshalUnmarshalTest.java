@@ -2,6 +2,10 @@ package de.escalon.xml.xjc;
 
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.isA;
+import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -11,6 +15,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
@@ -23,11 +29,13 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import com.example.person.AddrBase;
 import com.example.person.Address;
+import com.example.person.USAddress;
 import com.example.person.Individuum;
 import com.example.person.Name;
 import com.example.person.ObjectFactory;
@@ -56,6 +64,20 @@ public class MarshalUnmarshalTest {
 
         assertTrue("both persons must be equal", person1.equals(person2));
         assertTrue("both persons must be equal", person2.equals(person1));
+    }
+
+    @Test
+    public void aliasBeansCanHaveCustomProperties() {
+        Individuum individuum = new Individuum();
+        individuum.setMyProperty(12);
+        assertEquals(new Integer(12), individuum.getMyProperty());
+    }
+
+    @Test
+    public void originalBeansCanHaveCustomProperties() {
+        USAddress usAddress = new USAddress();
+        usAddress.setGoVote(true);
+        assertTrue(usAddress.getGoVote());
     }
 
     @Test
@@ -106,9 +128,39 @@ public class MarshalUnmarshalTest {
         assertNotNull("HomeAddress not unmarshalled", homeAddress);
         assertEquals("Carl Benz Str. 12", homeAddress.getAddr1());
         assertEquals("Schwetzingen", homeAddress.getCity());
-        assertTrue(homeAddress instanceof Address);
+        assertTrue("unexpected address type", homeAddress instanceof Address);
         assertEquals("12121", ((Address) homeAddress).getPostCode());
         assertEquals("Germany", ((Address) homeAddress).getCountry());
+    }
+    
+    @Test
+    // @Ignore
+    public void testUnmarshalPersonWithUnknowAddressSubtype() throws JAXBException, IOException, SAXException {
+        JAXBContext context = JAXBContext.newInstance("com.example.person");
+
+        InputStream in = this.getClass().getResourceAsStream("/person-address-subtype.xml");
+        
+        Unmarshaller unmarshaller = context.createUnmarshaller();
+        JAXBElement<Individuum> personJAXBElement = unmarshaller
+                .unmarshal(new StreamSource(in), Individuum.class);
+        Individuum unmarshalledPerson = personJAXBElement.getValue();
+        assertNotNull("Person not unmarshalled", unmarshalledPerson);
+        assertEquals("John Doe", unmarshalledPerson.getDisplayName());
+        assertNotNull("Name not unmarshalled", unmarshalledPerson.getName());
+        assertEquals("John", unmarshalledPerson.getName()
+                .getFirstName());
+        assertEquals("Doe", unmarshalledPerson.getName()
+                .getLastName());
+        assertEquals(18, unmarshalledPerson.getAge()
+                .intValue());
+        assertEquals("Workhorse", unmarshalledPerson.getRole());
+        AddrBase homeAddress = unmarshalledPerson.getInvoiceAddress();
+        assertNotNull("HomeAddress not unmarshalled", homeAddress);
+        assertEquals("Carl Benz Str. 12", homeAddress.getAddr1());
+        assertEquals("Schwetzingen", homeAddress.getCity());
+        assertThat(homeAddress, isA(AddrBase.class));
+        List<AddrBase> otherAddresses = unmarshalledPerson.getOtherAddress();
+        assertEquals(2, otherAddresses.size());
     }
 
     @Test
@@ -131,6 +183,7 @@ public class MarshalUnmarshalTest {
         name.setFirstName("John");
         name.setLastName("Doe");
         person.setName(name);
+        //person.getHobbies().add("playing Minecraft");
 
         person.setAge(18);
         person.setRole("Workhorse");
@@ -140,6 +193,10 @@ public class MarshalUnmarshalTest {
         globalAddress.setAddr1("Carl Benz Str. 12");
         globalAddress.setCountry("Germany");
         globalAddress.setPostCode("12121");
+        
+        List<AddrBase> otherAddress = person.getOtherAddress();
+        otherAddress.add(globalAddress);
+        otherAddress.add(globalAddress);
 
         person.setInvoiceAddress(globalAddress);
         return person;
