@@ -288,8 +288,8 @@ Allows to define additional custom bean properties which will be generated as `@
 ===== property attribute
 Name of the bean property that should be added.
 
-===== class attribute
-Fully qualified class name defining the type of the added property.
+===== type attribute
+Fully qualified class name or simple type of the added property.
 
 === Configuring Annotation for hydra-jsonld
 The `@Expose` annotation of hydra-jsonld can be applied automatically to generate JSON-LD directly from the JAXB beans.

@@ -35,6 +35,7 @@ import org.xml.sax.SAXException;
 
 import com.example.person.AddrBase;
 import com.example.person.Address;
+import com.example.person.USAddress;
 import com.example.person.Individuum;
 import com.example.person.Name;
 import com.example.person.ObjectFactory;
@@ -66,6 +67,20 @@ public class MarshalUnmarshalTest {
     }
 
     @Test
+    public void aliasBeansCanHaveCustomProperties() {
+        Individuum individuum = new Individuum();
+        individuum.setMyProperty(12);
+        assertEquals(new Integer(12), individuum.getMyProperty());
+    }
+
+    @Test
+    public void originalBeansCanHaveCustomProperties() {
+        USAddress usAddress = new USAddress();
+        usAddress.setGoVote(true);
+        assertTrue(usAddress.getGoVote());
+    }
+
+    @Test
     public void testMarshallingPerson() throws JAXBException, IOException, SAXException {
         JAXBContext context = JAXBContext.newInstance("com.example.person");
 
@@ -80,7 +95,6 @@ public class MarshalUnmarshalTest {
         ObjectFactory objectFactory = new ObjectFactory();
 
         Individuum person = createPerson(objectFactory);
-        assertEquals(new Integer(12), person.getMyProperty());
 
         JAXBElement<Individuum> jaxbElement = new JAXBElement<Individuum>(new QName("http://example.com/person",
                 "Person"),
@@ -185,7 +199,6 @@ public class MarshalUnmarshalTest {
         otherAddress.add(globalAddress);
 
         person.setInvoiceAddress(globalAddress);
-        person.setMyProperty(12);
         return person;
     }
 

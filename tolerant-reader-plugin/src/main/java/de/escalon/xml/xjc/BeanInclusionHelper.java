@@ -302,18 +302,18 @@ public class BeanInclusionHelper {
             } else if ("add".equals(item.getLocalName())) {
                 NamedNodeMap attributes = item.getAttributes();
                 Node propertyAttr = attributes.getNamedItem("property");
-                Node classAttr = attributes.getNamedItem("class");
+                Node typeAttr = attributes.getNamedItem("type");
 
                 String propertyName = propertyAttr.getNodeValue();
-                String className = classAttr.getNodeValue();
-                if (className.isEmpty() || propertyName.isEmpty()) {
+                String typeName = typeAttr.getNodeValue();
+                if (typeName.isEmpty() || propertyName.isEmpty()) {
                     throw new IllegalStateException(
-                            "tr:add element requires both property attribute and class attribute on bean "
+                            "tr:add element requires both property attribute and type attribute on bean "
                                     + beanName);
                 }
-                if (propertyAttr != null && classAttr != null) {
+                if (propertyAttr != null && typeAttr != null) {
                     if (!propertyName.isEmpty()) {
-                        propertiesToAdd.put(propertyName, className);
+                        propertiesToAdd.put(propertyName, typeName);
                     }
                 }
             }
