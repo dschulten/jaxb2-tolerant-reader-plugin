@@ -147,7 +147,7 @@ Add at least one tr:include element as customization root. If you need to define
 ===== packageRoot attribute (optional)
 You may add a `packageRoot` attribute to an `include` element if you have to select beans from specific packages. The package root does not have to be the entire package name, it uses startsWith to match packages and falls back to regex matching. That way you can be tolerant about particular versions of a schema if the schema provider uses version numbers in namespaces. I.e. if the schema uses a target namespace `com.example.namespace.fun.v5_7`, you can use a packageRoot `com.example.namespace.fun` to select your beans. 
 
-TIP: In situations where the schema uses a versioned `targetNamespace`, apply https://jaxb.java.net/guide/Customizing_Java_packages.html[custom java packages] to avoid having to fix lots of import statements for every version change. If you do this, the original versioned namespace will still be preserved during marshalling via the package definition in _package-info.java_.
+TIP: In situations where the schema uses a versioned `targetNamespace`, apply https://javaee.github.io/jaxb-v2/doc/user-guide/ch03.html#customization-of-schema-compilation-customizing-java-packages[custom java packages] to avoid having to fix lots of import statements for every version change. If you do this, the original versioned namespace will still be preserved during marshalling via the package definition in _package-info.java_.
 Note that each version of a schema with versioned `targetNamespace` requires you to generate a different set of JAXB beans, i.e. your client still speaks only one version of the schema.
 
 The section <<References>> lists some blog entries on XML versioning.
