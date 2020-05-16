@@ -28,6 +28,7 @@ import javax.xml.namespace.QName;
 
 import com.sun.tools.xjc.model.*;
 import com.sun.tools.xjc.reader.Ring;
+import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.ErrorHandler;
@@ -202,7 +203,6 @@ public class TolerantReaderPlugin extends Plugin {
             }
         }
 
-
         performEditing(outline, opts, beanInclusions);
     }
 
@@ -278,7 +278,7 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private void addPropertiesToAliases(Outline outline, BeanInclusions beanInclusions,
-                                        Map<String, ChangeSet> beansToRename) {
+            Map<String, ChangeSet> beansToRename) {
         for (ChangeSet changeSet : beansToRename.values()) {
             ClassOutline targetClassOutline = changeSet.targetClassOutline;
             ClassOutline sourceClassOutline = changeSet.sourceClassOutline;
@@ -288,7 +288,7 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private void addProperties(Outline outline, BeanInclusion beanInclusion, ClassOutline classOutline) {
-        if(beanInclusion == null) {
+        if (beanInclusion == null) {
             return;
         }
 
@@ -321,8 +321,8 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private void applyXmlSeeAlso(Outline outline, BeanInclusions beanInclusions,
-                                 Collection<? extends ClassOutline> classOutlines, Map<String, Set<String>> classesToKeep,
-                                 Map<String, ChangeSet> beansToRename) {
+            Collection<? extends ClassOutline> classOutlines, Map<String, Set<String>> classesToKeep,
+            Map<String, ChangeSet> beansToRename) {
         for (ClassOutline classOutline : classOutlines) {
             CClassInfo classInfo = classOutline.target;
             JDefinedClass implClass = classOutline.implClass;
@@ -338,7 +338,7 @@ public class TolerantReaderPlugin extends Plugin {
      * @param beansToRename  fqcn of original class to change set
      */
     private void applyExpressions(Outline outline, BeanInclusions beanInclusions,
-                                  Collection<? extends ClassOutline> classOutlines, Map<String, ChangeSet> beansToRename) {
+            Collection<? extends ClassOutline> classOutlines, Map<String, ChangeSet> beansToRename) {
 
         JCodeModel codeModel = outline.getCodeModel();
 
@@ -401,7 +401,7 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private void applyExposeToClasses(Outline outline, BeanInclusions beanInclusions,
-                                      Collection<? extends ClassOutline> classOutlines, Map<String, ChangeSet> beansToRename) {
+            Collection<? extends ClassOutline> classOutlines, Map<String, ChangeSet> beansToRename) {
         for (final ClassOutline classOutline : classOutlines) {
             Annotatable annotatable = Annotatable.from(classOutline.implClass);
             applyPrefixTerm(annotatable, beanInclusions, outline, classOutline.target);
@@ -411,7 +411,7 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private void applyPrefixTerm(Annotatable target, BeanInclusions beanInclusions, Outline outline,
-                                 CClassInfo classInfo) {
+            CClassInfo classInfo) {
         if (HYDRA_PRESENT) {
             BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(classInfo);
             if (beanInclusion == null) {
@@ -432,7 +432,7 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private void applyExposeToAliasClasses(Outline outline, BeanInclusions beanInclusions,
-                                           Map<String, ChangeSet> beansToRename) {
+            Map<String, ChangeSet> beansToRename) {
         Collection<ChangeSet> values = beansToRename.values();
         for (ChangeSet changeSet : values) {
             Annotatable target = Annotatable.from(changeSet.definedClass);
@@ -442,7 +442,7 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private void applyXmlTypeToAliases(Collection<? extends ClassOutline> classOutlines, BeanInclusions beanInclusions,
-                                       Map<String, Set<String>> classesToKeep, Map<String, ChangeSet> beansToRename) {
+            Map<String, Set<String>> classesToKeep, Map<String, ChangeSet> beansToRename) {
 
         for (Entry<String, ChangeSet> beanToRenameEntry : beansToRename.entrySet()) {
             ChangeSet changeSet = beanToRenameEntry.getValue();
@@ -465,7 +465,7 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private void applyXmlTypeToClasses(Collection<? extends ClassOutline> classOutlines, BeanInclusions beanInclusions,
-                                       Map<String, Set<String>> classesToKeep) throws IOException {
+            Map<String, Set<String>> classesToKeep) throws IOException {
         for (final ClassOutline classOutline : classOutlines) {
             CClassInfo classInfo = classOutline.target;
             String className = classInfo.getName();
@@ -493,8 +493,8 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private void applyBeanAliasesAndAdaptersToClassMembers(Outline outline, BeanInclusions beanInclusions,
-                                                           Collection<? extends ClassOutline> classOutlines, Map<String, Set<String>> classesToKeep,
-                                                           Map<String, ChangeSet> beansToRename) throws ClassNotFoundException, IOException {
+            Collection<? extends ClassOutline> classOutlines, Map<String, Set<String>> classesToKeep,
+            Map<String, ChangeSet> beansToRename) throws ClassNotFoundException, IOException {
 
         for (ClassOutline classOutline : classOutlines) {
             CClassInfo classInfo = classOutline.target;
@@ -525,7 +525,7 @@ public class TolerantReaderPlugin extends Plugin {
      * @throws IOException
      */
     private void applyAdaptersToFieldsAndAccessors(Outline outline, BeanInclusions beanInclusions,
-                                                   Map<String, ChangeSet> beansToRename, CClassInfo classInfo, JDefinedClass implClass)
+            Map<String, ChangeSet> beansToRename, CClassInfo classInfo, JDefinedClass implClass)
             throws ClassNotFoundException, IOException {
         BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(classInfo);
         if (beanInclusion == null) {
@@ -603,7 +603,7 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private void applyBeanAliasesToFieldsAndAccessors(Outline outline, BeanInclusions beanInclusions,
-                                                      Map<String, ChangeSet> beansToRename, CClassInfo classInfo, JDefinedClass implClass)
+            Map<String, ChangeSet> beansToRename, CClassInfo classInfo, JDefinedClass implClass)
             throws ClassNotFoundException, IOException {
         Collection<JMethod> methods = implClass.methods();
         Map<String, JFieldVar> fields = implClass.fields();
@@ -676,7 +676,7 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private void addXmlSeeAlso(Outline outline, Map<String, Set<String>> classesToKeep,
-                               Map<String, ChangeSet> beansToRename, CClassInfo classInfo, JDefinedClass implClass) {
+            Map<String, ChangeSet> beansToRename, CClassInfo classInfo, JDefinedClass implClass) {
         Iterator<CClassInfo> subclasses = classInfo.listSubclasses();
         JAnnotationArrayMember arrayValue = null;
         while (subclasses.hasNext()) {
@@ -702,7 +702,7 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private void fillAliasBeanContent(Outline outline, Map<String, Set<String>> classesToKeep,
-                                      BeanInclusions beanInclusions, Map<String, ChangeSet> beansToRename)
+            BeanInclusions beanInclusions, Map<String, ChangeSet> beansToRename)
             throws ClassNotFoundException, IOException {
         for (ChangeSet changeSet : beansToRename.values()) {
             ClassOutline sourceClassOutline = changeSet.sourceClassOutline;
@@ -722,7 +722,7 @@ public class TolerantReaderPlugin extends Plugin {
             copyJavadocAndImplementsClause(sourceClassInfo, aliasBean);
 
             copyProperties(outline, beanInclusions, beansToRename, sourceClassInfo, sourceImplClass, changeSet,
-                    aliasBean, Collections.<String, XSParticle>emptyMap());
+                    aliasBean, Collections.<String, XSComponent>emptyMap());
 
             Collection<JAnnotationUse> annotations = sourceImplClass.annotations();
             // XmlSeeAlso is handled by ourselves, hence ignore here:
@@ -742,7 +742,7 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private void createAliasBeans(Outline outline, BeanInclusions beanInclusions,
-                                  Collection<? extends ClassOutline> classOutlines, Map<String, ChangeSet> beansToRename)
+            Collection<? extends ClassOutline> classOutlines, Map<String, ChangeSet> beansToRename)
             throws JClassAlreadyExistsException {
         for (ClassOutline classOutline : new ArrayList<ClassOutline>(classOutlines)) { // no
             // concurrent
@@ -773,6 +773,7 @@ public class TolerantReaderPlugin extends Plugin {
                 continue;
             }
 
+            BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(sourceClassInfo);
             XSComponent schemaComponent = sourceClassInfo.getSchemaComponent();
             if (schemaComponent instanceof XSComplexType) {
                 XSComplexType xsComplexType = (XSComplexType) schemaComponent;
@@ -780,8 +781,9 @@ public class TolerantReaderPlugin extends Plugin {
                 XSType baseType = xsComplexType.getBaseType();
                 if (XSType.RESTRICTION == derivationMethod && !"anyType".equals(baseType.getName())) {
                     XSContentType contentType = xsComplexType.getContentType();
+                    Collection<? extends XSAttributeUse> attributeUses = xsComplexType.getAttributeUses();
                     // TODO this might be nested element restrictions, maybe visit instead
-                    Map<String, XSParticle> expectedProperties = new HashMap<String, XSParticle>();
+                    Map<String, XSComponent> expectedProperties = new HashMap<String, XSComponent>();
                     if (contentType instanceof XSParticle) {
                         XSParticle contentTypeParticle = (XSParticle) contentType;
                         XSTerm term = contentTypeParticle.getTerm();
@@ -792,9 +794,18 @@ public class TolerantReaderPlugin extends Plugin {
                                 if (elementDeclTerm.isElementDecl()) {
                                     XSElementDecl elementDecl = elementDeclTerm.asElementDecl();
                                     String name = elementDecl.getName();
-                                    expectedProperties.put(name, xsParticle);
+                                    if ((beanInclusion != null && beanInclusion.includesProperty(name)) || isRequiredElementOrAttribute(xsParticle)) {
+                                        expectedProperties.put(StringUtils.capitalize(name), xsParticle);
+                                    }
                                 }
                             }
+                        }
+                    }
+                    for (XSAttributeUse attributeUse : attributeUses) {
+                        String name = attributeUse.getDecl().getName();
+                        if ((beanInclusion != null && beanInclusion.includesProperty(name)
+                                || isRequiredElementOrAttribute(attributeUse))) {
+                            expectedProperties.put(StringUtils.capitalize(name), attributeUse);
                         }
                     }
 
@@ -822,8 +833,8 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private void copyProperties(Outline outline, BeanInclusions beanInclusions, Map<String, ChangeSet> beansToRename,
-                                CClassInfo sourceClassInfo, JDefinedClass sourceImplClass, ChangeSet changeSet, JDefinedClass aliasBean,
-                                Map<String, XSParticle> expectedProperties) throws ClassNotFoundException, IOException {
+            CClassInfo sourceClassInfo, JDefinedClass sourceImplClass, ChangeSet changeSet, JDefinedClass aliasBean,
+                                Map<String, XSComponent> expectedProperties) throws ClassNotFoundException, IOException {
 
         // TODO review parameter list:ChangeSet vs sourceClassInfo/sourceImplClass
 
@@ -912,7 +923,7 @@ public class TolerantReaderPlugin extends Plugin {
      * @param classesToKeep  which should not be removed
      */
     private void removeUnusedAndRenameProperties(Outline outline, BeanInclusions beanInclusions,
-                                                 Collection<? extends ClassOutline> classOutlines, Map<String, Set<String>> classesToKeep) {
+            Collection<? extends ClassOutline> classOutlines, Map<String, Set<String>> classesToKeep) {
         for (final ClassOutline classOutline : classOutlines) {
             CClassInfo classInfo = classOutline.target;
             String className = classInfo.getName();
@@ -1015,7 +1026,7 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private void applyExpose(String property, Annotatable target, BeanInclusions beanInclusions, Outline outline,
-                             CClassInfo classInfo) {
+            CClassInfo classInfo) {
         if (HYDRA_PRESENT) {
             BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(classInfo);
             if (beanInclusion == null) {
@@ -1067,7 +1078,7 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private void addSetter(Outline outline, JDefinedClass bean, JFieldVar fieldVar, JMethod originalSetter,
-                           JType fieldTypeForNewSetter) {
+            JType fieldTypeForNewSetter) {
         if (!List.class.getName()
                 .equals(fieldTypeForNewSetter.erasure()
                         .fullName())) {
@@ -1093,7 +1104,7 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private Map<String, Set<String>> getClassesToKeep(BeanInclusions beanInclusions,
-                                                      Collection<? extends ClassOutline> classOutlines) {
+            Collection<? extends ClassOutline> classOutlines) {
         Map<String, Set<String>> classesToKeep = new HashMap<String, Set<String>>();
         for (ClassOutline classOutline : classOutlines) {
             CClassInfo classInfo = classOutline.target;
@@ -1111,8 +1122,8 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private void addClassesWithPropertiesToKeep(Map<String, Set<String>> classesToKeep,
-                                                Collection<? extends ClassOutline> classOutlines, ClassOutline classOutline, BeanInclusions beanInclusions,
-                                                BeanInclusion beanInclusion, Set<String> includedPropertiesChecklist) {
+            Collection<? extends ClassOutline> classOutlines, ClassOutline classOutline, BeanInclusions beanInclusions,
+            BeanInclusion beanInclusion, Set<String> includedPropertiesChecklist) {
         CClassInfo currentClassInfo = classOutline.target;
 
         // don't check BeanInclusion.includesClass here,
@@ -1131,17 +1142,7 @@ public class TolerantReaderPlugin extends Plugin {
                 String propertyInfoName = propertyInfo.getName(false); // fooBar
 
                 XSComponent schemaComponent = propertyInfo.getSchemaComponent();
-                boolean requiredElementOrAttribute = false;
-                if (schemaComponent instanceof XSParticle) {
-                    XSParticle particle = (XSParticle) schemaComponent;
-                    BigInteger minOccurs = particle.getMinOccurs();
-                    if (minOccurs == null || minOccurs.compareTo(BigInteger.ONE) > -1) {
-                        requiredElementOrAttribute = true;
-                    }
-                } else if (schemaComponent instanceof XSAttributeUse) {
-                    XSAttributeUse attributeUse = (XSAttributeUse) schemaComponent;
-                    requiredElementOrAttribute = attributeUse.isRequired();
-                }
+                boolean requiredElementOrAttribute = isRequiredElementOrAttribute(schemaComponent);
 
                 if (beanInclusion.includesProperty(propertyInfoName) || requiredElementOrAttribute) {
                     Set<String> props = classesToKeep.get(currentClassName);
@@ -1164,6 +1165,21 @@ public class TolerantReaderPlugin extends Plugin {
                 }
             }
         } while (null != (currentClassInfo = currentClassInfo.getBaseClass()));
+    }
+
+    private boolean isRequiredElementOrAttribute(XSComponent schemaComponent) {
+        boolean requiredElementOrAttribute = false;
+        if (schemaComponent instanceof XSParticle) {
+            XSParticle particle = (XSParticle) schemaComponent;
+            BigInteger minOccurs = particle.getMinOccurs();
+            if (minOccurs == null || minOccurs.compareTo(BigInteger.ONE) > -1) {
+                requiredElementOrAttribute = true;
+            }
+        } else if (schemaComponent instanceof XSAttributeUse) {
+            XSAttributeUse attributeUse = (XSAttributeUse) schemaComponent;
+            requiredElementOrAttribute = attributeUse.isRequired();
+        }
+        return requiredElementOrAttribute;
     }
 
     private String findPropertyTypeToKeep(ClassOutline classOutline, CPropertyInfo propertyInfo) {
@@ -1194,7 +1210,7 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private ClassOutline findMatchingInclusionEntry(Collection<? extends ClassOutline> classOutlines,
-                                                    BeanInclusion inclusionEntry) {
+            BeanInclusion inclusionEntry) {
         for (ClassOutline classOutline : classOutlines) {
             String className = classOutline.target.getName();
             if (inclusionEntry.includesClass(className)) {
@@ -1252,7 +1268,7 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private ChangeSet replaceClass(Outline outline, JPackage targetPackage, String newClassName,
-                                   ClassOutline toReplace) {
+            ClassOutline toReplace) {
 
         ChangeSet changeSet = defineNewClassFrom(outline, targetPackage, newClassName, toReplace);
 
@@ -1262,7 +1278,7 @@ public class TolerantReaderPlugin extends Plugin {
     }
 
     private ChangeSet defineNewClassFrom(Outline outline, JPackage targetPackage, String newClassName,
-                                         ClassOutline toReplace) {
+            ClassOutline toReplace) {
         CClassInfo oldClassInfo = toReplace.target;
         Locator locator = oldClassInfo.getLocator();
         QName typeName = oldClassInfo.getTypeName();

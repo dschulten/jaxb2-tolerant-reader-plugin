@@ -2,7 +2,7 @@
 :toc:
 :toc-placement: preamble
 
-Test project to demonstrate usage of Tolerant Reader Plugin
+Test project to demonstrate usage of Tolerant Reader Plugin.
 
 == Execution
 

@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xfn="xFinanz310" targetNamespace="xFinanz310" version="3.1.0" elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <xs:include schemaLocation="xfinanz-baukasten.xsd" />
+  <xs:element name="kasseExport.Ist.0201">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="istbuchungExport" maxOccurs="unbounded" type="xfn:Ist" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseExport.SollAdV.0202">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="aussetzungVollziehung" maxOccurs="unbounded" type="xfn:SollAdV" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseExport.SollAenderung.0203">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="sollAenderung" maxOccurs="unbounded" type="xfn:SollAenderung" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseExport.SollDoppisch.0204">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="sollDoppisch" maxOccurs="unbounded" type="xfn:SollDoppisch" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseExport.SollEinnahmeart.0205">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="sollEinnahmeart" maxOccurs="unbounded" type="xfn:SollEinnahmeart" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseExport.SollErlass.0206">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="erlass" maxOccurs="unbounded" type="xfn:SollErlass" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseExport.SollKameral.0207">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Nachricht zur erstmaligen Übermittlung von Sollbeträgen (Forderungen, offener Posten). Eine Ursprungsbuchungsnummer ist  nicht erforderlich, da sie in diesem Fall der Buchungsnummer entspricht.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="sollKameral" maxOccurs="unbounded" type="xfn:SollKameral" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseExport.SollMitPersonDoppisch.0208">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="sollDoppisch" maxOccurs="unbounded" type="xfn:SollDoppisch" />
+        <xs:element name="personKomplett" type="xfn:PersonKomplett" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseExport.SollMitPersonEinnahmeart.0209">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="sollEinnahmeart" maxOccurs="unbounded" type="xfn:SollEinnahmeart" />
+        <xs:element name="personKomplett" type="xfn:PersonKomplett" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseExport.SollMitPersonKameral.0210">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="personKomplett" type="xfn:PersonKomplett" />
+        <xs:element name="sollKameral" maxOccurs="unbounded" type="xfn:SollKameral" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseExport.SollNiederschlagung.0211">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="niederschlagung" maxOccurs="unbounded" type="xfn:SollNiederschlagung" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseExport.SollStundung.0212">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="stundung" maxOccurs="unbounded" type="xfn:SollStundung" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseExport.StatusaenderungForderung.0213">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="statusaenderungForderung" maxOccurs="unbounded" type="xfn:StatusaenderungForderung" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseExport.SollIstDoppisch.0214">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="sollDoppisch" maxOccurs="unbounded" type="xfn:SollDoppisch" />
+        <xs:element name="sollAenderung" minOccurs="0" maxOccurs="unbounded" type="xfn:SollAenderung" />
+        <xs:element name="ist" minOccurs="0" maxOccurs="unbounded" type="xfn:Ist" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseExport.SollIstEinnahmeart.0215">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="sollEinnahmeart" maxOccurs="unbounded" type="xfn:SollEinnahmeart" />
+        <xs:element name="sollAenderung" minOccurs="0" maxOccurs="unbounded" type="xfn:SollAenderung" />
+        <xs:element name="ist" minOccurs="0" maxOccurs="unbounded" type="xfn:Ist" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseExport.SollIstKameral.0216">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="sollKameral" maxOccurs="unbounded" type="xfn:SollKameral" />
+        <xs:element name="sollAenderung" minOccurs="0" maxOccurs="unbounded" type="xfn:SollAenderung" />
+        <xs:element name="ist" minOccurs="0" maxOccurs="unbounded" type="xfn:Ist" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseExport.SollIstMitPersonDoppisch.0217">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="sollDoppisch" maxOccurs="unbounded" type="xfn:SollDoppisch" />
+        <xs:element name="sollAenderung" minOccurs="0" maxOccurs="unbounded" type="xfn:SollAenderung" />
+        <xs:element name="ist" minOccurs="0" maxOccurs="unbounded" type="xfn:Ist" />
+        <xs:element name="personKomplett" type="xfn:PersonKomplett" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseExport.SollIstMitPersonEinnahmeart.0218">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="sollEinnahmeart" maxOccurs="unbounded" type="xfn:SollEinnahmeart" />
+        <xs:element name="sollAenderung" minOccurs="0" maxOccurs="unbounded" type="xfn:SollAenderung" />
+        <xs:element name="ist" minOccurs="0" maxOccurs="unbounded" type="xfn:Ist" />
+        <xs:element name="personKomplett" type="xfn:PersonKomplett" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseExport.SollIstMitPersonKameral.0219">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="sollKameral" maxOccurs="unbounded" type="xfn:SollKameral" />
+        <xs:element name="sollAenderung" minOccurs="0" maxOccurs="unbounded" type="xfn:SollAenderung" />
+        <xs:element name="ist" minOccurs="0" maxOccurs="unbounded" type="xfn:Ist" />
+        <xs:element name="personKomplett" type="xfn:PersonKomplett" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+

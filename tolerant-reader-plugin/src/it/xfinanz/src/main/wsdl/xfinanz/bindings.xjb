@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<jxb:bindings version="2.1" xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+              xmlns:xs="http://www.w3.org/2001/XMLSchema"
+              xmlns:tr="http://jaxb2-commons.dev.java.net/tolerant-reader"
+              xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+              xmlns:person="http://example.com/person"
+              jxb:extensionBindingPrefixes="xjc tr">
+
+  <jxb:globalBindings>
+    <xjc:simple/>
+    <xjc:serializable uid="1"/>
+  </jxb:globalBindings>
+
+  <jxb:bindings schemaLocation="xoev-code.xsd">
+    <jxb:schemaBindings>
+      <jxb:package name="xoev.schemata.code"/>
+    </jxb:schemaBindings>
+  </jxb:bindings>
+
+  <jxb:bindings schemaLocation="xfinanz-nachricht-sepa.xsd">
+
+    <jxb:schemaBindings>
+      <jxb:package name="de.escalon.xfinanz"/>
+    </jxb:schemaBindings>
+
+    <tr:include>
+
+      <tr:bean name="SepaMandatAenderung0601"/>
+      <tr:bean name="SepaMandatNeu0602"/>
+      <tr:bean name="CodeMandatTyp" properties="listURI"/>
+      <tr:bean name="PersonKomplett" properties="personNats bankverbindungs adressStamms"/>
+      <tr:bean name="NameNatuerlichePerson" properties="vorname"/>
+      <tr:bean name="AllgemeinerName" properties="name"/>
+      <tr:bean name="Code" properties="listVersionID"/>
+      <tr:bean name="Bankkonto"
+               properties="arts nummer iban geldinstitut inhaberNatuerlichePersons inhaberJuristischePerson bankverbindungsNummern bankkontoGueltigkeit">
+      </tr:bean>
+      <tr:bean name="AnschriftErweitert" properties="postanschrift"/>
+      <tr:bean name="Postanschrift" properties="strasse hausnummer hausnummernzusatz postleitzahl ort staat adressierungszusatz">
+        <tr:alias alias="strassekomplett">
+          <tr:compute to="java.lang.String"
+                      expr="T(org.apache.commons.lang3.StringUtils).trimToNull(strasse + ' ' + hausnummer + hausnummernzusatz?:'')" />
+        </tr:alias>
+      </tr:bean>
+
+    </tr:include>
+  </jxb:bindings>
+</jxb:bindings>

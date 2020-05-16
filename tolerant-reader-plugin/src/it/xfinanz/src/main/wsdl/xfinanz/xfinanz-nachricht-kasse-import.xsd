@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xfn="xFinanz310" targetNamespace="xFinanz310" version="3.1.0" elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <xs:include schemaLocation="xfinanz-baukasten.xsd" />
+  <xs:element name="kasseImport.AOAdV.0301">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Die APNummer ist fortlaufend, lückenlos, aufsteigend und von 1 beginnend zu vergeben.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="aOAdV" maxOccurs="unbounded" type="xfn:AOAdV" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseImport.AOAenderung.0302">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Die APNummer ist fortlaufend, lückenlos, aufsteigend und von 1 beginnend zu vergeben.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="aOAenderung" maxOccurs="unbounded" type="xfn:AOAenderung" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseImport.AODoppisch.0303">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Die APNummer ist fortlaufend, lückenlos, aufsteigend und von 1 beginnend zu vergeben.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="aODoppisch" maxOccurs="unbounded" type="xfn:AODoppisch" />
+        <xs:element name="bankverbindung" minOccurs="0" maxOccurs="unbounded" type="xfn:Bankverbindung" />
+        <xs:element name="sepaMandat" minOccurs="0" maxOccurs="unbounded" type="xfn:SepaMandat" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseImport.AOEinnahmeart.0304">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Die APNummer ist fortlaufend, lückenlos, aufsteigend und von 1 beginnend zu vergeben.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="aOEinnahmeart" maxOccurs="unbounded" type="xfn:AOEinnahmeart" />
+        <xs:element name="sepaMandat" minOccurs="0" maxOccurs="unbounded" type="xfn:SepaMandat" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseImport.AOErlass.0305">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Die APNummer ist fortlaufend, lückenlos, aufsteigend und von 1 beginnend zu vergeben.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="aOErlass" maxOccurs="unbounded" type="xfn:AOErlass" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseImport.AOIstDoppisch.0306">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Die Nachricht wird verwendet bei bereits erfolgten Zahlungen im Vorverfahren. Die Zahlung darf im Kassenverfahren nicht mehr ausgeführt werden.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="aOIstDoppische" maxOccurs="unbounded" type="xfn:AOIstDoppisch" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseImport.AOIstEinnahmeart.0307">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Die APNummer ist fortlaufend, lückenlos, aufsteigend und von 1 beginnend zu vergeben.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="aOIstEinnahmeart" maxOccurs="unbounded" type="xfn:AOIstEinnahmeart" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseImport.AOIstKameral.0308">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Die APNummer ist fortlaufend, lückenlos, aufsteigend und von 1 beginnend zu vergeben.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="aOIstKameral" maxOccurs="unbounded" type="xfn:AOIstKameral" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseImport.AOIstMitPersonDoppisch.0309">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="aOIstDoppisch" maxOccurs="unbounded" type="xfn:AOIstDoppisch" />
+        <xs:element name="personKomplett" type="xfn:PersonKomplett" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseImport.AOIstMitPersonEinnahmeart.0310">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="aOIstEinnahmeart" maxOccurs="unbounded" type="xfn:AOIstEinnahmeart" />
+        <xs:element name="personKomplett" type="xfn:PersonKomplett" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseImport.AOIstMitPersonKameral.0311">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="aOIstKameral" maxOccurs="unbounded" type="xfn:AOIstKameral" />
+        <xs:element name="personKomplett" type="xfn:PersonKomplett" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseImport.AOKameral.0312">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Die APNummer ist fortlaufend, lückenlos, aufsteigend und von 1 beginnend zu vergeben.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="aOKameral" maxOccurs="unbounded" type="xfn:AOKameral" />
+        <xs:element name="sepaMandat" minOccurs="0" maxOccurs="unbounded" type="xfn:SepaMandat" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseImport.AOMitPersonDoppisch.0313">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Die APNummer ist fortlaufend, lückenlos, aufsteigend und von 1 beginnend zu vergeben.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="aODoppisch" maxOccurs="unbounded" type="xfn:AODoppisch" />
+        <xs:element name="personKomplett" type="xfn:PersonKomplett" />
+        <xs:element name="sepaMandat" minOccurs="0" maxOccurs="unbounded" type="xfn:SepaMandat" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseImport.AOMitPersonEinnahmeart.0314">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="personKomplett" type="xfn:PersonKomplett" />
+        <xs:element name="aOEinnahmeart" maxOccurs="unbounded" type="xfn:AOEinnahmeart" />
+        <xs:element name="sepaMandat" minOccurs="0" maxOccurs="unbounded" type="xfn:SepaMandat" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseImport.AOMitPersonKameral.0315">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="aOKameral" maxOccurs="unbounded" type="xfn:AOKameral" />
+        <xs:element name="personKomplett" type="xfn:PersonKomplett" />
+        <xs:element name="sepaMandat" minOccurs="0" maxOccurs="unbounded" type="xfn:SepaMandat" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseImport.AONiederschlagung.0316">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Die APNummer ist fortlaufend, lückenlos, aufsteigend und von 1 beginnend zu vergeben.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="aONiederschlagung" maxOccurs="unbounded" type="xfn:AONiederschlagung" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseImport.AOStundungDoppisch.0317">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Besteht aus dem Abgang der ursprünglichen Fälligkeit und den zugängen der Ratenfälligkeiten. Dabei ist die APNummer unabhängig vom AOPos-Typ fortlaufend, lückenlos, aufsteigend und von 1 beginnend zu vergeben.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="aOStundungDoppisch" maxOccurs="unbounded" type="xfn:AOStundungDoppisch" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseImport.AOStundungEinnahmeart.0318">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Besteht aus dem Abgang der ursprünglichen Fälligkeit und den zugängen der Ratenfälligkeiten. Dabei ist die APNummer unabhängig vom AOPos-Typ fortlaufend, lückenlos, aufsteigend und von 1 beginnend zu vergeben.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="aOStundungEinnahmeart" maxOccurs="unbounded" type="xfn:AOStundungEinnahmeart" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseImport.AOStundungKameral.0319">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Besteht aus dem Abgang der ursprünglichen Fälligkeit und den zugängen der Ratenfälligkeiten. Dabei ist die APNummer unabhängig vom AOPos-Typ fortlaufend, lückenlos, aufsteigend und von 1 beginnend zu vergeben.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="aOStundungKameral" maxOccurs="unbounded" type="xfn:AOStundungKameral" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseImport.Ist.0320">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="istbuchungImport" maxOccurs="unbounded" type="xfn:Ist" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseImport.AODauerDoppisch.0321">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Eine Daueranordnung beschreibt eine Ratenzahlung innerhalb des Haushaltsjahres, welche sich in den Folgejahren bis auf weiteres genauso wiederholt.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="aODauerDoppisch" maxOccurs="unbounded" type="xfn:AODauerDoppisch" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseImport.Vorkontierung.0322">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="vorkontierung" maxOccurs="unbounded" type="xfn:Vorkontierung" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseImport.VorkontierungStorno.0323">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="vorkontierungStorno" maxOccurs="unbounded" type="xfn:VorkontierungStorno" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kasseImport.AODauerAenderung.0324">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="aODauerAenderung" type="xfn:AODauerAenderung" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+

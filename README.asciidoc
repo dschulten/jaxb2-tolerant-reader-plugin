@@ -17,6 +17,8 @@ I want to use the incoming xml as a _business document_ defined in terms of a sc
 
 Note that schema changes might still require regeneration and recompilation of the client code. The goal is that at least this should be all there is to do, and that I get immediate feedback when the schema change breaks my client, so I can fix the breaking change at the root.
 
+To a certain extent it is possible to support multiple schema versions with a single JAXB bean, for details see the _src/it/xfinanz_ integration test and the section *Example bindings file*.
+
 The plugin configuration can also be handed to the service as an executable description of my client expectations.
 It could be http://martinfowler.com/articles/consumerDrivenContracts.html[used as a test] by the service to see which client will break upon any given change.
 
@@ -139,6 +141,10 @@ Below you see an example of an external binding customization file, i.e a _bindi
   </jxb:bindings>
 </jxb:bindings>
 ----
+
+A second example in _src/it/xfinanz_ uses the tolerant-reader-plugin with the public schema https://www.xrepository.de/details/urn:xoev-de:agxfinanz:standard:xfinanz[XFinanz] created by German governments. It demonstrates how you can support two schema versions with a single JAXB bean, looking at a contrived scenario where the older schema version "had" a single field for road/houseNumber/houseNumberAppendix, whereas the current version uses three distinct fields.
+
+In order to support two versions at once, we use Eclipselink Moxy during marshalling. Run the maven build and look at the _target/it/xfinanz/build.log_ to see the xml result.
 
 ==== tr:include element
 Add at least one tr:include element as customization root. If you need to define beans from multiple packages, have one include element per package.

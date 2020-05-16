@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xfn="xFinanz310" targetNamespace="xFinanz310" version="3.1.0" elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <xs:annotation>
+    <xs:documentation>Projektspezifische Datentypen, welche nicht aus anderen Namensräumen stammen.</xs:documentation>
+  </xs:annotation>
+  <xs:simpleType name="String.Trenner">
+    <xs:annotation>
+      <xs:appinfo>
+        <title>trennzeichenseparierte Werte</title>
+      </xs:appinfo>
+      <xs:documentation>In Elementen mit diesem Datentyp kann das Trennzeichen aus dem Nachrichtenkopf zur Segmentierung von Feldinhalten  nicht, ein- oder mehrfach auftreten.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string" />
+  </xs:simpleType>
+</xs:schema>
+

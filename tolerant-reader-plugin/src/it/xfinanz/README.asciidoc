@@ -1,0 +1,39 @@
+= jaxb-tolerant-reader-plugin-test-xfinanz
+:toc:
+:toc-placement: preamble
+
+Test project to demonstrate usage of Tolerant Reader Plugin with the https://www.xrepository.de/details/urn:xoev-de:agxfinanz:standard:xfinanz[XFinanz Schema], using EclipseLink Moxy.
+
+== Execution
+
+This test project is part of maven-invoker-plugin integration tests. It contains configuration placeholders and it is therefore not executable as-is.
+
+Run mvn integration-test on jaxb2-tolerant-reader to generate an executable project from this project. 
+
+The invoker plugin filters resources and creates an executable project below target/it/xfinanz. That project can also be imported into an IDE.
+
+== Execution Results
+
+Note that the generated Person class has no getListVersionID and setListVersionID methods. That is the effect of the tolerant-reader configuration in src/main/wsdl/bindings.xjb, which does not include the listVersionID property of `CodeMandatTyp`:
+
+----
+<jxb:bindings schemaLocation="xfinanz-nachricht-sepa.xsd">
+    <tr:include>
+      <tr:bean name="CodeMandatTyp" properties="listURI"/> <-- no 'listVersionID' property
+      ...
+    </tr:include>
+</jxb:bindings>
+----
+
+The maven-jaxb2-plugin has an Eclipse lifecycle integration, therefore you can immediately see the effect of the tolerant-reader plugin by editing the bindings.xjb file. For instance, if you remove the properties attribute from CodeMandatTyp:
+
+----
+<jxb:bindings schemaLocation="Person.xsd">
+    <tr:include>
+      <tr:bean name="CodeMandatTyp"/>                       <-- no optional properties
+      ...
+    </tr:include>
+</jxb:bindings>
+----
+
+Then the CodeMandatType class below target/generated-sources/xjc will be updated accordingly, i.e. it will only have a getter and setter for the required `code` bean property.

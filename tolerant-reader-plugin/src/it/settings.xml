@@ -1,5 +1,15 @@
 <?xml version="1.0"?>
 <settings>
+  <proxies>
+    <proxy>
+      <id>dzbw-proxy</id>
+      <active>true</active>
+      <protocol>http</protocol>
+      <host>squid.dzbw.de</host>
+      <port>3128</port>
+      <nonProxyHosts>127.0.0.1|localhost|*.dzbw.de</nonProxyHosts>
+    </proxy>
+  </proxies>
   <profiles>
     <profile>
       <id>it-repo</id>

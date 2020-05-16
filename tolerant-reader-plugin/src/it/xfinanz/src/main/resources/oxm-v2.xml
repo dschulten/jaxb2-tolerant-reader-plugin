@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<xml-bindings
+    xmlns="http://www.eclipse.org/eclipselink/xsds/persistence/oxm"
+    package-name="de.escalon.xfinanz">
+  <java-types>
+    <java-type name="SepaMandatNeu0602">
+      <xml-named-object-graphs>
+        <xml-named-object-graph name="v1">
+          <xml-named-attribute-node name="nachrichtenkopf"/>
+          <xml-named-attribute-node name="sepaMandats"/>
+          <xml-named-attribute-node name="personKomplett" subgraph="v1"/>
+        </xml-named-object-graph>
+        <xml-named-object-graph name="v2">
+          <xml-named-attribute-node name="nachrichtenkopf"/>
+          <xml-named-attribute-node name="sepaMandats"/>
+          <xml-named-attribute-node name="personKomplett" subgraph="v2"/>
+        </xml-named-object-graph>
+      </xml-named-object-graphs>
+    </java-type>
+    <java-type name="PersonKomplett">
+      <xml-named-object-graphs>
+        <xml-named-object-graph name="v1">
+          <xml-named-attribute-node name="personNats"/>
+          <xml-named-attribute-node name="adressStamms" subgraph="v1"/>
+          <xml-named-attribute-node name="bankverbindung"/>
+        </xml-named-object-graph>
+        <xml-named-object-graph name="v2">
+          <xml-named-attribute-node name="personNats"/>
+          <xml-named-attribute-node name="adressStamms" subgraph="v2"/>
+          <xml-named-attribute-node name="bankverbindung"/>
+        </xml-named-object-graph>
+      </xml-named-object-graphs>
+    </java-type>
+
+    <java-type name="Adressstamm">
+      <xml-named-object-graphs>
+        <xml-named-object-graph name="v1">
+          <xml-named-attribute-node name="anschrift" subgraph="v1"/>
+          <xml-named-attribute-node name="personenNummern"/>
+        </xml-named-object-graph>
+        <xml-named-object-graph name="v2">
+          <xml-named-attribute-node name="anschrift" subgraph="v2"/>
+          <xml-named-attribute-node name="personenNummern"/>
+        </xml-named-object-graph>
+      </xml-named-object-graphs>
+    </java-type>
+
+    <java-type name="AnschriftErweitert">
+      <xml-named-object-graphs>
+        <xml-named-object-graph name="v1">
+          <xml-named-attribute-node name="postanschrift" subgraph="v1"/>
+          <xml-named-attribute-node name="anschriftNummern"/>
+        </xml-named-object-graph>
+        <xml-named-object-graph name="v2">
+          <xml-named-attribute-node name="postanschrift" subgraph="v2"/>
+          <xml-named-attribute-node name="anschriftNummern"/>
+        </xml-named-object-graph>
+      </xml-named-object-graphs>
+    </java-type>
+    <java-type name="Postanschrift">
+      <xml-named-object-graphs>
+        <xml-named-object-graph name="v1">
+          <xml-named-attribute-node name="strassekomplett"/>
+        </xml-named-object-graph>
+        <xml-named-object-graph name="v2">
+          <xml-named-attribute-node name="strasse"/>
+          <xml-named-attribute-node name="hausnummer"/>
+          <xml-named-attribute-node name="hausnummernzusatz"/>
+        </xml-named-object-graph>
+      </xml-named-object-graphs>
+<!--      <java-attributes>-->
+<!--        <xml-element java-attribute="strassekomplett" name="strasse"/>-->
+<!--      </java-attributes>-->
+    </java-type>
+
+  </java-types>
+</xml-bindings>

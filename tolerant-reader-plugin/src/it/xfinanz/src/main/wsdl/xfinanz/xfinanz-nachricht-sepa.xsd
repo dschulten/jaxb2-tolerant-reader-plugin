@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xfn="xFinanz310" targetNamespace="xFinanz310" version="3.1.0" elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <xs:include schemaLocation="xfinanz-baukasten.xsd" />
+  <xs:element name="sepa.MandatAenderung.0601">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="sepaMandatAenderung" maxOccurs="unbounded" type="xfn:SepaMandatAenderung" />
+        <xs:element name="bankverbindungAenderung" minOccurs="0" type="xfn:Bankverbindung">
+          <xs:annotation>
+            <xs:documentation>Wird diese Zweig gesendet, werden alle Attribute komplett ersetzt. Leere oder fehlende Attribute löschen vorherige Werte. Wird dieser Zweig nicht gesendet, bleiben bisherige Werte unverändert erhalten.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="sepa.MandatNeu.0602">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Diese Nachricht dient ausschließlich zur Neuanlage von Mandaten in der zentralen Mandatsverwaltung. (z. B. Import in das Finanzwesen)</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="sepaMandat" maxOccurs="unbounded" type="xfn:SepaMandat" />
+        <xs:element name="personKomplett" type="xfn:PersonKomplett" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+
