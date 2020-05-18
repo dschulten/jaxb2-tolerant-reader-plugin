@@ -2,7 +2,7 @@
 :toc:
 :toc-placement: preamble
 
-Test project to demonstrate usage of Tolerant Reader Plugin with the https://www.xrepository.de/details/urn:xoev-de:agxfinanz:standard:xfinanz[XFinanz Schema], using EclipseLink Moxy.
+Test project to demonstrate usage of Tolerant Reader Plugin with the https://www.xrepository.de/details/urn:xoev-de:agxfinanz:standard:xfinanz[XFinanz Schema], using EclipseLink MOXy.
 
 == Execution
 

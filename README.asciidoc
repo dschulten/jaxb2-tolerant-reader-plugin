@@ -80,6 +80,70 @@ The pom.xml of the https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tre
 </plugin>
 ----
 
+The https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tree/master/tolerant-reader-plugin/src/it/xfinanz[it/xfinanz test project] shows how you can use the tolerant reader plugin together with Eclipselink MOXy in order to marshall two versions of a schema with a single set of JXB beans.
+
+Its _bindings.xjb_ generates a synthetic getter/setter which handles a (contrived) incompatible change from a complete street address field to distinct fields for street name, house number and house number appendix. Note the `tr:set` element below:
+
+[source,xml]
+----
+<?xml version="1.0"?>
+<jxb:bindings version="2.1" xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+              xmlns:xs="http://www.w3.org/2001/XMLSchema"
+              xmlns:tr="http://jaxb2-commons.dev.java.net/tolerant-reader"
+              xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+              xmlns:person="http://example.com/person"
+              jxb:extensionBindingPrefixes="xjc tr">
+
+  <jxb:globalBindings>
+    <xjc:simple/>
+    <xjc:serializable uid="1"/>
+  </jxb:globalBindings>
+
+  <jxb:bindings schemaLocation="xoev-code.xsd">
+    <jxb:schemaBindings>
+      <jxb:package name="xoev.schemata.code"/>
+    </jxb:schemaBindings>
+  </jxb:bindings>
+
+  <jxb:bindings schemaLocation="xfinanz-nachricht-sepa.xsd">
+
+    <jxb:schemaBindings>
+      <jxb:package name="de.escalon.xfinanz"/>
+    </jxb:schemaBindings>
+
+    <tr:include>
+
+      <tr:bean name="SepaMandatAenderung0601"/>
+      <tr:bean name="SepaMandatNeu0602"/>
+      <tr:bean name="CodeMandatTyp" properties="listURI"/>
+      <tr:bean name="PersonKomplett" properties="personNats bankverbindungs adressStamms"/>
+      <tr:bean name="NameNatuerlichePerson" properties="vorname"/>
+      <tr:bean name="AllgemeinerName" properties="name"/>
+      <tr:bean name="Code" properties="listVersionID"/>
+      <tr:bean name="Bankkonto"
+               properties="arts nummer iban geldinstitut inhaberNatuerlichePersons inhaberJuristischePerson bankverbindungsNummern bankkontoGueltigkeit">
+      </tr:bean>
+      <tr:bean name="AnschriftErweitert" properties="postanschrift"/>
+      <tr:bean name="Postanschrift" properties="strasse hausnummer hausnummernzusatz postleitzahl ort staat adressierungszusatz">
+        <tr:alias alias="strassekomplett">
+          <tr:compute to="java.lang.String"
+                      expr="T(org.apache.commons.lang3.StringUtils).trimToNull(strasse + ' ' + hausnummer + hausnummernzusatz?:'')" />
+
+          <!-- tr:set allows to parse setter input and assign the result to bean properties using Spring EL; supported from v0.5.2 -->
+          <tr:set>
+            <tr:regex>^([\S\s]+?)\s+([\d-\s]*?)\s*([a-zA-Z])?$</tr:regex>
+            <tr:assign>strasse = #matcher.group(1)</tr:assign>
+            <tr:assign>hausnummer = #matcher.group(2)</tr:assign>
+            <tr:assign>hausnummerzusatz = #matcher.group(3)</tr:assign>
+          </tr:set>
+        </tr:alias>
+      </tr:bean>
+
+    </tr:include>
+  </jxb:bindings>
+</jxb:bindings>
+----
+
 == Configuration: Include Required Data Only and Decouple Structurally
 The idea is to require only the Java beans and bean attributes your client really needs and be tolerant about the rest.
 For this, you define a binding file with an `include` element on the schema level where you describe beans that should be generated.
@@ -144,7 +208,7 @@ Below you see an example of an external binding customization file, i.e a _bindi
 
 A second example in _src/it/xfinanz_ uses the tolerant-reader-plugin with the public schema https://www.xrepository.de/details/urn:xoev-de:agxfinanz:standard:xfinanz[XFinanz] created by German governments. It demonstrates how you can support two schema versions with a single JAXB bean, looking at a contrived scenario where the older schema version "had" a single field for road/houseNumber/houseNumberAppendix, whereas the current version uses three distinct fields.
 
-In order to support two versions at once, we use Eclipselink Moxy during marshalling. Run the maven build and look at the _target/it/xfinanz/build.log_ to see the xml result.
+In order to support two versions at once, we use Eclipselink MOXy during marshalling. Run the maven build and look at the _target/it/xfinanz/build.log_ to see the xml result. The key point is the ability of MOXy to customize the default namespace and to filter out JAXB bean properties which do not exist in the target schema version.
 
 ==== tr:include element
 Add at least one tr:include element as customization root. If you need to define beans from multiple packages, have one include element per package.
@@ -154,7 +218,7 @@ Add at least one tr:include element as customization root. If you need to define
 You may add a `packageRoot` attribute to an `include` element if you have to select beans from specific packages. The package root does not have to be the entire package name, it uses startsWith to match packages and falls back to regex matching. That way you can be tolerant about particular versions of a schema if the schema provider uses version numbers in namespaces. I.e. if the schema uses a target namespace `com.example.namespace.fun.v5_7`, you can use a packageRoot `com.example.namespace.fun` to select your beans. 
 
 TIP: In situations where the schema uses a versioned `targetNamespace`, apply https://javaee.github.io/jaxb-v2/doc/user-guide/ch03.html#customization-of-schema-compilation-customizing-java-packages[custom java packages] to avoid having to fix lots of import statements for every version change. If you do this, the original versioned namespace will still be preserved during marshalling via the package definition in _package-info.java_.
-Note that each version of a schema with versioned `targetNamespace` requires you to generate a different set of JAXB beans, i.e. your client still speaks only one version of the schema.
+Note that each version of a schema with versioned `targetNamespace` requires you to generate a different set of JAXB beans, i.e. your client still speaks only one version of the schema. In order to support multiple versions of a schema with a single set of JAXB beans, it is necessary to customize marshalling. Eclipselink MOXy allows this, as shown in the https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tree/master/tolerant-reader-plugin/src/it/xfinanz[it/xfinanz test project]
 
 The section <<References>> lists some blog entries on XML versioning.
 

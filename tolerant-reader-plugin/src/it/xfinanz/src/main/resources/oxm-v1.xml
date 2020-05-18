@@ -2,6 +2,7 @@
 <xml-bindings
     xmlns="http://www.eclipse.org/eclipselink/xsds/persistence/oxm"
     package-name="de.escalon.xfinanz">
+  <xml-schema element-form-default="QUALIFIED" namespace="xFinanz280" />
   <java-types>
     <java-type name="SepaMandatNeu0602">
       <xml-named-object-graphs>

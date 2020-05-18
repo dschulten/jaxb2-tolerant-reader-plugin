@@ -29,7 +29,7 @@ import static org.junit.Assert.assertNotNull;
 public class MarshalUnmarshalTest {
 
   @Test
-  public void testMarshallingSepaMandatNeu0602PreviousVersion() throws Exception {
+  public void testMarshallingSepaMandatNeu0602CurrentToPreviousVersion() throws Exception {
     Map<String, Object> props = new HashMap<String, Object>();
 
     props.put(JAXBContextProperties.OXM_METADATA_SOURCE, "oxm-v1.xml");
@@ -47,7 +47,7 @@ public class MarshalUnmarshalTest {
 
     SepaMandatNeu0602 sepaMandatNeu0602 = createSepaMandatNeu0602(xfn);
 
-    // TODO: see if we can override the namespace from the package-info.java
+    // MOXy allows to override the default namespace in xml-bindings
     JAXBElement<SepaMandatNeu0602> jaxbElement =
         new JAXBElement<SepaMandatNeu0602>(
             new QName("xFinanz280", "sepa.MandatNeu.0602"),
@@ -64,50 +64,9 @@ public class MarshalUnmarshalTest {
     DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
     Document document = documentBuilder.parse(inXPath);
-
     assertThat(document, Matchers.hasXPath("//postanschrift/strasse", Matchers.equalTo("Q7 1A")));
 
-    String marshalledWithAdjustedNamespace =
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                    + "<ns0:sepa.MandatNeu.0602 xmlns=\"xFinanz280\" xmlns:ns0=\"xFinanz280\">\n"
-                    + "   <nachrichtenkopf/>\n"
-                    + "   <sepaMandat>\n"
-                    + "      <mandatsreferenz>xxx</mandatsreferenz>\n"
-                    + "      <glaeubigerID>xxx</glaeubigerID>\n"
-                    + "      <sepaMandatStammdaten>\n"
-                    + "         <mandatTyp>\n"
-                    + "            <code>001</code>\n"
-                    + "         </mandatTyp>\n"
-                    + "      </sepaMandatStammdaten>\n"
-                    + "   </sepaMandat>\n"
-                    + "   <personKomplett>\n"
-                    + "      <personNat>\n"
-                    + "         <natuerlichePerson>\n"
-                    + "            <nameNatuerlichePerson>\n"
-                    + "               <vorname>\n"
-                    + "                  <name>Arndt</name>\n"
-                    + "               </vorname>\n"
-                    + "               <familienname>\n"
-                    + "                  <name>von Bohlen und Halbach</name>\n"
-                    + "               </familienname>\n"
-                    + "            </nameNatuerlichePerson>\n"
-                    + "         </natuerlichePerson>\n"
-                    + "      </personNat>\n"
-                    + "      <adressStamm>\n"
-                    + "         <anschrift>\n"
-                    + "            <postanschrift>\n"
-                    + "               <strasse>Q7 1A</strasse>\n"
-                    + "            </postanschrift>\n"
-                    + "         </anschrift>\n"
-                    + "      </adressStamm>\n"
-                    + "   </personKomplett>\n"
-                    + "</ns0:sepa.MandatNeu.0602>\n";
-
-
-    //    ByteArrayInputStream in = new ByteArrayInputStream(outBytes);
-    ByteArrayInputStream in = new ByteArrayInputStream(marshalledWithAdjustedNamespace.getBytes("utf-8"));
-
-
+    ByteArrayInputStream in = new ByteArrayInputStream(outBytes);
     JAXBContext oldVersionContext =
         JAXBContext.newInstance(
             "de.escalon.xfinanz_oldver", Thread.currentThread().getContextClassLoader());
@@ -153,7 +112,6 @@ public class MarshalUnmarshalTest {
 
     SepaMandatNeu0602 sepaMandatNeu0602 = createSepaMandatNeu0602(xfn);
 
-    // TODO: see if we can override the namespace from the package-info.java
     JAXBElement<SepaMandatNeu0602> jaxbElement =
         new JAXBElement<SepaMandatNeu0602>(
             new QName("xFinanz310", "sepa.MandatNeu.0602"),
@@ -190,60 +148,6 @@ public class MarshalUnmarshalTest {
             .getAnschrift()
             .getPostanschrift()
             .getStrassekomplett());
-  }
-
-  @Test
-  public void testMarshallingSepaMandatNeu0602OldVersion() throws Exception {
-    Map<String, Object> props = new HashMap<String, Object>();
-
-    JAXBContext context =
-            JAXBContext.newInstance(
-                    "de.escalon.xfinanz_oldver", Thread.currentThread().getContextClassLoader(), props);
-
-    Marshaller marshaller = context.createMarshaller();
-    marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-
-    de.escalon.xfinanz_oldver.ObjectFactory xfn = new de.escalon.xfinanz_oldver.ObjectFactory();
-
-    de.escalon.xfinanz_oldver.SepaMandatNeu0602 sepaMandatNeu0602 = createSepaMandatNeu0602(xfn);
-
-    // TODO: see if we can override the namespace from the package-info.java
-    JAXBElement<de.escalon.xfinanz_oldver.SepaMandatNeu0602> jaxbElement =
-            new JAXBElement<de.escalon.xfinanz_oldver.SepaMandatNeu0602>(
-                    new QName("xFinanz280", "sepa.MandatNeu.0602"),
-                    de.escalon.xfinanz_oldver.SepaMandatNeu0602.class,
-                    sepaMandatNeu0602);
-
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    marshaller.marshal(jaxbElement, out);
-
-    byte[] outBytes = out.toByteArray();
-    System.out.write(outBytes);
-
-    ByteArrayInputStream in = new ByteArrayInputStream(outBytes);
-
-    Unmarshaller unmarshaller = context.createUnmarshaller();
-    JAXBElement<de.escalon.xfinanz_oldver.SepaMandatNeu0602> personJAXBElement =
-            unmarshaller.unmarshal(new StreamSource(in), de.escalon.xfinanz_oldver.SepaMandatNeu0602.class);
-    de.escalon.xfinanz_oldver.SepaMandatNeu0602 unmarshalledSepaMandatNeu = personJAXBElement.getValue();
-    assertNotNull("SepaMandatNeu not unmarshalled", unmarshalledSepaMandatNeu);
-    assertEquals(
-            "001",
-            unmarshalledSepaMandatNeu
-                    .getSepaMandats()
-                    .get(0)
-                    .getSepaMandatStammdaten()
-                    .getMandatTyp()
-                    .getCode());
-    assertEquals(
-            "Q7 1A",
-            unmarshalledSepaMandatNeu
-                    .getPersonKomplett()
-                    .getAdressStamms()
-                    .get(0)
-                    .getAnschrift()
-                    .getPostanschrift()
-                    .getStrasse());
   }
 
   private SepaMandatNeu0602 createSepaMandatNeu0602(ObjectFactory xfn) {
@@ -298,54 +202,5 @@ public class MarshalUnmarshalTest {
                                     .withCode("001") // Basislastschrift IV.1.113.2
                                 ))));
   }
-  private de.escalon.xfinanz_oldver.SepaMandatNeu0602 createSepaMandatNeu0602(de.escalon.xfinanz_oldver.ObjectFactory xfn) {
-    return xfn.createSepaMandatNeu0602()
-        .withNachrichtenkopf(xfn.createNachrichtenkopf())
-        .withPersonKomplett(
-            xfn.createPersonKomplett()
-                .withBankverbindungs(
-                    xfn.createBankverbindung()
-                        .withPersonenNummern(xfn.createPersonenNummern())
-                        .withBankkonto(
-                            xfn.createBankkonto()
-                                .withIban("DE89 3704 0044 0532 0130 00")
-                                .withInhaberNatuerlichePersons(
-                                    xfn.createNatuerlichePerson()
-                                        .withNameNatuerlichePerson(
-                                            xfn.createNameNatuerlichePerson()
-                                                .withVorname(
-                                                    xfn.createAllgemeinerName().withName("Arndt"))
-                                                .withFamilienname(
-                                                    xfn.createAllgemeinerName()
-                                                        .withName("von Bohlen und Halbach"))))
-                                .withBankverbindungsNummern(xfn.createBankverbindungsNummern())))
-                .withAdressStamms(
-                    xfn.createAdressstamm()
-                        .withAnschrift(
-                            xfn.createAnschriftErweitert()
-                                .withPostanschrift(
-                                    xfn.createPostanschrift()
-                                        .withStrasse("Q7 1A"))))
-                .withPersonNats(
-                    xfn.createPersonNat()
-                        .withNatuerlichePerson(
-                            xfn.createNatuerlichePerson()
-                                .withNameNatuerlichePerson(
-                                    xfn.createNameNatuerlichePerson()
-                                        .withVorname(xfn.createAllgemeinerName().withName("Arndt"))
-                                        .withFamilienname(
-                                            xfn.createAllgemeinerName()
-                                                .withName("von Bohlen und Halbach"))))))
-        .withSepaMandats(
-            Arrays.asList(
-                xfn.createSepaMandat()
-                    .withMandatsreferenz("xxx")
-                    .withGlaeubigerID("xxx")
-                    .withSepaMandatStammdaten(
-                        xfn.createSepaMandatStammdaten()
-                            .withMandatTyp(
-                                xfn.createCodeMandatTyp()
-                                    .withCode("001") // Basislastschrift IV.1.113.2
-                                ))));
-  }
+
 }
