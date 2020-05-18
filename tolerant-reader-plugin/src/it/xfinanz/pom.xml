@@ -80,7 +80,7 @@
                     <dependency>
                         <groupId>de.escalon.jaxb2</groupId>
                         <artifactId>xjc-classinfo-patch</artifactId>
-                        <version>0.5.2-SNAPSHOT</version>
+                        <version>@project.version@</version>
                     </dependency>
                     <dependency>
                         <groupId>de.escalon.hypermedia</groupId>
@@ -105,7 +105,7 @@
                         <plugin>
                             <groupId>de.escalon.jaxb2</groupId>
                             <artifactId>jaxb2-tolerant-reader</artifactId>
-                            <version>0.5.2-SNAPSHOT</version>
+                            <version>@project.version@</version>
                         </plugin>
                         <plugin>
                             <groupId>org.jvnet.jaxb2_commons</groupId>
@@ -135,6 +135,27 @@
                                 <arg>-XhashCode</arg>
                             </args>
                             <schemaDirectory>${basedir}/src/main/wsdl/xfinanz</schemaDirectory>
+                            <produces>
+                                <produce>de.escalon.xfinanz/**/*.java</produce>
+                            </produces>
+                            <episode>false</episode>
+                            <specVersion>2.0</specVersion>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>xfinanz-unmarshal-old-version</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <args>
+                                <arg>-Xtolerant-reader</arg>
+                                <arg>-Xfluent-api</arg>
+                                <arg>-XtoString</arg>
+                                <arg>-Xequals</arg>
+                                <arg>-XhashCode</arg>
+                            </args>
+                            <schemaDirectory>${basedir}/src/main/wsdl/xfinanz-test-unmarshal-old-version</schemaDirectory>
                             <produces>
                                 <produce>de.escalon.xfinanz/**/*.java</produce>
                             </produces>

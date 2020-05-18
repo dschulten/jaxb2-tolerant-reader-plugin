@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xfn="xFinanz280" targetNamespace="xFinanz280" version="2.8.0" elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <xs:include schemaLocation="xfinanz-baukasten.xsd" />
+  <xs:element name="anbu.Doppisch.0501">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Diese Nachricht ist für die Übertragung von Informationen zu Anlagegütern aus der Ersterfassung (z. B. Inventur, Gebäudemanagement) in das doppische  Finanzverfahren.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="anBuBuchungDoppisch" maxOccurs="unbounded" type="xfn:AnBuBuchungDoppisch" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="anbu.Kameral.0502">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Diese Nachricht ist für die Übertragung von Informationen zu Anlagegütern aus der Ersterfassung (z. B. Inventur, Gebäudemanagement) in das kamerale Finanzverfahren.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="anBuBuchungKameral" maxOccurs="unbounded" type="xfn:AnBuBuchungKameral" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+

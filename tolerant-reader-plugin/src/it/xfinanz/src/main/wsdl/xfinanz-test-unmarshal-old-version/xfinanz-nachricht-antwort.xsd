@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xfn="xFinanz280" targetNamespace="xFinanz280" version="2.8.0" elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <xs:include schemaLocation="xfinanz-baukasten.xsd" />
+  <xs:element name="antwort.AnnahmeVerweigert.9901">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Dient der Ablehnung nicht verarbeitbarer oder nicht unterstützter Nachrichten. Sie wird nur auf komplette Datenübermittlungen angewendet und bezieht sich nie auf einzelne Elemente einer Übertragung.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="fehlertext" maxOccurs="unbounded" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="antwort.Anschriften.9902">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="antwortAnschrift" maxOccurs="unbounded" type="xfn:AntwortAnschrift" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="antwort.AOOhnePerson.9903">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Diese Nachricht beschreibt die an den Sender einer oder meherer Anordnungen zu übermittelnden Informationen hinsichtlich einer Empfangsbestätigung. Es können sowohl ganze Anordnungen als auch konkrete Anordnungspositionen referenziert, bestätigt oder als fehlerhaft gekennzeichnet werden. In diesem Fall kann ein erklärender Fehlertext übermittelt werden.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="antwortAO" maxOccurs="unbounded" type="xfn:AntwortAO">
+          <xs:annotation>
+            <xs:documentation>Beschreibt die nach einer Erstanordnung auf diese Bezug nehmende Antwort hinsichtlich des Annahmestatus.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="antwort.AOMitPerson.9904">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="antwortPersonKomplett" type="xfn:AntwortPersonKomplett" />
+        <xs:element name="antwortAO" maxOccurs="unbounded" type="xfn:AntwortAO" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="antwort.Bankverbindungen.9905">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="antwortBankverbindung" maxOccurs="unbounded" type="xfn:AntwortBankverbindung" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="antwort.IstExport.9906">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="antwortSollIst" maxOccurs="unbounded" type="xfn:AntwortSollIst" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="antwort.IstImport.9907">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Diese Nachricht beschreibt die an den Sender einer oder meherer Ist/Sollinformationen zu übermittelnden Informationen hinsichtlich einer Empfangsbestätigung. Es wird jede einzelne Nachricht bestätigt oder als fehlerhaft gekennzeichnet. Im Fehlerfall kann ein erklärender Fehlertext übermittelt werden.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="antwortSollIst" maxOccurs="unbounded" type="xfn:AntwortSollIst">
+          <xs:annotation>
+            <xs:documentation>Beschreibt die nach einer Erstanordnung auf diese Bezug nehmende Antwort hinsichtlich des Annahmestatus.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="antwort.KLR.9908">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="antwortKLR" maxOccurs="unbounded" type="xfn:AntwortKLRPos" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="antwort.MandateAenderung.9909">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="antwortMandatAenderung" maxOccurs="unbounded" type="xfn:AntwortMandatAenderung" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="antwort.MandateNeu.9910">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="antwortMandatNeu" maxOccurs="unbounded" type="xfn:AntwortMandatNeu" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="antwort.Personen.9911">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="antwortPerson" maxOccurs="unbounded" type="xfn:AntwortPerson" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="antwort.PersonenKomplett.9912">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="antwortPersonKomplett" type="xfn:AntwortPersonKomplett" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="antwort.Soll.9913">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Diese Nachricht beschreibt die an den Sender einer oder meherer Ist/Sollinformationen zu übermittelnden Informationen hinsichtlich einer Empfangsbestätigung. Es wird jede einzelne Nachricht bestätigt oder als fehlerhaft gekennzeichnet. Im Fehlerfall kann ein erklärender Fehlertext übermittelt werden.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="antwortSolIst" maxOccurs="unbounded" type="xfn:AntwortSollIst">
+          <xs:annotation>
+            <xs:documentation>Beschreibt die nach einer Erstanordnung auf diese Bezug nehmende Antwort hinsichtlich des Annahmestatus.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="antwort.SollMitPerson.9914">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="nachrichtAntwortSollIst" maxOccurs="unbounded" type="xfn:AntwortSollIst" />
+        <xs:element name="antwortPersonKomplett" type="xfn:AntwortPersonKomplett" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="antwort.StatusaenderungenForderung.9915">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="antwortStatusaenderungForderung" maxOccurs="unbounded" type="xfn:AntwortStatusaenderungForderung" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="antwort.Vorkontierung.9916">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="vorkontierung" maxOccurs="unbounded" type="xfn:AntwortVorkontierung" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="antwort.VorkontierungStorno.9917">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="vorkontierungStorno" maxOccurs="unbounded" type="xfn:AntwortVorkontierungStorno" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="antwort.CodelistWerte.9918">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="codelist" type="xfn:Codelist" />
+        <xs:element name="codelistWerte" maxOccurs="unbounded" type="xfn:CodelistWerte" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+

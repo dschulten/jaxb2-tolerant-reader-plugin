@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.sun.xsom:xsom:20140925">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/sun/xsom/xsom/20140925/xsom-20140925.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/sun/xsom/xsom/20140925/xsom-20140925-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/sun/xsom/xsom/20140925/xsom-20140925-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

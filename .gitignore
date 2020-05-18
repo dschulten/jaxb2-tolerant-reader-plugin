@@ -6,3 +6,5 @@ target
 *#
 .idea
 *.iml
+!**/src/it/**/.idea/
+!**/src/it/**/*.iml

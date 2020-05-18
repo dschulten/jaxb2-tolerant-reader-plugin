@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xfn="xFinanz280" targetNamespace="xFinanz280" version="2.8.0" elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <xs:include schemaLocation="xfinanz-baukasten.xsd" />
+  <xs:element name="finanzadressdaten.AnschriftAenderung.0101">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Eine Änderung findet statt, wenn die Anschrift eindeutig über die Anschriftennummern (intern oder extern) zugeordnet werden kann. Die Anschrift ist immer komplett zu übergeben. Nicht übergebene oder leere Attribute werden gelöscht.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="adressstamm" maxOccurs="unbounded" type="xfn:Adressstamm" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="finanzadressdaten.AnschriftNeu.0102">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="adressstamm" maxOccurs="unbounded" type="xfn:Adressstamm" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="finanzadressdaten.BankverbindungAenderung.0103">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Eine Änderung findet statt, wenn BankkontoAlt eindeutig zugeordnet werden kann. Diese Eindeutigkeit wird durch Übermittlung und Deckungsgleichheit aller Attribute erreicht. Ist dies der Fall, werden nur die in BankkontoNeu übergebenen Attrribute im referenzierten Bankkonto überschrieben. Nicht übergebene Attribute werden beibehalten.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="bankverbindung" maxOccurs="unbounded" type="xfn:Bankverbindung" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="finanzadressdaten.BankverbindungNeu.0104">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Dient der Übermittlung von neu angelegten Bankkonten zu einer Person.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="bankverbindung" maxOccurs="unbounded" type="xfn:Bankverbindung" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="finanzadressdaten.PersonJurAenderung.0105">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Eine Änderung findet statt, wenn die Person eindeutig  über die Personennummern zugeordnet werden kann. Ist dies der Fall, werden nur die in JurisitschePerson übergebenen Attrribute in der referenzierten Person überschrieben. Nicht übergebene Attribute werden beibehalten.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="personJur" maxOccurs="unbounded" type="xfn:PersonJur" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="finanzadressdaten.PersonJurNeu.0106">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Eine Mindestübergabemenge für eine neue juristische Person ist ein Namensattribut.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="personJur" maxOccurs="unbounded" type="xfn:PersonJur">
+          <xs:annotation>
+            <xs:documentation>Personen-  und anschriftenbezogene Stammdaten von juristischen Personen.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="finanzadressdaten.PersonKomplettNeu.0107">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="personKomplett" type="xfn:PersonKomplett" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="finanzadressdaten.PersonNatAenderung.0108">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+      <xs:documentation>Eine Änderung findet statt, wenn die Person eindeutig  über die Personennummern zugeordnet werden kann. Ist dies der Fall, werden nur die in NatuerlichePerson übergebenen Attrribute in der referenzierten Person überschrieben. Nicht übergebene Attribute werden beibehalten.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="personNat" maxOccurs="unbounded" type="xfn:PersonNat" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="finanzadressdaten.PersonNatNeu.0109">
+    <xs:annotation>
+      <xs:appinfo>
+        <rechtsgrundlage>Es gelten die jeweiligen landes- und bundesspezifischen Rechtsgrundlagen.</rechtsgrundlage>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nachrichtenkopf" type="xfn:Nachrichtenkopf" />
+        <xs:element name="personNat" maxOccurs="unbounded" type="xfn:PersonNat" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+

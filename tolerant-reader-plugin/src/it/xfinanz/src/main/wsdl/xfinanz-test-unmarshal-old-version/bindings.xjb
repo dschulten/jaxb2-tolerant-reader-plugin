@@ -13,14 +13,14 @@
 
   <jxb:bindings schemaLocation="xoev-code.xsd">
     <jxb:schemaBindings>
-      <jxb:package name="xoev.schemata.code"/>
+      <jxb:package name="xoev.schemata.code.testunmarshal"/>
     </jxb:schemaBindings>
   </jxb:bindings>
 
   <jxb:bindings schemaLocation="xfinanz-nachricht-sepa.xsd">
 
     <jxb:schemaBindings>
-      <jxb:package name="de.escalon.xfinanz"/>
+      <jxb:package name="de.escalon.xfinanz_oldver"/>
     </jxb:schemaBindings>
 
     <tr:include>
@@ -36,17 +36,17 @@
                properties="arts nummer iban geldinstitut inhaberNatuerlichePersons inhaberJuristischePerson bankverbindungsNummern bankkontoGueltigkeit">
       </tr:bean>
       <tr:bean name="AnschriftErweitert" properties="postanschrift"/>
-      <tr:bean name="Postanschrift" properties="strasse hausnummer hausnummernzusatz postleitzahl ort staat adressierungszusatz">
-        <tr:alias alias="strassekomplett">
-          <tr:compute to="java.lang.String"
-                      expr="T(org.apache.commons.lang3.StringUtils).trimToNull(strasse + ' ' + hausnummer + hausnummernzusatz?:'')" />
-          <tr:set>
-            <tr:regex>^([\S\s]+?)\s+([\d-\s]*?)\s*([a-zA-Z])?$</tr:regex>
-            <tr:assign>strasse = #matcher.group(1)</tr:assign>
-            <tr:assign>hausnummer = #matcher.group(2)</tr:assign>
-            <tr:assign>hausnummerzusatz = #matcher.group(3)</tr:assign>
-          </tr:set>
-        </tr:alias>
+      <tr:bean name="Postanschrift" properties="strasse postleitzahl ort staat adressierungszusatz">
+<!--        <tr:alias alias="strassekomplett">-->
+<!--          <tr:compute to="java.lang.String"-->
+<!--                      expr="T(org.apache.commons.lang3.StringUtils).trimToNull(strasse + ' ' + hausnummer + hausnummernzusatz?:'')" />-->
+<!--          <tr:set>-->
+<!--            <tr:regex>^([\S\s]+?)\s+([\d-\s]*?)\s*([a-zA-Z])?$</tr:regex>-->
+<!--            <tr:assign>strasse = #matcher.group(1)</tr:assign>-->
+<!--            <tr:assign>hausnummer = #matcher.group(2)</tr:assign>-->
+<!--            <tr:assign>hausnummerzusatz = #matcher.group(3)</tr:assign>-->
+<!--          </tr:set>-->
+<!--        </tr:alias>-->
       </tr:bean>
 
     </tr:include>

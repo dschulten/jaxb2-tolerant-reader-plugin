@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="744f4478-d8f1-4eae-8b1b-62da6ae0dfc2" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/resources/de/escalon/xfinanz_oldver/jaxb.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/wsdl/xfinanz-test-unmarshal-old-version/bindings.xjb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/wsdl/xfinanz-test-unmarshal-old-version/latinchars.xsd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/wsdl/xfinanz-test-unmarshal-old-version/xfinanz-basisdatentypen.xsd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/wsdl/xfinanz-test-unmarshal-old-version/xfinanz-baukasten.xsd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/wsdl/xfinanz-test-unmarshal-old-version/xfinanz-nachricht-anbu.xsd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/wsdl/xfinanz-test-unmarshal-old-version/xfinanz-nachricht-anfrage.xsd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/wsdl/xfinanz-test-unmarshal-old-version/xfinanz-nachricht-antwort.xsd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/wsdl/xfinanz-test-unmarshal-old-version/xfinanz-nachricht-finanzadressdaten.xsd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/wsdl/xfinanz-test-unmarshal-old-version/xfinanz-nachricht-kasse-export.xsd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/wsdl/xfinanz-test-unmarshal-old-version/xfinanz-nachricht-kasse-import.xsd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/wsdl/xfinanz-test-unmarshal-old-version/xfinanz-nachricht-klr.xsd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/wsdl/xfinanz-test-unmarshal-old-version/xfinanz-nachricht-sepa.xsd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/wsdl/xfinanz-test-unmarshal-old-version/xoev-code.xsd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../test/java/de/escalon/xml/xjc/AddrBase.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../test/java/de/escalon/xml/xjc/Individuum.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../test/java/de/escalon/xml/xjc/Name.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../test/java/de/escalon/xml/xjc/SpringExpressionTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/oxm-v2.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/oxm.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/wsdl/xfinanz/bindings.xjb" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/wsdl/xfinanz/bindings.xjb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/de/escalon/xml/xjc/MarshalUnmarshalTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/de/escalon/xml/xjc/MarshalUnmarshalTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../main/java/de/escalon/xml/xjc/BeanInclusionHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../main/java/de/escalon/xml/xjc/BeanInclusionHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../main/java/de/escalon/xml/xjc/TolerantReaderPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../main/java/de/escalon/xml/xjc/TolerantReaderPlugin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../test/java/de/escalon/xml/xjc/BeanInclusionHelperTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../test/java/de/escalon/xml/xjc/BeanInclusionHelperTest.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../../.." />
+  </component>
+  <component name="ProjectId" id="1c4FIZteYkBnml9eV66jnVcsrk9" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/main/resources" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Schulten\Documents\projekte\jaxb2-tolerant-reader-plugin\tolerant-reader-plugin\src\it\xfinanz\src\main\resources\de\escalon" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Schulten\Documents\projekte\jaxb2-tolerant-reader-plugin\tolerant-reader-plugin\src\it\xfinanz\src\main\resources" />
+    </key>
+  </component>
+  <component name="RunManager" selected="JUnit.MarshalUnmarshalTest">
+    <configuration name="MarshalUnmarshalTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="jaxb2-tolerant-reader-plugin-test-xfinanz" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="de.escalon.xml.xjc.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="de.escalon.xml.xjc" />
+      <option name="MAIN_CLASS_NAME" value="de.escalon.xml.xjc.MarshalUnmarshalTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="MarshalUnmarshalTest.testMarshallingSepaMandatNeu0602CurrentVersion" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="jaxb2-tolerant-reader-plugin-test-xfinanz" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="de.escalon.xml.xjc.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="de.escalon.xml.xjc" />
+      <option name="MAIN_CLASS_NAME" value="de.escalon.xml.xjc.MarshalUnmarshalTest" />
+      <option name="METHOD_NAME" value="testMarshallingSepaMandatNeu0602CurrentVersion" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="MarshalUnmarshalTest.testMarshallingSepaMandatNeu0602PreviousVersion" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="jaxb2-tolerant-reader-plugin-test-xfinanz" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="de.escalon.xml.xjc.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="de.escalon.xml.xjc" />
+      <option name="MAIN_CLASS_NAME" value="de.escalon.xml.xjc.MarshalUnmarshalTest" />
+      <option name="METHOD_NAME" value="testMarshallingSepaMandatNeu0602PreviousVersion" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JUnit.MarshalUnmarshalTest" />
+        <item itemvalue="JUnit.MarshalUnmarshalTest.testMarshallingSepaMandatNeu0602PreviousVersion" />
+        <item itemvalue="JUnit.MarshalUnmarshalTest.testMarshallingSepaMandatNeu0602CurrentVersion" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="744f4478-d8f1-4eae-8b1b-62da6ae0dfc2" name="Default Changelist" comment="" />
+      <created>1589779879946</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1589779879946</updated>
+      <workItem from="1589779884169" duration="3269000" />
+      <workItem from="1589783224462" duration="27000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="2" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state width="546" height="466" key="DebuggerActiveHint" timestamp="1589781776397">
+      <screen x="-3840" y="0" width="3840" height="1560" />
+    </state>
+    <state width="546" height="466" key="DebuggerActiveHint/0.0.3840.1560/-3840.0.3840.1560@-3840.0.3840.1560" timestamp="1589781776397" />
+    <state width="1874" height="552" key="GridCell.Tab.0.bottom" timestamp="1589783164246">
+      <screen x="-3840" y="0" width="3840" height="1560" />
+    </state>
+    <state width="1874" height="552" key="GridCell.Tab.0.bottom/0.0.3840.1560/-3840.0.3840.1560@-3840.0.3840.1560" timestamp="1589783164246" />
+    <state width="1874" height="552" key="GridCell.Tab.0.center" timestamp="1589783164246">
+      <screen x="-3840" y="0" width="3840" height="1560" />
+    </state>
+    <state width="1874" height="552" key="GridCell.Tab.0.center/0.0.3840.1560/-3840.0.3840.1560@-3840.0.3840.1560" timestamp="1589783164246" />
+    <state width="1874" height="552" key="GridCell.Tab.0.left" timestamp="1589783164246">
+      <screen x="-3840" y="0" width="3840" height="1560" />
+    </state>
+    <state width="1874" height="552" key="GridCell.Tab.0.left/0.0.3840.1560/-3840.0.3840.1560@-3840.0.3840.1560" timestamp="1589783164246" />
+    <state width="1874" height="552" key="GridCell.Tab.0.right" timestamp="1589783164246">
+      <screen x="-3840" y="0" width="3840" height="1560" />
+    </state>
+    <state width="1874" height="552" key="GridCell.Tab.0.right/0.0.3840.1560/-3840.0.3840.1560@-3840.0.3840.1560" timestamp="1589783164246" />
+    <state width="1874" height="552" key="GridCell.Tab.1.bottom" timestamp="1589783164246">
+      <screen x="-3840" y="0" width="3840" height="1560" />
+    </state>
+    <state width="1874" height="552" key="GridCell.Tab.1.bottom/0.0.3840.1560/-3840.0.3840.1560@-3840.0.3840.1560" timestamp="1589783164246" />
+    <state width="1874" height="552" key="GridCell.Tab.1.center" timestamp="1589783164246">
+      <screen x="-3840" y="0" width="3840" height="1560" />
+    </state>
+    <state width="1874" height="552" key="GridCell.Tab.1.center/0.0.3840.1560/-3840.0.3840.1560@-3840.0.3840.1560" timestamp="1589783164246" />
+    <state width="1874" height="552" key="GridCell.Tab.1.left" timestamp="1589783164246">
+      <screen x="-3840" y="0" width="3840" height="1560" />
+    </state>
+    <state width="1874" height="552" key="GridCell.Tab.1.left/0.0.3840.1560/-3840.0.3840.1560@-3840.0.3840.1560" timestamp="1589783164246" />
+    <state width="1874" height="552" key="GridCell.Tab.1.right" timestamp="1589783164246">
+      <screen x="-3840" y="0" width="3840" height="1560" />
+    </state>
+    <state width="1874" height="552" key="GridCell.Tab.1.right/0.0.3840.1560/-3840.0.3840.1560@-3840.0.3840.1560" timestamp="1589783164246" />
+    <state x="-1827" y="100" width="1734" height="1360" key="com.intellij.history.integration.ui.views.FileHistoryDialog" timestamp="1589780039473">
+      <screen x="-3840" y="0" width="3840" height="1560" />
+    </state>
+    <state x="-1827" y="100" width="1734" height="1360" key="com.intellij.history.integration.ui.views.FileHistoryDialog/0.0.3840.1560/-3840.0.3840.1560@-3840.0.3840.1560" timestamp="1589780039473" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/test/java/de/escalon/xml/xjc/MarshalUnmarshalTest.java</url>
+          <line>116</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/eclipse/persistence/org.eclipse.persistence.core/2.7.7/org.eclipse.persistence.core-2.7.7-sources.jar!/org/eclipse/persistence/internal/oxm/record/SAXUnmarshaller.java</url>
+          <line>1017</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>
