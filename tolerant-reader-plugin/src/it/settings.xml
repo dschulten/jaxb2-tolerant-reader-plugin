@@ -2,12 +2,12 @@
 <settings>
   <proxies>
     <proxy>
-      <id>dzbw-proxy</id>
-      <active>true</active>
+      <id>company-proxy</id>
+      <active>false</active>
       <protocol>http</protocol>
-      <host>squid.dzbw.de</host>
+      <host>proxy.example.com</host>
       <port>3128</port>
-      <nonProxyHosts>127.0.0.1|localhost|*.dzbw.de</nonProxyHosts>
+      <nonProxyHosts>127.0.0.1|localhost|*.example.com</nonProxyHosts>
     </proxy>
   </proxies>
   <profiles>

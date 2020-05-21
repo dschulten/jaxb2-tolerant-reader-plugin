@@ -11,16 +11,16 @@ Furthermore, the schema might evolve in incompatible ways for reasons which are 
 
 The client on the other hand uses only a tiny fraction of the types from the schema. As a developer, I do not want to bother with an enormous tree of classes I don't understand and I want no changes to affect my code base which are irrelevant to my client.
 
-The goal of this plugin is to handle this situation by applying ideas of http://martinfowler.com/bliki/TolerantReader.html[TolerantReader] to JAXB. In an attempt to eat the cake and have it, too, I want to generate beans from the schema, but I want to be able to depend only on the data I care about, and most importantly, I still want to avoid the https://www.continuousdeliveryconsulting.com/blog/application-antipattern-serialisation/[serialization antipattern] of enterprise integration by being able to decouple structurally.
+The goal of this plugin is to handle this situation by applying ideas of http://martinfowler.com/bliki/TolerantReader.html[TolerantReader] to JAXB. I want to generate beans from the schema, but I want to be able to depend only on the data I care about, and most importantly, I still want to avoid the https://www.continuousdeliveryconsulting.com/blog/application-antipattern-serialisation/[serialization antipattern] of enterprise integration by being able to decouple structurally.
 
 I want to use the incoming xml as a _business document_ defined in terms of a schema by creating a Java bean from it, but not by deserializing it as a remote binary object. I want to decouple my Java bean from the evolution of the schema as much as possible, thus at least partially avoiding the http://blog.iancartwright.com/2006/11/dangers-of-serialization.html[dangers of serialization].
 
 Note that schema changes might still require regeneration and recompilation of the client code. The goal is that at least this should be all there is to do, and that I get immediate feedback when the schema change breaks my client, so I can fix the breaking change at the root.
 
-To a certain extent it is possible to support multiple schema versions with a single JAXB bean, for details see the _src/it/xfinanz_ integration test and the section *Example bindings file*.
+To a certain extent it is possible to support multiple schema versions with a single JAXB bean, for details see the section <<multiple-schema-versions>>.
 
 The plugin configuration can also be handed to the service as an executable description of my client expectations.
-It could be http://martinfowler.com/articles/consumerDrivenContracts.html[used as a test] by the service to see which client will break upon any given change.
+The service can use it as a test for http://martinfowler.com/articles/consumerDrivenContracts.html[ConsumerDrivenContracts] to see which client will break upon any given change.
 
 Finally, the plugin annotates the generated beans with the `@Expose` annotation from https://github.com/dschulten/hydra-java/tree/master/hydra-jsonld[hydra-jsonld], if hydra-jsonld is on the classpath.
 
@@ -80,82 +80,25 @@ The pom.xml of the https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tre
 </plugin>
 ----
 
-The https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tree/master/tolerant-reader-plugin/src/it/xfinanz[it/xfinanz test project] shows how you can use the tolerant reader plugin together with Eclipselink MOXy in order to marshall two versions of a schema with a single set of JXB beans.
-
-Its _bindings.xjb_ generates a synthetic getter/setter which handles a (contrived) incompatible change from a complete street address field to distinct fields for street name, house number and house number appendix. Note the `tr:set` element below:
-
-[source,xml]
-----
-<?xml version="1.0"?>
-<jxb:bindings version="2.1" xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
-              xmlns:xs="http://www.w3.org/2001/XMLSchema"
-              xmlns:tr="http://jaxb2-commons.dev.java.net/tolerant-reader"
-              xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
-              xmlns:person="http://example.com/person"
-              jxb:extensionBindingPrefixes="xjc tr">
-
-  <jxb:globalBindings>
-    <xjc:simple/>
-    <xjc:serializable uid="1"/>
-  </jxb:globalBindings>
-
-  <jxb:bindings schemaLocation="xoev-code.xsd">
-    <jxb:schemaBindings>
-      <jxb:package name="xoev.schemata.code"/>
-    </jxb:schemaBindings>
-  </jxb:bindings>
-
-  <jxb:bindings schemaLocation="xfinanz-nachricht-sepa.xsd">
-
-    <jxb:schemaBindings>
-      <jxb:package name="de.escalon.xfinanz"/>
-    </jxb:schemaBindings>
-
-    <tr:include>
-
-      <tr:bean name="SepaMandatAenderung0601"/>
-      <tr:bean name="SepaMandatNeu0602"/>
-      <tr:bean name="CodeMandatTyp" properties="listURI"/>
-      <tr:bean name="PersonKomplett" properties="personNats bankverbindungs adressStamms"/>
-      <tr:bean name="NameNatuerlichePerson" properties="vorname"/>
-      <tr:bean name="AllgemeinerName" properties="name"/>
-      <tr:bean name="Code" properties="listVersionID"/>
-      <tr:bean name="Bankkonto"
-               properties="arts nummer iban geldinstitut inhaberNatuerlichePersons inhaberJuristischePerson bankverbindungsNummern bankkontoGueltigkeit">
-      </tr:bean>
-      <tr:bean name="AnschriftErweitert" properties="postanschrift"/>
-      <tr:bean name="Postanschrift" properties="strasse hausnummer hausnummernzusatz postleitzahl ort staat adressierungszusatz">
-        <tr:alias alias="strassekomplett">
-          <tr:compute to="java.lang.String"
-                      expr="T(org.apache.commons.lang3.StringUtils).trimToNull(strasse + ' ' + hausnummer + hausnummernzusatz?:'')" />
-
-          <!-- tr:set allows to parse setter input and assign the result to bean properties using Spring EL; supported from v0.5.2 -->
-          <tr:set>
-            <tr:regex>^([\S\s]+?)\s+([\d-\s]*?)\s*([a-zA-Z])?$</tr:regex>
-            <tr:assign>strasse = #matcher.group(1)</tr:assign>
-            <tr:assign>hausnummer = #matcher.group(2)</tr:assign>
-            <tr:assign>hausnummerzusatz = #matcher.group(3)</tr:assign>
-          </tr:set>
-        </tr:alias>
-      </tr:bean>
-
-    </tr:include>
-  </jxb:bindings>
-</jxb:bindings>
-----
-
 == Configuration: Include Required Data Only and Decouple Structurally
 The idea is to require only the Java beans and bean attributes your client really needs and be tolerant about the rest.
 For this, you define a binding file with an `include` element on the schema level where you describe beans that should be generated.
 
 If the service provider renames a property or introduces an otherwise incompatible structural change, I want to keep my representation of the data intact. To cope with situations like that, it is possible to rename properties and to use XmlAdapters or computed fields as a mechanism to handle a structural change.
 
-Schemas which use version numbers in their `targetNamespace` are a particular challenge. See <<packageRoot>> for possibilities to suppress versioned package names for your beans.
+Schemas which use version numbers in their `targetNamespace` are a particular challenge. See the sections <<multiple-schema-versions>> and <<packageRoot>> for possibilities to handle versioned package names for your beans.
 
-=== Example bindings file
+First we discuss some example bindings, followed by a reference of all binding elements supported by the tolerant-reader-plugin.
+
+=== Example Bindings
 The configuration of the tolerant-reader-plugin uses the http://docs.oracle.com/cd/E17802_01/webservices/webservices/docs/1.5/tutorial/doc/JAXBUsing4.html[standard customization options] of the xml-to-java compiler xjc. 
-Below you see an example of an external binding customization file, i.e a _bindings.xjb_ file which you put into your schemadirectory. In the sample binding below we use the extension binding prefix `tr` for the tolerant-reader plugin namespace.
+Below you see examples of external binding customization files, i.e _bindings.xjb_ files which you put into your schemadirectory.
 
+==== Rename, Adapt and Compute Fields
+
+In the sample binding below we use the extension binding prefix `tr` for the tolerant-reader plugin namespace. We rename beans and attributes, we apply an `@XmlJavaTypeAdapter` and we compute a field.
+
+.src/it/person/src/main/wsdl/example/bindings.xjb
 [source,xml]
 ----
 <jxb:bindings version="2.1" xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
@@ -206,9 +149,191 @@ Below you see an example of an external binding customization file, i.e a _bindi
 </jxb:bindings>
 ----
 
-A second example in _src/it/xfinanz_ uses the tolerant-reader-plugin with the public schema https://www.xrepository.de/details/urn:xoev-de:agxfinanz:standard:xfinanz[XFinanz] created by German governments. It demonstrates how you can support two schema versions with a single JAXB bean, looking at a contrived scenario where the older schema version "had" a single field for road/houseNumber/houseNumberAppendix, whereas the current version uses three distinct fields.
+[[multiple-schema-versions]]
+==== Support Multiple Schema Versions
 
-In order to support two versions at once, we use Eclipselink MOXy during marshalling. Run the maven build and look at the _target/it/xfinanz/build.log_ to see the xml result. The key point is the ability of MOXy to customize the default namespace and to filter out JAXB bean properties which do not exist in the target schema version.
+A second example in the https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tree/master/tolerant-reader-plugin/src/it/xfinanz[it/xfinanz] test project uses the tolerant-reader-plugin with the public schema https://www.xrepository.de/details/urn:xoev-de:agxfinanz:standard:xfinanz[XFinanz] created by German governments. It demonstrates how you can support two schema versions with a single JAXB bean, looking at a contrived scenario where the older schema version "had" a single element for streetName/houseNumber/houseNumberAppendix, whereas the new version uses three distinct elements for the same information and drops the element for the complete street address.
+
+The _bindings.xjb_ file below creates a JAXB bean with the distinct street address fields of the new version and an artificial bean property `strassekomplett` for the old version.
+
+.https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tree/master/tolerant-reader-plugin/src/it/xfinanz[bindings.xjb]
+[source, xml]
+----
+<?xml version="1.0"?>
+<jxb:bindings version="2.1" xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+              xmlns:xs="http://www.w3.org/2001/XMLSchema"
+              xmlns:tr="http://jaxb2-commons.dev.java.net/tolerant-reader"
+              xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+              xmlns:person="http://example.com/person"
+              jxb:extensionBindingPrefixes="xjc tr">
+
+  <jxb:bindings schemaLocation="xoev-code.xsd">
+    <jxb:schemaBindings>
+      <jxb:package name="xoev.schemata.code"/>
+    </jxb:schemaBindings>
+  </jxb:bindings>
+
+  <jxb:bindings schemaLocation="xfinanz-nachricht-sepa.xsd">
+
+    <jxb:schemaBindings>
+      <jxb:package name="de.escalon.xfinanz"/>
+    </jxb:schemaBindings>
+
+    <tr:include>
+
+      <tr:bean name="SepaMandatAenderung0601"/>
+      <tr:bean name="SepaMandatNeu0602"/>
+      <tr:bean name="CodeMandatTyp" properties="listURI"/>
+      <tr:bean name="PersonKomplett" properties="personNats bankverbindungs adressStamms"/>
+      <tr:bean name="NameNatuerlichePerson" properties="vorname"/>
+      <tr:bean name="AllgemeinerName" properties="name"/>
+      <tr:bean name="Code" properties="listVersionID"/>
+      <tr:bean name="Bankkonto"
+               properties="arts nummer iban geldinstitut inhaberNatuerlichePersons inhaberJuristischePerson bankverbindungsNummern bankkontoGueltigkeit">
+      </tr:bean>
+      <tr:bean name="AnschriftErweitert" properties="postanschrift"/>
+      <tr:bean name="Postanschrift" properties="strasse hausnummer hausnummernzusatz postleitzahl ort staat adressierungszusatz">
+
+        <tr:alias alias="strassekomplett">
+          <tr:compute to="java.lang.String"
+                      expr="T(org.apache.commons.lang3.StringUtils).trimToNull(strasse + ' ' + hausnummer + hausnummernzusatz?:'')" />
+          <tr:set>
+            <tr:regex>^([\S\s]+?)\s+([\d-\s]*?)\s*([a-zA-Z])?$</tr:regex>
+            <tr:assign>strasse = #matcher.group(1)</tr:assign>
+            <tr:assign>hausnummer = #matcher.group(2)</tr:assign>
+            <tr:assign>hausnummerzusatz = #matcher.group(3)</tr:assign>
+          </tr:set>
+        </tr:alias>
+
+      </tr:bean>
+
+    </tr:include>
+  </jxb:bindings>
+</jxb:bindings>
+----
+
+The resulting bean will have all the setters and getters of the new version, and synthetic methods `getStrassekomplett` and `setStrassekomplett` for the old version.
+
+I.e. the old field `strasse` will become a bean property `strassekomplett` consisting of a getter which computes the old field value from the new distinct fields, and a setter which parses an incoming full street address string into its components and assigns them to the new distinct fields.
+
+Below you see the generated JAXB bean.
+
+[source, java]
+----
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "Postanschrift")
+public class Postanschrift implements Serializable, Equals, HashCode, ToString
+{
+
+    private final static long serialVersionUID = 1L;
+    protected String hausnummer;
+    protected String hausnummernzusatz;
+    protected String ort;
+    protected String postleitzahl;
+    protected String strasse;
+    protected Staat staat;
+    protected String adressierungszusatz;
+
+    ...
+
+    @XmlTransient
+    public String getStrassekomplett() {
+        ExpressionParser parser = new SpelExpressionParser();
+        EvaluationContext context = new StandardEvaluationContext(this);
+        Expression exp = parser.parseExpression("T(org.apache.commons.lang3.StringUtils).trimToNull(strasse + ' ' + hausnummer + hausnummernzusatz?:'')");
+        Object ret = exp.getValue(context);
+        return ((String) ret);
+    }
+
+    public void setStrassekomplett(String value) {
+        ExpressionParser parser = new SpelExpressionParser();
+        EvaluationContext context = new StandardEvaluationContext(this);
+        Pattern pattern = Pattern.compile("^([\\S\\s]+?)\\s+([\\d-\\s]*?)\\s*([a-zA-Z])?$");
+        Matcher matcher = pattern.matcher(value);
+        matcher.find();
+        context.setVariable("matcher", matcher);
+        context.setVariable("value", value);
+        List<String> assignmentExpressions = Arrays.asList(new String[] {"strasse = #matcher.group(1)", "hausnummer = #matcher.group(2)", "hausnummerzusatz = #matcher.group(3)"});
+        for (String assignmentExpression: assignmentExpressions) {
+            parser.parseExpression(assignmentExpression);
+        }
+    }
+
+----
+Note that `getStrassekomplett` is annotated with `@XMLTransient`, i.e. it will not be marshalled by the standard marshalling procedure.
+
+However, it is possible to adjust marshalling so that it renders the result of `getStrassekomplett` as an element `strasse` in the xml output and produces the older namespace. The Eclipselink MOXy implementation of JAXB is able to do this via its custom xml-bindings. We use three customizations:
+
+* `xml-schema` to adjust the namespace; here we set the namespace to the older version
+* `xml-named-object-graphs` to describe a desired partial output; here we select the element `strassekomplett` only and drop the distinct elements, which are not supported by the older version. This also allows us to use an `@XMLTransient` element during marshalling
+* `xml-element` to rename bean properties inside a java-type; here we rename `strassekomplett` in the `Postanschrift` java-type to the old name `strasse`
+
+.oxm-v1.xml
+[source, xml]
+----
+<?xml version="1.0"?>
+<xml-bindings
+    xmlns="http://www.eclipse.org/eclipselink/xsds/persistence/oxm"
+    package-name="de.escalon.xfinanz">
+
+  <xml-schema element-form-default="QUALIFIED" namespace="xFinanz280" />
+
+  <java-types>
+    <java-type name="SepaMandatNeu0602">
+      <xml-named-object-graphs>
+        <xml-named-object-graph name="v1">
+          <xml-named-attribute-node name="nachrichtenkopf"/>
+          <xml-named-attribute-node name="sepaMandats"/>
+          <xml-named-attribute-node name="personKomplett" subgraph="v1"/>
+        </xml-named-object-graph>
+      </xml-named-object-graphs>
+    </java-type>
+    <java-type name="PersonKomplett">
+      <xml-named-object-graphs>
+        <xml-named-object-graph name="v1">
+          <xml-named-attribute-node name="personNats"/>
+          <xml-named-attribute-node name="adressStamms" subgraph="v1"/>
+          <xml-named-attribute-node name="bankverbindung"/>
+        </xml-named-object-graph>
+      </xml-named-object-graphs>
+    </java-type>
+    <java-type name="Adressstamm">
+      <xml-named-object-graphs>
+        <xml-named-object-graph name="v1">
+          <xml-named-attribute-node name="anschrift" subgraph="v1"/>
+          <xml-named-attribute-node name="personenNummern"/>
+        </xml-named-object-graph>
+      </xml-named-object-graphs>
+    </java-type>
+    <java-type name="AnschriftErweitert">
+      <xml-named-object-graphs>
+        <xml-named-object-graph name="v1">
+          <xml-named-attribute-node name="postanschrift" subgraph="v1"/>
+          <xml-named-attribute-node name="anschriftNummern"/>
+        </xml-named-object-graph>
+      </xml-named-object-graphs>
+    </java-type>
+
+    <java-type name="Postanschrift">
+      <xml-named-object-graphs>
+        <xml-named-object-graph name="v1">
+          <xml-named-attribute-node name="strassekomplett"/>
+        </xml-named-object-graph>
+      </xml-named-object-graphs>
+      <java-attributes>
+        <xml-element java-attribute="strassekomplett" name="strasse"/>
+      </java-attributes>
+    </java-type>
+
+  </java-types>
+</xml-bindings>
+----
+MOXy named object graphs must describe the entire desired graph, therefore the graph needs to start with the root bean `SepaMandatNeu602`, describe all elements of the desired output and pass down the version `"v1"` to all subgraphs which have version-specific adjustments.
+The only subgraph which really adjusts something is the subgraph for `Postanschrift`. This makes the xml-bindings file quite verbose.
+
+It is also possible to https://wiki.eclipse.org/EclipseLink/Examples/MOXy/ObjectGraphs/Programmatic[create named object graphs programmatically], which might allow to cut down the verbosity of the xml-bindings file.
+
+=== Tolerant Reader Element Reference
 
 ==== tr:include element
 Add at least one tr:include element as customization root. If you need to define beans from multiple packages, have one include element per package.
@@ -217,13 +342,14 @@ Add at least one tr:include element as customization root. If you need to define
 ===== packageRoot attribute (optional)
 You may add a `packageRoot` attribute to an `include` element if you have to select beans from specific packages. The package root does not have to be the entire package name, it uses startsWith to match packages and falls back to regex matching. That way you can be tolerant about particular versions of a schema if the schema provider uses version numbers in namespaces. I.e. if the schema uses a target namespace `com.example.namespace.fun.v5_7`, you can use a packageRoot `com.example.namespace.fun` to select your beans. 
 
-TIP: In situations where the schema uses a versioned `targetNamespace`, apply https://javaee.github.io/jaxb-v2/doc/user-guide/ch03.html#customization-of-schema-compilation-customizing-java-packages[custom java packages] to avoid having to fix lots of import statements for every version change. If you do this, the original versioned namespace will still be preserved during marshalling via the package definition in _package-info.java_.
-Note that each version of a schema with versioned `targetNamespace` requires you to generate a different set of JAXB beans, i.e. your client still speaks only one version of the schema. In order to support multiple versions of a schema with a single set of JAXB beans, it is necessary to customize marshalling. Eclipselink MOXy allows this, as shown in the https://github.com/dschulten/jaxb2-tolerant-reader-plugin/tree/master/tolerant-reader-plugin/src/it/xfinanz[it/xfinanz test project]
+TIP: Instead of using the `packageRoot` attribute in situations where the schema uses a versioned `targetNamespace`, you may want to apply https://javaee.github.io/jaxb-v2/doc/user-guide/ch03.html#customization-of-schema-compilation-customizing-java-packages[custom java packages] to avoid having to fix lots of import statements for every version change. The bindings file in the section <<multiple-schema-versions>> is an example of this technique.
+If you apply a custom java package, the original versioned namespace will still be preserved during marshalling via the package definition in _package-info.java_.
+If you do not customize marshalling, each version of a schema with versioned `targetNamespace` requires you to generate a different set of JAXB beans. In order to support multiple versions of a schema with a single set of JAXB beans, it is necessary to customize marshalling. Eclipselink MOXy is able to do this, as shown in the section in the section <<multiple-schema-versions>>.
 
 The section <<References>> lists some blog entries on XML versioning.
 
 ===== prefix attribute (optional)
-Allows to specify a prefix to be used for the target namespace URI when used with hydra-jsonld. When the plugin detects hydra-jsonld on the classpath, it annotates the beans with `@Term(define = "cust", as = "http://example.com/person#")`, i.e. `cust` represents the target namespace of the schema.
+Allows to specify a prefix to be used for the target namespace URI when used with https://github.com/dschulten/hydra-java/tree/master/hydra-jsonld[hydra-jsonld]. When the plugin detects hydra-jsonld on the classpath, it annotates the beans with `@Term(define = "cust", as = "http://example.com/person#")`, i.e. `cust` represents the target namespace of the schema.
 
 ==== tr:bean element
 Describes an expected bean. Super classes will be included automatically. If an expected bean is not defined by the schema, an error is thrown. This allows you to detect and fix breaking changes early.
@@ -279,6 +405,8 @@ In the example below, a `ValueWrapperXmlAdapter` adapts the field `role` of comp
     to="java.lang.String" />
 </tr:alias>
 ----
+
+WARNING: The tr:adapter element is mainly useful in situations where a bean property type needs to be adjusted to a different type in XML, and where the bean property can fully represent the information in XML. If that is not the case and you need to write back information to a server, tr:compute with tr:set is probably a better fit, so you can expose several fields of a complex type as distinct fields on your JAXB bean, which preserve the full information.
 
 ===== class attribute
 Fully qualified class name of the `XmlAdapter` implementation to apply to the field.
@@ -352,6 +480,46 @@ If you include no EL dependencies, you can still write Java expressions, which r
       + (name.lastName == null? &quot;&quot; : name.lastName)
 </tr:alias>  
 ----
+
+==== tr:set element (optional)
+Specifies a synthetic setter which uses Spring EL to assign the incoming value, for use inside of a `tr:alias` element, usually in conjunction with a `tr:compute` element.
+
+See the tr:compute element to see how to set up Spring EL.
+
+The plugin assumes that the incoming value is of type String by default, and makes that value accessible under the default variable name `#value` to Spring EL.
+
+There are two ways in which you can use `tr:set`. The first is to parse an incoming String value using a regex and assign the matching groups to fields on the current bean:
+
+[source, xml]
+----
+<tr:set>
+    <tr:regex>^([\S\s]+?)\s+([\d-\s]*?)\s*([a-zA-Z])?$</tr:regex>
+    <tr:assign>strasse = #matcher.group(1)</tr:assign>
+    <tr:assign>hausnummer = #matcher.group(2)</tr:assign>
+    <tr:assign>hausnummerzusatz = #matcher.group(3)</tr:assign>
+</tr:set>
+----
+
+The second is to read properties from an incoming bean and assign them to properties on the current bean.
+
+The example below assumes that the current bean has a roleText and a roleValue property.
+
+The ValueWrapper represents a human-readable text and a technical value for a person's role.
+
+[source, xml]
+----
+<tr:set paramType="com.example.ValueWrapper">
+    <tr:assign>roleText = #value.text</tr:assign>
+    <tr:assign>roleValue = #value.value</tr:assign>
+</tr:set>
+----
+
+===== paramType attribute
+If the incoming type is of a type other than String, that type needs to be specified as fully qualified class name using the `paramType` attribute on `tr:set`.
+
+===== paramName attribute
+Allows to adjust the name of the incoming value to something different than `#value`.
+
 ==== tr:add element (optional)
 Allows to define additional custom bean properties which will be generated as `@XmlTransient`.
 
@@ -402,9 +570,12 @@ public class Person {
 === Building the Plugin Project
 This section is for people who do not want to use the plugin, but who want to build the plugin themselves.
 
-Normally it should be sufficient to invoke mvn clean install on the plugin project.
+Normally it should be sufficient to invoke `mvn clean install` on the plugin parent project.
+
+If you are behind a company proxy, add https://docs.oracle.com/javase/8/docs/technotes/guides/net/proxies.html[proxy system properties] to your MAVEN_OPTS or adjust the proxy settings for the integration tests in _src/it/settings.xml_.
 
 If you run the maven build of the plugin project with embedded maven (e.g. inside Eclipse), make sure you have an environment variable `M2_HOME` pointing to a standalone maven installation which can be picked up by the maven invoker plugin during integration test.
+
 
 === Manual execution
 As a plugin developer you may want to execute the plugin manually, but you want its output in the same place where maven puts it.
