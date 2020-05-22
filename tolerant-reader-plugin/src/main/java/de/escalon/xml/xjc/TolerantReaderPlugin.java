@@ -60,11 +60,10 @@ import de.escalon.xml.xjc.BeanInclusionHelper.BeanInclusion;
 import de.escalon.xml.xjc.BeanInclusionHelper.BeanInclusions;
 import de.escalon.xml.xjc.BeanInclusionHelper.ExpressionSpec;
 
+// TODO other plugins do not see adaptations from collection to single type
 // TODO alias properties on parent classes loses withXXX method
 // TODO serialVersionUID not copied in alias beans
-// TODO person.function should be a String and the adapted type should only be written in xml
-// TODO putting the adaption into the class requires both an xml transient property and the proper property
-// TODO wrong list of aliases in error message about expected bean
+// TODO putting the adaptation into the class requires both an xml transient property and the proper property
 // TODO use getSettersAndGetters when looking for accessors, from ClassHelper
 // TODO allow multiline properties attribute list
 // TODO improve error message when alias element is empty (string index -1)
@@ -72,31 +71,25 @@ import de.escalon.xml.xjc.BeanInclusionHelper.ExpressionSpec;
 // TODO do we include required properties from beans further up in the inheritance?
 // TODO no serialVersionUID in alias class Address
 // TODO even if a base bean does not have an element, a derived restricted 
-// child bean might: Fullname.middleInitial - automatically include restricted properties 
-// on base so we can copy them, then zap them after copy or - well - keep them
+//   child bean might: Fullname.middleInitial - automatically include restricted properties
+//   on base so we can copy them, then zap them after copy or - well - keep them
 // TODO Expose for restricted classes: should it expose the restriction base instead of the restricted type?
 // TODO expose implicitly included classes, too?
 // TODO automatically keep required fields or attributes
-// TODO automatically adjust getter and setter names for alias beans according to alias
-// beans
+// TODO automatically adjust getter and setter names for alias beans according to alias beans
 // TODO let beanInclusions not maintain a map of simple name to list of beaninclusions matching 
-// that simple name, but something more specific, maybe map of fullName to BeanInclusion? 
+//   that simple name, but something more specific, maybe map of fullName to BeanInclusion?
 // TODO allow to expose properties under a different vocab
 // TODO package-info prefix annotation, currently we expose with full url and use prefix
-// TODO decouple structurally: support EL for property paths to aliases, or xpath or use
-// https://blog.frankel.ch/customize-your-jaxb-bindings/ converter method. Reading a property as-is
-// is simple, in order to 
 // TODO create XSD Schema for tr extensions
 // TODO use renamed namespace without version part for Expose (xjc renames packages, this
-// TODO would require introducing a namespace-rename feature)
+//   would require introducing a namespace-rename feature)
 // TODO add getter Javadoc which allows to tell where property comes from, have XCD XPointer
-// syntax there
+//   syntax there
 
 /**
- * Reduces generated classes to only those classes and properties which a client really needs. For
- * decoupling structurally, use an {@link XmlAdapter} with {@link XmlJavaTypeAdapter} annotation,
- * annotated with jaxb2-annotate-plugin - your XmlAdapter can take an incoming class and convert it
- * to the structure you need.
+ * Reduces generated classes to only those classes and properties which a client really needs
+ * and allows to rename and restructure.
  */
 public class TolerantReaderPlugin extends Plugin {
 
