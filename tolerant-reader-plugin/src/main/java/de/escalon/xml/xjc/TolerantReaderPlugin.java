@@ -423,6 +423,7 @@ public class TolerantReaderPlugin extends Plugin {
                     // required Type references
                     JType parserIface = codeModel._ref(org.springframework.expression.ExpressionParser.class);
                     JType contextIface = codeModel._ref(org.springframework.expression.EvaluationContext.class);
+                    JType expressionIface = codeModel._ref(org.springframework.expression.Expression.class);
                     JType matcher = codeModel._ref(java.util.regex.Matcher.class);
                     JType pattern = codeModel._ref(java.util.regex.Pattern.class);
                     JClass stringList = codeModel.ref(List.class).narrow(String.class);
@@ -448,7 +449,7 @@ public class TolerantReaderPlugin extends Plugin {
                     body.invoke(contextVar, "setVariable")
                             .arg(setterSpec.paramName)
                             .arg(setterMethod.params().get(0));
-                    // TODO make input accessible as variable to spring context
+
                     JArray assignmentArray = JExpr.newArray(codeModel._ref(String.class));
                     List<String> assignments = setterSpecEntry.getValue().assignments;
                     for (String assignment : assignments) {
@@ -459,10 +460,9 @@ public class TolerantReaderPlugin extends Plugin {
 
                     JForEach forEach = body
                             .forEach(codeModel.ref(String.class), "assignmentExpression", assignmentExpressions);
-                    JInvocation parseExpressionInvocation = forEach.body().invoke(parserVar, "parseExpression");
-                    parseExpressionInvocation
-                            .arg(forEach.var());
-                    parseExpressionInvocation.invoke("getValue").arg(contextVar);
+                    JVar expVar = forEach.body().decl(expressionIface, "exp", JExpr.invoke(parserVar, "parseExpression")
+                        .arg(forEach.var()));
+                    forEach.body().invoke(expVar, "getValue").arg(contextVar);
                 } else if (ClassHelper.isPresent("javax.el.ELProcessor")) {
                     throw new IllegalArgumentException("tr:set requires Spring EL");
                 } else {
@@ -1223,7 +1223,7 @@ public class TolerantReaderPlugin extends Plugin {
 
                     // include property types
                     String propertyTypeToKeep = findPropertyTypeToKeep(classOutline, propertyInfo);
-                    if (propertyTypeToKeep != null) {
+                    if (propertyTypeToKeep != null && !classesToKeep.containsKey(propertyTypeToKeep)) {
                         for (ClassOutline propertyClass : classOutlines) {
                             if (propertyTypeToKeep.equals(propertyClass.target.fullName())) {
                                 // include property type class hierarchy

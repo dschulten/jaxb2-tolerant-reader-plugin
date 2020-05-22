@@ -2,6 +2,7 @@ package de.escalon.xml.xjc;
 
 import static org.junit.Assert.assertEquals;
 
+import com.example.person.ValueWrapper;
 import org.junit.Test;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
@@ -66,4 +67,19 @@ public class SpringExpressionTest {
         assertEquals("John Doe", ret);
     }
 
+  @Test
+  public void testRole() {
+    Individuum individuum = new Individuum();
+    individuum.setRoleWrapper(new ValueWrapper().withText("foo").withValue("001"));
+    assertEquals("foo", individuum.getRoleText());
+    assertEquals("001", individuum.getRoleValue());
+  }
+
+  @Test
+  public void testEmployer() {
+    Individuum individuum = new Individuum().withName(new Name().withFirstName("Joe"))
+        .withEmployer(new Individuum().withName(new Name().withFirstName("Lisa")));
+    individuum.setEmployerFirstName("Ben");
+    assertEquals("Ben", individuum.getEmployerFirstName());
+  }
 }

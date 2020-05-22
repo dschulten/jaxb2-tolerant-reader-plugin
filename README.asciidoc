@@ -488,7 +488,7 @@ See the tr:compute element to see how to set up Spring EL.
 
 The plugin assumes that the incoming value is of type String by default, and makes that value accessible under the default variable name `#value` to Spring EL.
 
-There are two ways in which you can use `tr:set`. The first is to parse an incoming String value using a regex and assign the matching groups to fields on the current bean:
+There are several ways in which you can use `tr:set`. The first is to parse an incoming String value using a regex and assign the matching groups to fields on the current bean:
 
 [source, xml]
 ----
@@ -500,18 +500,38 @@ There are two ways in which you can use `tr:set`. The first is to parse an incom
 </tr:set>
 ----
 
-The second is to read properties from an incoming bean and assign them to properties on the current bean.
+Another possibility is to read properties from an incoming bean and assign them to properties on the current bean.
 
-The example below assumes that the current bean has a roleText and a roleValue property.
+The example below assumes that the current bean has a `roleText` and a `roleValue` property.
 
 The ValueWrapper represents a human-readable text and a technical value for a person's role.
 
 [source, xml]
 ----
-<tr:set paramType="com.example.ValueWrapper">
+<tr:set paramType="com.example.person.ValueWrapper">
     <tr:assign>roleText = #value.text</tr:assign>
     <tr:assign>roleValue = #value.value</tr:assign>
 </tr:set>
+----
+
+A third possibility is to flatten a complex type onto the target bean, creating distinct setters and getters.
+
+This example assumes that the current bean has a complex property `employer`.
+
+[source, xml]
+----
+<tr:alias alias="employerFirstName">
+  <tr:compute expr="employer.name.firstName"/>
+  <tr:set>
+    <tr:assign>employer.name.firstName = #value</tr:assign>
+  </tr:set>
+</tr:alias>
+<tr:alias alias="employerLastName">
+  <tr:compute expr="employer.name.lastName"/>
+  <tr:set>
+    <tr:assign>employer.name.lastName = #value</tr:assign>
+  </tr:set>
+</tr:alias>
 ----
 
 ===== paramType attribute

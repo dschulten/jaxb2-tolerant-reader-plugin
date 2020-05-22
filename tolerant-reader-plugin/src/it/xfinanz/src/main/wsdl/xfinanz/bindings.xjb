@@ -44,7 +44,7 @@
             <tr:regex>^([\S\s]+?)\s+([\d-\s]*?)\s*([a-zA-Z])?$</tr:regex>
             <tr:assign>strasse = #matcher.group(1)</tr:assign>
             <tr:assign>hausnummer = #matcher.group(2)</tr:assign>
-            <tr:assign>hausnummerzusatz = #matcher.group(3)</tr:assign>
+            <tr:assign>hausnummernzusatz = #matcher.group(3)</tr:assign>
           </tr:set>
         </tr:alias>
       </tr:bean>
