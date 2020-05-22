@@ -1,23 +1,18 @@
 package de.escalon.xml.xjc;
 
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.hasItems;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.isA;
-import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
+import com.example.person.AddrBase;
+import com.example.person.Address;
+import com.example.person.Individuum;
+import com.example.person.Name;
+import com.example.person.ObjectFactory;
+import com.example.person.USAddress;
+import com.example.person.ValueWrapper;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -28,17 +23,16 @@ import javax.xml.namespace.QName;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
-
-import org.junit.Ignore;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import com.example.person.AddrBase;
-import com.example.person.Address;
-import com.example.person.USAddress;
-import com.example.person.Individuum;
-import com.example.person.Name;
-import com.example.person.ObjectFactory;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.isA;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class MarshalUnmarshalTest {
 
@@ -49,10 +43,10 @@ public class MarshalUnmarshalTest {
         Individuum person = createPerson(objectFactory);
         // check toString both for renamed properties and renamed classes
         assertThat(person.toString(), allOf(
-                containsString("firstName=John"), containsString("lastName=Doe"),
-                containsString("age=18"),
-                containsString("invoiceAddress=com.example.person.Address"),
-                containsString("postCode=12121")));
+            containsString("firstName=John"), containsString("lastName=Doe"),
+            containsString("age=18"),
+            containsString("invoiceAddress=com.example.person.Address"),
+            containsString("postCode=12121")));
     }
 
     @Test
@@ -89,7 +83,7 @@ public class MarshalUnmarshalTest {
 
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         Schema schema = schemaFactory.newSchema(new StreamSource(new File(System.getProperty("user.dir")
-                + "/src/main/wsdl/example", "Person.xsd")));
+            + "/src/main/wsdl/example", "Person.xsd")));
         marshaller.setSchema(schema);
 
         ObjectFactory objectFactory = new ObjectFactory();
@@ -97,8 +91,8 @@ public class MarshalUnmarshalTest {
         Individuum person = createPerson(objectFactory);
 
         JAXBElement<Individuum> jaxbElement = new JAXBElement<Individuum>(new QName("http://example.com/person",
-                "Person"),
-                Individuum.class, person);
+            "Person"),
+            Individuum.class, person);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         marshaller.marshal(jaxbElement, out);
@@ -112,17 +106,17 @@ public class MarshalUnmarshalTest {
 
         Unmarshaller unmarshaller = context.createUnmarshaller();
         JAXBElement<Individuum> personJAXBElement = unmarshaller
-                .unmarshal(new StreamSource(in), Individuum.class);
+            .unmarshal(new StreamSource(in), Individuum.class);
         Individuum unmarshalledPerson = personJAXBElement.getValue();
         assertNotNull("Person not unmarshalled", unmarshalledPerson);
         assertEquals("John Doe", unmarshalledPerson.getDisplayName());
         assertNotNull("Name not unmarshalled", unmarshalledPerson.getName());
         assertEquals("John", unmarshalledPerson.getName()
-                .getFirstName());
+            .getFirstName());
         assertEquals("Doe", unmarshalledPerson.getName()
-                .getLastName());
+            .getLastName());
         assertEquals(18, unmarshalledPerson.getAge()
-                .intValue());
+            .intValue());
         assertEquals("Workhorse", unmarshalledPerson.getRole());
         AddrBase homeAddress = unmarshalledPerson.getInvoiceAddress();
         assertNotNull("HomeAddress not unmarshalled", homeAddress);
@@ -132,27 +126,27 @@ public class MarshalUnmarshalTest {
         assertEquals("12121", ((Address) homeAddress).getPostCode());
         assertEquals("Germany", ((Address) homeAddress).getCountry());
     }
-    
+
     @Test
     // @Ignore
     public void testUnmarshalPersonWithUnknowAddressSubtype() throws JAXBException, IOException, SAXException {
         JAXBContext context = JAXBContext.newInstance("com.example.person");
 
         InputStream in = this.getClass().getResourceAsStream("/person-address-subtype.xml");
-        
+
         Unmarshaller unmarshaller = context.createUnmarshaller();
         JAXBElement<Individuum> personJAXBElement = unmarshaller
-                .unmarshal(new StreamSource(in), Individuum.class);
+            .unmarshal(new StreamSource(in), Individuum.class);
         Individuum unmarshalledPerson = personJAXBElement.getValue();
         assertNotNull("Person not unmarshalled", unmarshalledPerson);
         assertEquals("John Doe", unmarshalledPerson.getDisplayName());
         assertNotNull("Name not unmarshalled", unmarshalledPerson.getName());
         assertEquals("John", unmarshalledPerson.getName()
-                .getFirstName());
+            .getFirstName());
         assertEquals("Doe", unmarshalledPerson.getName()
-                .getLastName());
+            .getLastName());
         assertEquals(18, unmarshalledPerson.getAge()
-                .intValue());
+            .intValue());
         assertEquals("Workhorse", unmarshalledPerson.getRole());
         AddrBase homeAddress = unmarshalledPerson.getInvoiceAddress();
         assertNotNull("HomeAddress not unmarshalled", homeAddress);
@@ -168,10 +162,10 @@ public class MarshalUnmarshalTest {
         ObjectFactory objectFactory = new ObjectFactory();
         // ensure builder methods are generated for alias bean
         Address globalAddress = objectFactory.createAddress()
-                .withCity("Schwetzingen")
-                .withAddr1("Carl Benz Str. 12")
-                .withCountry("Germany")
-                .withPostCode("12121");
+            .withCity("Schwetzingen")
+            .withAddr1("Carl Benz Str. 12")
+            .withCountry("Germany")
+            .withPostCode("12121");
         assertNotNull(globalAddress);
     }
 
@@ -193,12 +187,13 @@ public class MarshalUnmarshalTest {
         globalAddress.setAddr1("Carl Benz Str. 12");
         globalAddress.setCountry("Germany");
         globalAddress.setPostCode("12121");
-        
+
         List<AddrBase> otherAddress = person.getOtherAddress();
         otherAddress.add(globalAddress);
         otherAddress.add(globalAddress);
 
         person.setInvoiceAddress(globalAddress);
+        person.setRoleWrapper(new ValueWrapper().withText("foo").withValue("001"));
         return person;
     }
 
