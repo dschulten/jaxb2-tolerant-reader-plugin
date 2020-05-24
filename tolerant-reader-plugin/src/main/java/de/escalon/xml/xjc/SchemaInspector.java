@@ -7,7 +7,7 @@ import java.math.BigInteger;
 
 public class SchemaInspector {
 
-  static boolean isRequiredElementOrAttribute(XSComponent schemaComponent) {
+  public static boolean isRequiredElementOrAttribute(XSComponent schemaComponent) {
     boolean requiredElementOrAttribute = false;
     if (schemaComponent instanceof XSParticle) {
       XSParticle particle = (XSParticle) schemaComponent;

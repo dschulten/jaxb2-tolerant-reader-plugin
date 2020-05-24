@@ -1,7 +1,6 @@
 package de.escalon.xml.xjc;
 
 import com.sun.codemodel.JClass;
-import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JType;
 import com.sun.tools.xjc.Options;
@@ -11,7 +10,12 @@ import com.sun.tools.xjc.outline.ClassOutline;
 import com.sun.tools.xjc.outline.Outline;
 import com.sun.tools.xjc.reader.Ring;
 import com.sun.xml.xsom.XSComponent;
-import de.escalon.xml.xjc.BeanInclusionHelper.BeanInclusions;
+import de.escalon.xml.xjc.beaninclusion.BeanInclusion;
+import de.escalon.xml.xjc.beaninclusion.BeanInclusions;
+import de.escalon.xml.xjc.edit.ClassInfoEditor;
+import de.escalon.xml.xjc.edit.CodeModelEditor;
+import de.escalon.xml.xjc.edit.HydraEditor;
+import de.escalon.xml.xjc.helpers.ClassHelper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -41,8 +45,8 @@ public class SchemaProcessor {
 
     Collection<? extends ClassOutline> classOutlines = outline.getClasses();
 
-    for (List<BeanInclusionHelper.BeanInclusion> inclusionCandidates : beanInclusions) {
-      for (BeanInclusionHelper.BeanInclusion beanInclusion : inclusionCandidates) {
+    for (List<BeanInclusion> inclusionCandidates : beanInclusions) {
+      for (BeanInclusion beanInclusion : inclusionCandidates) {
         ClassOutline found = findMatchingInclusionEntry(classOutlines, beanInclusion);
         if (found == null) {
           throw new IllegalArgumentException(
@@ -123,7 +127,7 @@ public class SchemaProcessor {
       CClassInfo classInfo = classOutline.target;
       Set<String> includedPropertiesChecklist = new HashSet<String>();
 
-      BeanInclusionHelper.BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(classInfo);
+      BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(classInfo);
       if (beanInclusion == null) {
         continue;
       }
@@ -138,7 +142,7 @@ public class SchemaProcessor {
   private void addClassesWithPropertiesToKeep(Map<String, Set<String>> classesToKeep,
       Collection<? extends ClassOutline> classOutlines, ClassOutline classOutline,
       BeanInclusions beanInclusions,
-      BeanInclusionHelper.BeanInclusion beanInclusion, Set<String> includedPropertiesChecklist) {
+      BeanInclusion beanInclusion, Set<String> includedPropertiesChecklist) {
     CClassInfo currentClassInfo = classOutline.target;
 
     // don't check BeanInclusion.includesClass here,
@@ -211,7 +215,7 @@ public class SchemaProcessor {
 
 
   private ClassOutline findMatchingInclusionEntry(Collection<? extends ClassOutline> classOutlines,
-      BeanInclusionHelper.BeanInclusion inclusionEntry) {
+      BeanInclusion inclusionEntry) {
     for (ClassOutline classOutline : classOutlines) {
       String className = classOutline.target.getName();
       if (inclusionEntry.includesClass(className)) {
@@ -219,26 +223,5 @@ public class SchemaProcessor {
       }
     }
     return null;
-  }
-
-  /**
-   * Holds changes for class.
-   */
-  static class ChangeSet {
-    final ClassOutline sourceClassOutline;
-    final ClassOutline targetClassOutline;
-    final JDefinedClass definedClass;
-
-    public ChangeSet(ClassOutline sourceClassOutline, ClassOutline targetClassOutline,
-        JDefinedClass definedClass) {
-      super();
-      this.sourceClassOutline = sourceClassOutline;
-      this.targetClassOutline = targetClassOutline;
-      this.definedClass = definedClass;
-    }
-
-    public String getAliasBeanName() {
-      return definedClass.fullName();
-    }
   }
 }

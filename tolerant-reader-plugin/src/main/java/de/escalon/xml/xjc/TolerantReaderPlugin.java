@@ -1,5 +1,7 @@
 package de.escalon.xml.xjc;
 
+import de.escalon.xml.xjc.beaninclusion.BeanInclusionHelper;
+import de.escalon.xml.xjc.beaninclusion.BeanInclusions;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,7 +47,7 @@ import com.sun.tools.xjc.outline.Outline;
  */
 public class TolerantReaderPlugin extends Plugin {
 
-  static final String NAMESPACE_URI = "http://jaxb2-commons.dev.java.net/tolerant-reader";
+  public static final String NAMESPACE_URI = "http://jaxb2-commons.dev.java.net/tolerant-reader";
 
   /**
    * Name of Option to enable this plugin
@@ -90,7 +92,7 @@ public class TolerantReaderPlugin extends Plugin {
   public boolean run(Outline outline, Options opts, ErrorHandler errHandler) {
     CCustomizations customizations = outline.getModel()
         .getCustomizations();
-    BeanInclusionHelper.BeanInclusions beanInclusions = beanInclusionHelper.getBeanInclusions(customizations);
+    BeanInclusions beanInclusions = beanInclusionHelper.getBeanInclusions(customizations);
     schemaProcessor.processSchemaTags(outline, beanInclusions, opts);
     return true;
   }

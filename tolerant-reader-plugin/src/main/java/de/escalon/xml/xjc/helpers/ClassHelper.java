@@ -1,4 +1,4 @@
-package de.escalon.xml.xjc;
+package de.escalon.xml.xjc.helpers;
 
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JMethod;
@@ -29,7 +29,7 @@ public class ClassHelper {
     }
 
     // TODO consider to replace by ClassHelper.findGetterInClass/findSetterInClass
-    static Set<String> getSettersAndGetters(String propertyPublicName) {
+    public static Set<String> getSettersAndGetters(String propertyPublicName) {
         return new HashSet<String>(Arrays.asList("set" + propertyPublicName, // FooBar
             "get" + propertyPublicName, "is" + propertyPublicName, "has" + propertyPublicName));
     }

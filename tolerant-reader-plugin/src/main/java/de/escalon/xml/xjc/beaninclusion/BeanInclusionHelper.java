@@ -1,5 +1,6 @@
-package de.escalon.xml.xjc;
+package de.escalon.xml.xjc.beaninclusion;
 
+import de.escalon.xml.xjc.TolerantReaderPlugin;
 import java.util.*;
 
 import org.w3c.dom.Element;
@@ -7,14 +8,12 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.sun.tools.xjc.model.CClassInfo;
 import com.sun.tools.xjc.model.CCustomizations;
 import com.sun.tools.xjc.model.CPluginCustomization;
-import com.sun.tools.xjc.model.CPropertyInfo;
 
 public class BeanInclusionHelper {
 
-    BeanInclusions getBeanInclusions(CCustomizations ccs) {
+    public BeanInclusions getBeanInclusions(CCustomizations ccs) {
         Map<String, List<BeanInclusion>> includedClasses = new HashMap<String, List<BeanInclusion>>();
         for (CPluginCustomization pluginCustomization : findMyCustomizations(ccs)) {
             pluginCustomization.markAsAcknowledged();
@@ -271,199 +270,11 @@ public class BeanInclusionHelper {
     }
 
     private void addBeanInclusion(Map<String, List<BeanInclusion>> includedClasses, BeanInclusion beanInclusion) {
-        List<BeanInclusion> list = includedClasses.get(beanInclusion.simpleName);
+        List<BeanInclusion> list = includedClasses.get(beanInclusion.getSimpleName());
         if (list == null) {
             list = new ArrayList<BeanInclusion>();
-            includedClasses.put(beanInclusion.simpleName, list);
+            includedClasses.put(beanInclusion.getSimpleName(), list);
         }
         list.add(beanInclusion);
     }
-
-    static class BeanInclusions implements Iterable<List<BeanInclusion>> {
-        Map<String, List<BeanInclusion>> beanInclusions;
-
-        public BeanInclusions(Map<String, List<BeanInclusion>> beanInclusions) {
-            this.beanInclusions = beanInclusions;
-        }
-
-        public BeanInclusion getBeanInclusion(CClassInfo classInfo) {
-            List<BeanInclusion> beanInclusionList = beanInclusions.get(classInfo.shortName);
-            if (beanInclusionList != null) {
-                for (BeanInclusion beanInclusion : beanInclusionList) {
-                    if (beanInclusion.includesClass(classInfo.getName())) {
-                        return beanInclusion;
-                    }
-                }
-            }
-            return null;
-        }
-
-        public Iterator<List<BeanInclusion>> iterator() {
-            return beanInclusions.values()
-                .iterator();
-        }
-    }
-
-    static class BeanInclusion {
-        private final String simpleName;
-        private Set<String> properties;
-        private final String packageRoot;
-        private final String trailingName;
-        private Map<String, String> aliases;
-        private String beanAlias;
-        private Map<String, String> propertiesToAdd;
-        private final String prefix;
-        private Map<String, AdapterSpec> xmlAdapters = Collections.<String, AdapterSpec>emptyMap();
-        private Map<String, ExpressionSpec> expressions = Collections.<String, ExpressionSpec>emptyMap();
-        private Map<String, SetterSpec> setters = Collections.<String, SetterSpec>emptyMap();;
-
-        public BeanInclusion(String simpleName,
-            String packageRoot, String prefix) {
-            this.simpleName = simpleName;
-            this.prefix = prefix;
-            this.trailingName = "." + simpleName;
-            this.packageRoot = packageRoot;
-        }
-
-        public Map<String, String> getPropertiesToAdd() {
-            return propertiesToAdd;
-        }
-
-        public String getPropertyAlias(String property) {
-            return aliases.get(property);
-        }
-
-        public void setBeanAlias(String beanAlias) {
-            this.beanAlias = beanAlias;
-        }
-
-        public String getBeanAlias() {
-            return beanAlias;
-        }
-
-        public String getPrefix() {
-            return prefix;
-        }
-
-        public AdapterSpec getXmlAdapter(String property) {
-            return xmlAdapters.get(property);
-        }
-
-        public boolean includesClass(String className) {
-            return className.endsWith(trailingName) && (packageRoot == null
-                || (className.startsWith(packageRoot) || className.matches(packageRoot)));
-        }
-
-        public boolean includesProperty(String propertyName) {
-            return properties.contains(propertyName);
-        }
-
-        @Override
-        public String toString() {
-            return (packageRoot.isEmpty() ? packageRoot : packageRoot + ".") + simpleName + " " + properties.toString()
-                + " aliases " + aliases.toString();
-        }
-
-        public boolean isSatisfiedByProperties(List<CPropertyInfo> propertyInfos) {
-            for (String propertyName : properties) {
-                CPropertyInfo found = findPropertyInfo(propertyInfos, propertyName);
-                if (found == null) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        private CPropertyInfo findPropertyInfo(List<CPropertyInfo> propertyInfos, String propertyName) {
-            for (CPropertyInfo cPropertyInfo : propertyInfos) {
-                if (propertyName.equals(cPropertyInfo.getName(false))) { // fooBar
-                    return cPropertyInfo;
-                }
-            }
-            return null;
-        }
-
-        public void setXmlAdapters(Map<String, AdapterSpec> xmlAdapters) {
-            this.xmlAdapters = xmlAdapters;
-        }
-
-        public void setExpressions(Map<String, ExpressionSpec> expressions) {
-            this.expressions = expressions;
-        }
-
-        public Map<String, ExpressionSpec> getExpressions() {
-            return expressions;
-        }
-
-        public void setProperties(HashSet<String> properties) {
-            this.properties = properties;
-        }
-
-        public void setPropertiesToAdd(Map<String, String> propertiesToAdd) {
-            this.propertiesToAdd = propertiesToAdd;
-        }
-
-        public void setAliases(HashMap<String, String> aliases) {
-            this.aliases = aliases;
-        }
-
-        public void setSetters(Map<String, SetterSpec> setters) {
-            this.setters = setters;
-        }
-
-        public Map<String, SetterSpec> getSetters() {
-            return setters;
-        }
-    }
-
-    static class AdapterSpec {
-        public final String adapterClass;
-        public final String adaptsToType;
-
-        public AdapterSpec(String adapterClass, String adaptsToType) {
-            super();
-            this.adapterClass = adapterClass;
-            this.adaptsToType = adaptsToType;
-        }
-
-    }
-
-    /**
-     * Represents tr:compute element.
-     */
-    static class ExpressionSpec {
-
-        public final String expression;
-        public final String computesToType;
-        public final String regex;
-        public final String regexPropertyExpr;
-
-        public ExpressionSpec(String expression, String computesToType, String regex,
-            String regexPropertyExpr) {
-            this.expression = expression;
-            this.computesToType = computesToType;
-            this.regex = regex;
-            this.regexPropertyExpr = regexPropertyExpr;
-        }
-
-    }
-
-    /**
-     * Represents tr:set element.
-     */
-    static class SetterSpec {
-
-        public final String paramType;
-        public final String paramName;
-        public final String regex;
-        public final List<String> assignments;
-
-        public SetterSpec(String paramType, String paramName, String regex, List<String> assignments) {
-            this.paramType = paramType;
-            this.paramName = paramName;
-            this.regex = regex;
-            this.assignments = assignments;
-        }
-    }
-
 }

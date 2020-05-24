@@ -1,4 +1,4 @@
-package de.escalon.xml.xjc;
+package de.escalon.xml.xjc.helpers;
 
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JDefinedClass;

@@ -1,5 +1,8 @@
 package de.escalon.xml.xjc;
 
+import de.escalon.xml.xjc.beaninclusion.BeanInclusion;
+import de.escalon.xml.xjc.beaninclusion.BeanInclusions;
+import de.escalon.xml.xjc.helpers.StringHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -27,9 +30,6 @@ import com.sun.xml.xsom.XSXPath;
 import com.sun.xml.xsom.impl.util.SchemaWriter;
 import com.sun.xml.xsom.visitor.XSTermVisitor;
 import com.sun.xml.xsom.visitor.XSVisitor;
-
-import de.escalon.xml.xjc.BeanInclusionHelper.BeanInclusion;
-import de.escalon.xml.xjc.BeanInclusionHelper.BeanInclusions;
 
 /**
  * Access original schema to find out the correct property order.

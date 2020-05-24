@@ -1,4 +1,4 @@
-package de.escalon.xml.xjc;
+package de.escalon.xml.xjc.edit;
 
 import com.sun.codemodel.JAnnotationArrayMember;
 import com.sun.codemodel.JAnnotationUse;
@@ -24,7 +24,14 @@ import com.sun.xml.xsom.XSModelGroup;
 import com.sun.xml.xsom.XSParticle;
 import com.sun.xml.xsom.XSTerm;
 import com.sun.xml.xsom.XSType;
-import de.escalon.xml.xjc.SchemaProcessor.ChangeSet;
+import de.escalon.xml.xjc.ChangeSet;
+import de.escalon.xml.xjc.annotate.Annotatable;
+import de.escalon.xml.xjc.annotate.AnnotationHelper;
+import de.escalon.xml.xjc.beaninclusion.BeanInclusion;
+import de.escalon.xml.xjc.beaninclusion.BeanInclusions;
+import de.escalon.xml.xjc.helpers.ClassHelper;
+import de.escalon.xml.xjc.helpers.OutlineHelper;
+import de.escalon.xml.xjc.helpers.StringHelper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -132,7 +139,7 @@ public class ClassInfoEditor {
     return new ChangeSet(toReplace, newClassOutline, newBean);
   }
 
-  void createAliasBeans(Outline outline, BeanInclusionHelper.BeanInclusions beanInclusions,
+  public void createAliasBeans(Outline outline, BeanInclusions beanInclusions,
       Collection<? extends ClassOutline> classOutlines,
       Map<String, ChangeSet> beansToChange) {
     for (ClassOutline classOutline : new ArrayList<ClassOutline>(classOutlines)) { // no
@@ -163,7 +170,7 @@ public class ClassInfoEditor {
     return changeSet;
   }
 
-  void removeBeansWhichHaveAliases(Outline outline,
+  public void removeBeansWhichHaveAliases(Outline outline,
       Map<String, ChangeSet> beansToChange) {
     for (Map.Entry<String, ChangeSet> beanToChange : beansToChange.entrySet()) {
       removeClass(outline, beanToChange.getValue().sourceClassOutline.target);
@@ -198,8 +205,8 @@ public class ClassInfoEditor {
   }
 
   private String getBeanAliasName(CClassInfo classInfo,
-      BeanInclusionHelper.BeanInclusions beanInclusions) {
-    BeanInclusionHelper.BeanInclusion beanInclusionForClassInfo =
+      BeanInclusions beanInclusions) {
+    BeanInclusion beanInclusionForClassInfo =
         beanInclusions.getBeanInclusion(classInfo);
 
     String aliasBeanName = "";
@@ -209,7 +216,7 @@ public class ClassInfoEditor {
     return aliasBeanName;
   }
 
-  void copyProperties(Outline outline, BeanInclusionHelper.BeanInclusions beanInclusions,
+  void copyProperties(Outline outline, BeanInclusions beanInclusions,
       Map<String, ChangeSet> beansToChange,
       CClassInfo sourceClassInfo, JDefinedClass sourceImplClass,
       ChangeSet changeSet,
@@ -255,7 +262,7 @@ public class ClassInfoEditor {
       }
       String sourcePropertyName = cPropertyInfo.getName(false);
 
-      BeanInclusionHelper.BeanInclusion beanInclusion =
+      BeanInclusion beanInclusion =
           beanInclusions.getBeanInclusion(sourceClassInfo);
       String fieldName = sourcePropertyName;
       if (beanInclusion != null) {
@@ -333,8 +340,8 @@ public class ClassInfoEditor {
     return ret;
   }
 
-  void applyBeanAliasesAndAdaptersToClassMembers(Outline outline,
-      BeanInclusionHelper.BeanInclusions beanInclusions,
+  public void applyBeanAliasesAndAdaptersToClassMembers(Outline outline,
+      BeanInclusions beanInclusions,
       Collection<? extends ClassOutline> classOutlines, Map<String, Set<String>> classesToKeep,
       Map<String, ChangeSet> beansToChange)
       throws ClassNotFoundException, IOException {
@@ -358,7 +365,7 @@ public class ClassInfoEditor {
   }
 
   private void applyBeanAliasesToFieldsAndAccessors(Outline outline,
-      BeanInclusionHelper.BeanInclusions beanInclusions,
+      BeanInclusions beanInclusions,
       Map<String, ChangeSet> beansToChange, CClassInfo classInfo,
       JDefinedClass implClass)
       throws ClassNotFoundException, IOException {
@@ -404,8 +411,8 @@ public class ClassInfoEditor {
     }
   }
 
-  void applyXmlTypeToClasses(Collection<? extends ClassOutline> classOutlines,
-      BeanInclusionHelper.BeanInclusions beanInclusions,
+  public void applyXmlTypeToClasses(Collection<? extends ClassOutline> classOutlines,
+      BeanInclusions beanInclusions,
       Map<String, Set<String>> classesToKeep) {
     for (final ClassOutline classOutline : classOutlines) {
       CClassInfo classInfo = classOutline.target;
@@ -426,28 +433,28 @@ public class ClassInfoEditor {
     }
   }
 
-  void addPropertiesToClasses(Outline outline, BeanInclusionHelper.BeanInclusions beanInclusions) {
+  public void addPropertiesToClasses(Outline outline, BeanInclusions beanInclusions) {
     Collection<? extends ClassOutline> classOutlines = outline.getClasses();
 
     for (final ClassOutline classOutline : classOutlines) {
-      BeanInclusionHelper.BeanInclusion beanInclusion =
+      BeanInclusion beanInclusion =
           beanInclusions.getBeanInclusion(classOutline.target);
       codeModelEditor.addProperties(outline, beanInclusion, classOutline);
     }
   }
 
-  void addPropertiesToAliases(Outline outline, BeanInclusionHelper.BeanInclusions beanInclusions,
+  public void addPropertiesToAliases(Outline outline, BeanInclusions beanInclusions,
       Map<String, ChangeSet> beansToChange) {
     for (ChangeSet changeSet : beansToChange.values()) {
       ClassOutline targetClassOutline = changeSet.targetClassOutline;
       ClassOutline sourceClassOutline = changeSet.sourceClassOutline;
-      BeanInclusionHelper.BeanInclusion beanInclusion =
+      BeanInclusion beanInclusion =
           beanInclusions.getBeanInclusion(sourceClassOutline.target);
       codeModelEditor.addProperties(outline, beanInclusion, targetClassOutline);
     }
   }
 
-  void applyXmlSeeAlso(Outline outline, BeanInclusionHelper.BeanInclusions beanInclusions,
+  public void applyXmlSeeAlso(Outline outline, BeanInclusions beanInclusions,
       Collection<? extends ClassOutline> classOutlines, Map<String, Set<String>> classesToKeep,
       Map<String, ChangeSet> beansToChange) {
     for (ClassOutline classOutline : classOutlines) {
@@ -457,8 +464,8 @@ public class ClassInfoEditor {
     }
   }
 
-  void applyXmlTypeToAliases(Collection<? extends ClassOutline> classOutlines,
-      BeanInclusionHelper.BeanInclusions beanInclusions,
+  public void applyXmlTypeToAliases(Collection<? extends ClassOutline> classOutlines,
+      BeanInclusions beanInclusions,
       Map<String, Set<String>> classesToKeep,
       Map<String, ChangeSet> beansToChange) {
 
@@ -481,7 +488,7 @@ public class ClassInfoEditor {
     }
   }
 
-  void createRestrictedBeans(Outline outline, BeanInclusionHelper.BeanInclusions beanInclusions,
+  public void createRestrictedBeans(Outline outline, BeanInclusions beanInclusions,
       Collection<? extends ClassOutline> classOutlines,
       Map<String, Set<String>> classesToKeep,
       Map<String, ChangeSet> beansToChange)
@@ -495,7 +502,7 @@ public class ClassInfoEditor {
         continue;
       }
 
-      BeanInclusionHelper.BeanInclusion beanInclusion =
+      BeanInclusion beanInclusion =
           beanInclusions.getBeanInclusion(sourceClassInfo);
       XSComponent schemaComponent = sourceClassInfo.getSchemaComponent();
       if (schemaComponent instanceof XSComplexType) {
@@ -565,8 +572,8 @@ public class ClassInfoEditor {
    * @param classOutlines  to use
    * @param classesToKeep  which should not be removed
    */
-  void removeUnusedClassesAndFieldsAndRenameProperties(Outline outline,
-      BeanInclusionHelper.BeanInclusions beanInclusions,
+  public void removeUnusedClassesAndFieldsAndRenameProperties(Outline outline,
+      BeanInclusions beanInclusions,
       Collection<? extends ClassOutline> classOutlines, Map<String, Set<String>> classesToKeep) {
     for (final ClassOutline classOutline : classOutlines) {
       CClassInfo classInfo = classOutline.target;
@@ -582,7 +589,7 @@ public class ClassInfoEditor {
         Collection<JMethod> methodsToRemove = new ArrayList<JMethod>();
         final Set<String> propertiesToKeep = classesToKeep.get(className);
         List<CPropertyInfo> properties = classInfo.getProperties();
-        BeanInclusionHelper.BeanInclusion beanInclusion =
+        BeanInclusion beanInclusion =
             beanInclusions.getBeanInclusion(classInfo);
 
         for (CPropertyInfo propertyInfo : new ArrayList<CPropertyInfo>(properties)) {
@@ -661,8 +668,8 @@ public class ClassInfoEditor {
     }
   }
 
-  void fillAliasBeanContent(Outline outline, Map<String, Set<String>> classesToKeep,
-      BeanInclusionHelper.BeanInclusions beanInclusions,
+  public void fillAliasBeanContent(Outline outline, Map<String, Set<String>> classesToKeep,
+      BeanInclusions beanInclusions,
       Map<String, ChangeSet> beansToChange)
       throws ClassNotFoundException, IOException {
     for (ChangeSet changeSet : beansToChange.values()) {

@@ -1,4 +1,4 @@
-package de.escalon.xml.xjc;
+package de.escalon.xml.xjc.edit;
 
 import com.sun.codemodel.JArray;
 import com.sun.codemodel.JBlock;
@@ -18,9 +18,17 @@ import com.sun.tools.xjc.model.CClassInfo;
 import com.sun.tools.xjc.model.CPropertyInfo;
 import com.sun.tools.xjc.outline.ClassOutline;
 import com.sun.tools.xjc.outline.Outline;
-import de.escalon.xml.xjc.BeanInclusionHelper.BeanInclusions;
-import de.escalon.xml.xjc.BeanInclusionHelper.ExpressionSpec;
-import de.escalon.xml.xjc.SchemaProcessor.ChangeSet;
+import de.escalon.xml.xjc.ChangeSet;
+import de.escalon.xml.xjc.annotate.Annotatable;
+import de.escalon.xml.xjc.annotate.AnnotationHelper;
+import de.escalon.xml.xjc.beaninclusion.AdapterSpec;
+import de.escalon.xml.xjc.beaninclusion.BeanInclusion;
+import de.escalon.xml.xjc.beaninclusion.BeanInclusions;
+import de.escalon.xml.xjc.beaninclusion.ExpressionSpec;
+import de.escalon.xml.xjc.beaninclusion.SetterSpec;
+import de.escalon.xml.xjc.helpers.ClassHelper;
+import de.escalon.xml.xjc.helpers.OutlineHelper;
+import de.escalon.xml.xjc.helpers.StringHelper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,7 +64,7 @@ public class CodeModelEditor {
       Map<String, ChangeSet> beansToChange, CClassInfo classInfo,
       JDefinedClass implClass)
       throws ClassNotFoundException, IOException {
-    BeanInclusionHelper.BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(classInfo);
+    BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(classInfo);
     if (beanInclusion == null) {
       return;
     }
@@ -76,7 +84,7 @@ public class CodeModelEditor {
       // the adapted field type is by definition not part of the Schema, must be available
       // at xjc compile time
 
-      BeanInclusionHelper.AdapterSpec xmlAdapterSpec = beanInclusion.getXmlAdapter(fieldName);
+      AdapterSpec xmlAdapterSpec = beanInclusion.getXmlAdapter(fieldName);
       if (xmlAdapterSpec != null) {
 
         JType adaptedFieldType = codeModel.parseType(xmlAdapterSpec.adaptsToType);
@@ -180,14 +188,14 @@ public class CodeModelEditor {
    * @param classOutlines         all classes in schema
    * @param changeSetsByClassname fqcn of original class to change set
    */
-  void addComputedGetter(Outline outline, BeanInclusions beanInclusions,
+  public void addComputedGetter(Outline outline, BeanInclusions beanInclusions,
       Collection<? extends ClassOutline> classOutlines,
       Map<String, ChangeSet> changeSetsByClassname) {
 
     JCodeModel codeModel = outline.getCodeModel();
 
     for (ClassOutline classOutline : classOutlines) {
-      BeanInclusionHelper.BeanInclusion beanInclusion =
+      BeanInclusion beanInclusion =
           beanInclusions.getBeanInclusion(classOutline.target);
       if (beanInclusion == null) {
         continue;
@@ -281,19 +289,19 @@ public class CodeModelEditor {
    * @param classOutlines         all classes in schema
    * @param changeSetsByClassname fqcn of original class to change set
    */
-  void addSyntheticSetter(Outline outline, BeanInclusions beanInclusions,
+  public void addSyntheticSetter(Outline outline, BeanInclusions beanInclusions,
       Collection<? extends ClassOutline> classOutlines,
       Map<String, ChangeSet> changeSetsByClassname) {
 
     JCodeModel codeModel = outline.getCodeModel();
 
     for (ClassOutline classOutline : classOutlines) {
-      BeanInclusionHelper.BeanInclusion beanInclusion =
+      BeanInclusion beanInclusion =
           beanInclusions.getBeanInclusion(classOutline.target);
       if (beanInclusion == null) {
         continue;
       }
-      Set<Map.Entry<String, BeanInclusionHelper.SetterSpec>> setterSpecEntries =
+      Set<Map.Entry<String, SetterSpec>> setterSpecEntries =
           beanInclusion.getSetters()
               .entrySet();
       ChangeSet changeSet = changeSetsByClassname.get(classOutline.implClass.fullName());
@@ -304,12 +312,12 @@ public class CodeModelEditor {
       } else {
         implClass = changeSet.definedClass;
       }
-      for (Map.Entry<String, BeanInclusionHelper.SetterSpec> setterSpecEntry : setterSpecEntries) {
+      for (Map.Entry<String, SetterSpec> setterSpecEntry : setterSpecEntries) {
         JMethod setterMethod = implClass.method(JMod.PUBLIC,
             outline.getCodeModel().VOID,
             "set" + StringHelper.capitalize(setterSpecEntry.getKey()));
 
-        BeanInclusionHelper.SetterSpec setterSpec = setterSpecEntry.getValue();
+        SetterSpec setterSpec = setterSpecEntry.getValue();
         setterMethod.param(OutlineHelper.getJClassFromOutline(outline, setterSpec.paramType),
             setterSpec.paramName);
 
@@ -383,7 +391,7 @@ public class CodeModelEditor {
     }
   }
 
-  void addProperties(Outline outline, BeanInclusionHelper.BeanInclusion beanInclusion,
+  void addProperties(Outline outline, BeanInclusion beanInclusion,
       ClassOutline classOutline) {
     if (beanInclusion == null) {
       return;

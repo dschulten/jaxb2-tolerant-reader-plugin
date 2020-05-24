@@ -1,6 +1,8 @@
-package de.escalon.xml.xjc;
+package de.escalon.xml.xjc.annotate;
 
 import com.sun.codemodel.JMethod;
+import de.escalon.xml.xjc.helpers.OutlineHelper;
+import de.escalon.xml.xjc.helpers.StringHelper;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -201,7 +203,7 @@ public class AnnotationHelper {
                 && annotationArrayValue.length() > 2;
     }
 
-    static boolean hasXmlElementDeclScope(JMethod method, String removedClassName) {
+    public static boolean hasXmlElementDeclScope(JMethod method, String removedClassName) {
         try {
             Collection<JAnnotationUse> annotations = method.annotations();
             for (JAnnotationUse ann : annotations) {

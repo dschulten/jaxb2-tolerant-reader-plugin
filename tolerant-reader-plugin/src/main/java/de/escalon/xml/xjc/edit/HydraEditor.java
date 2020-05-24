@@ -1,4 +1,4 @@
-package de.escalon.xml.xjc;
+package de.escalon.xml.xjc.edit;
 
 import com.sun.codemodel.JAnnotationUse;
 import com.sun.tools.xjc.model.CClassInfo;
@@ -6,6 +6,11 @@ import com.sun.tools.xjc.outline.ClassOutline;
 import com.sun.tools.xjc.outline.Outline;
 import de.escalon.hypermedia.hydra.mapping.Expose;
 import de.escalon.hypermedia.hydra.mapping.Term;
+import de.escalon.xml.xjc.ChangeSet;
+import de.escalon.xml.xjc.annotate.Annotatable;
+import de.escalon.xml.xjc.beaninclusion.BeanInclusion;
+import de.escalon.xml.xjc.beaninclusion.BeanInclusions;
+import de.escalon.xml.xjc.helpers.ClassHelper;
 import java.util.Collection;
 import java.util.Map;
 import javax.xml.namespace.QName;
@@ -18,10 +23,10 @@ public class HydraEditor {
   private static final boolean HYDRA_PRESENT =
       ClassHelper.isPresent("de.escalon.hypermedia.hydra.mapping.Expose");
 
-  void applyExposeToAliasClasses(Outline outline, BeanInclusionHelper.BeanInclusions beanInclusions,
-      Map<String, SchemaProcessor.ChangeSet> beansToChange) {
-    Collection<SchemaProcessor.ChangeSet> values = beansToChange.values();
-    for (SchemaProcessor.ChangeSet changeSet : values) {
+  public void applyExposeToAliasClasses(Outline outline, BeanInclusions beanInclusions,
+      Map<String, ChangeSet> beansToChange) {
+    Collection<ChangeSet> values = beansToChange.values();
+    for (ChangeSet changeSet : values) {
       Annotatable target = Annotatable.from(changeSet.definedClass);
       applyPrefixTerm(target, beanInclusions, outline, changeSet.sourceClassOutline.target);
       applyExpose(null, target, beanInclusions, outline,
@@ -30,11 +35,11 @@ public class HydraEditor {
   }
 
   void applyExpose(String property, Annotatable target,
-      BeanInclusionHelper.BeanInclusions beanInclusions,
+      BeanInclusions beanInclusions,
       Outline outline,
       CClassInfo classInfo) {
     if (HYDRA_PRESENT) {
-      BeanInclusionHelper.BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(classInfo);
+      BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(classInfo);
       if (beanInclusion == null) {
         return;
       }
@@ -53,9 +58,9 @@ public class HydraEditor {
     }
   }
 
-  void applyExposeToClasses(Outline outline, BeanInclusionHelper.BeanInclusions beanInclusions,
+  public void applyExposeToClasses(Outline outline, BeanInclusions beanInclusions,
       Collection<? extends ClassOutline> classOutlines,
-      Map<String, SchemaProcessor.ChangeSet> beansToChange) {
+      Map<String, ChangeSet> beansToChange) {
     for (final ClassOutline classOutline : classOutlines) {
       Annotatable annotatable = Annotatable.from(classOutline.implClass);
       applyPrefixTerm(annotatable, beanInclusions, outline, classOutline.target);
@@ -63,10 +68,10 @@ public class HydraEditor {
     }
   }
 
-  private void applyPrefixTerm(Annotatable target, BeanInclusionHelper.BeanInclusions beanInclusions, Outline outline,
+  private void applyPrefixTerm(Annotatable target, BeanInclusions beanInclusions, Outline outline,
       CClassInfo classInfo) {
     if (HYDRA_PRESENT) {
-      BeanInclusionHelper.BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(classInfo);
+      BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(classInfo);
       if (beanInclusion == null) {
         return;
       }
