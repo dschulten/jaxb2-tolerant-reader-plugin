@@ -28,7 +28,7 @@ Finally, the plugin annotates the generated beans with the `@Expose` annotation 
 To set up the plugin for a maven build, use the maven-jaxb2-plugin. In the maven plugin configuration add the jaxb2-tolerant-reader xjc plugin and make sure you enable xjc extension mode, as shown below. 
 The plugin is activated via the -Xtolerant-reader switch.
 
-IMPORTANT: Currently the tolerant-reader-plugin requires a patch to xjc classinfo (xjc-classinfo-patch). The patch is based upon the xjc version 2.2.11 used by the current maven-jaxb2-plugin. A https://github.com/gf-metro/jaxb/pull/30[pull request] has been submitted to gf-metro. In order to introduce the patch, add it as dependency to the maven-jaxb2-plugin as shown below.
+IMPORTANT: Currently the tolerant-reader-plugin requires a patch to xjc classinfo (xjc-classinfo-patch). The patch is based upon the xjc version 2.2.11 used by the current maven-jaxb2-plugin. A https://github.com/eclipse-ee4j/jaxb-ri/pull/1452[pull request] has been submitted to eclipse-ee4j/jaxb-ri. In order to introduce the patch, add it as dependency to the maven-jaxb2-plugin as shown below.
 
 Since the tolerant-reader-plugin updates the `Outline` built from the schema, it must run before other plugins such as the jaxb2-basics plugin, so they can pick up the changes introduced by tolerant-reader-plugin. 
 
