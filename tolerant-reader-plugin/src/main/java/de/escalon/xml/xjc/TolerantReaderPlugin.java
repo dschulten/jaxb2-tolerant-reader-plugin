@@ -1,69 +1,16 @@
 package de.escalon.xml.xjc;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import javax.xml.namespace.QName;
-
-import com.sun.codemodel.*;
 import com.sun.tools.xjc.model.*;
-import com.sun.tools.xjc.reader.Ring;
-import de.escalon.xml.xjc.BeanInclusionHelper.SetterSpec;
-import jdk.nashorn.internal.runtime.Property;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.PropertyAccessorFactory;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.ErrorHandler;
-import org.xml.sax.Locator;
-import org.xml.sax.SAXException;
 
 import com.sun.tools.xjc.Options;
 import com.sun.tools.xjc.Plugin;
-import com.sun.tools.xjc.outline.ClassOutline;
 import com.sun.tools.xjc.outline.Outline;
-import com.sun.xml.xsom.XSAttributeUse;
-import com.sun.xml.xsom.XSComplexType;
-import com.sun.xml.xsom.XSComponent;
-import com.sun.xml.xsom.XSContentType;
-import com.sun.xml.xsom.XSElementDecl;
-import com.sun.xml.xsom.XSModelGroup;
-import com.sun.xml.xsom.XSParticle;
-import com.sun.xml.xsom.XSTerm;
-import com.sun.xml.xsom.XSType;
-
-import de.escalon.hypermedia.hydra.mapping.Expose;
-import de.escalon.hypermedia.hydra.mapping.Term;
-import de.escalon.xml.xjc.BeanInclusionHelper.AdapterSpec;
-import de.escalon.xml.xjc.BeanInclusionHelper.BeanInclusion;
-import de.escalon.xml.xjc.BeanInclusionHelper.BeanInclusions;
-import de.escalon.xml.xjc.BeanInclusionHelper.ExpressionSpec;
-
-import static de.escalon.xml.xjc.SchemaInspector.isRequiredElementOrAttribute;
 
 // TODO other plugins do not see adaptations from collection to single type
 // TODO alias properties on parent classes loses withXXX method
@@ -135,6 +82,7 @@ public class TolerantReaderPlugin extends Plugin {
         || "add".equals(localName)
         || "bean".equals(localName) || "adapter".equals(localName) || "compute".equals(localName)
         || "set".equals(localName) || "assign".equals(localName) || "regex".equals(localName)
+        || "expr".equals(localName)
     );
   }
 
@@ -143,7 +91,7 @@ public class TolerantReaderPlugin extends Plugin {
     CCustomizations customizations = outline.getModel()
         .getCustomizations();
     BeanInclusionHelper.BeanInclusions beanInclusions = beanInclusionHelper.getBeanInclusions(customizations);
-    schemaProcessor.processSchemaTags(outline, opts, beanInclusions);
+    schemaProcessor.processSchemaTags(outline, beanInclusions, opts);
     return true;
   }
 

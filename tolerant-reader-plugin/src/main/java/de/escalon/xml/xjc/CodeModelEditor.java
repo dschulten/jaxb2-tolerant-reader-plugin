@@ -18,6 +18,9 @@ import com.sun.tools.xjc.model.CClassInfo;
 import com.sun.tools.xjc.model.CPropertyInfo;
 import com.sun.tools.xjc.outline.ClassOutline;
 import com.sun.tools.xjc.outline.Outline;
+import de.escalon.xml.xjc.BeanInclusionHelper.BeanInclusions;
+import de.escalon.xml.xjc.BeanInclusionHelper.ExpressionSpec;
+import de.escalon.xml.xjc.SchemaProcessor.ChangeSet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,15 +45,15 @@ public class CodeModelEditor {
    * <code>foo</code> field of type A, and type A is adapted to type B, this will make the
    * <code>foo</code> field into type B.
    *
-   * @param outline to use for code generation
+   * @param outline        to use for code generation
    * @param beanInclusions to apply
-   * @param beansToChange change sets by fqcn
-   * @param classInfo class info
-   * @param implClass to edit
+   * @param beansToChange  change sets by fqcn
+   * @param classInfo      class info
+   * @param implClass      to edit
    */
   void applyAdaptersToFieldsAndAccessors(
-      Outline outline, BeanInclusionHelper.BeanInclusions beanInclusions,
-      Map<String, SchemaProcessor.ChangeSet> beansToChange, CClassInfo classInfo,
+      Outline outline, BeanInclusions beanInclusions,
+      Map<String, ChangeSet> beansToChange, CClassInfo classInfo,
       JDefinedClass implClass)
       throws ClassNotFoundException, IOException {
     BeanInclusionHelper.BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(classInfo);
@@ -177,20 +180,21 @@ public class CodeModelEditor {
    * @param classOutlines         all classes in schema
    * @param changeSetsByClassname fqcn of original class to change set
    */
-  void applyExpressions(Outline outline, BeanInclusionHelper.BeanInclusions beanInclusions,
+  void addComputedGetter(Outline outline, BeanInclusions beanInclusions,
       Collection<? extends ClassOutline> classOutlines,
-      Map<String, SchemaProcessor.ChangeSet> changeSetsByClassname) {
+      Map<String, ChangeSet> changeSetsByClassname) {
 
     JCodeModel codeModel = outline.getCodeModel();
 
     for (ClassOutline classOutline : classOutlines) {
-      BeanInclusionHelper.BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(classOutline.target);
+      BeanInclusionHelper.BeanInclusion beanInclusion =
+          beanInclusions.getBeanInclusion(classOutline.target);
       if (beanInclusion == null) {
         continue;
       }
-      Set<Map.Entry<String, BeanInclusionHelper.ExpressionSpec>> expressionSpecEntries = beanInclusion.getExpressions()
+      Set<Map.Entry<String, ExpressionSpec>> expressionSpecEntries = beanInclusion.getExpressions()
           .entrySet();
-      SchemaProcessor.ChangeSet changeSet = changeSetsByClassname.get(classOutline.implClass.fullName());
+      ChangeSet changeSet = changeSetsByClassname.get(classOutline.implClass.fullName());
 
       JDefinedClass implClass;
       if (changeSet == null) {
@@ -198,10 +202,11 @@ public class CodeModelEditor {
       } else {
         implClass = changeSet.definedClass;
       }
-      for (Map.Entry<String, BeanInclusionHelper.ExpressionSpec> expressionSpecEntry : expressionSpecEntries) {
+      for (Map.Entry<String, ExpressionSpec> expressionSpecEntry : expressionSpecEntries) {
+        ExpressionSpec expressionSpec = expressionSpecEntry.getValue();
         JMethod computedMethod = implClass.method(JMod.PUBLIC,
             OutlineHelper.getJClassFromOutline(outline,
-                expressionSpecEntry.getValue().computesToType),
+                expressionSpec.computesToType),
             "get" + StringHelper.capitalize(expressionSpecEntry.getKey()));
         JBlock body = computedMethod.body();
         if (ClassHelper.isPresent("org.springframework.expression.ExpressionParser")) {
@@ -218,14 +223,35 @@ public class CodeModelEditor {
           JVar parserVar = body.decl(parserIface, "parser", JExpr._new(parser));
           JVar contextVar = body.decl(contextIface, "context", JExpr._new(context)
               .arg(JExpr._this()));
+
+          // assign #matcher as spel var if regex present
+          if (expressionSpec.regex != null) {
+            JType matcher = codeModel._ref(java.util.regex.Matcher.class);
+            JType pattern = codeModel._ref(java.util.regex.Pattern.class);
+            JVar patternVar = body.decl(pattern, "pattern",
+                codeModel.ref(Pattern.class).staticInvoke("compile").arg(expressionSpec.regex));
+
+            JVar regexPropertyValueVar =
+                body.decl(codeModel._ref(String.class), "regexPropertyValue",
+                    JExpr.cast(codeModel._ref(String.class),
+                        JExpr.invoke(parserVar, "parseExpression")
+                            .arg(JExpr.lit(expressionSpec.regexPropertyExpr))
+                            .invoke("getValue").arg(contextVar)));
+
+            JVar matcherVar = body.decl(matcher, "matcher",
+                JExpr.invoke(patternVar, "matcher").arg(regexPropertyValueVar));
+            body.invoke(matcherVar, "find");
+            body.invoke(contextVar, "setVariable").arg("matcher").arg(matcherVar);
+          }
+
           JVar expVar = body.decl(expressionIface, "exp", JExpr.invoke(parserVar, "parseExpression")
-              .arg(JExpr.lit(expressionSpecEntry.getValue().expression)));
+              .arg(JExpr.lit(expressionSpec.expression)));
 
           JVar ret = body.decl(codeModel._ref(java.lang.Object.class), "ret",
               JExpr.invoke(expVar, "getValue")
                   .arg(contextVar));
           body._return(
-              JExpr.cast(codeModel.ref(expressionSpecEntry.getValue().computesToType), ret));
+              JExpr.cast(codeModel.ref(expressionSpec.computesToType), ret));
         } else if (ClassHelper.isPresent("javax.el.ELProcessor")) {
           JType elp = codeModel._ref(javax.el.ELProcessor.class);
           JVar elpVar = body.decl(elp, "elp", JExpr._new(elp));
@@ -235,12 +261,12 @@ public class CodeModelEditor {
 
           JVar ret =
               body.decl(codeModel.ref("java.lang.Object"), "ret", JExpr.invoke(elpVar, "eval")
-                  .arg(JExpr.lit(expressionSpecEntry.getValue().expression)));
+                  .arg(JExpr.lit(expressionSpec.expression)));
 
           body._return(
-              JExpr.cast(codeModel.ref(expressionSpecEntry.getValue().computesToType), ret));
+              JExpr.cast(codeModel.ref(expressionSpec.computesToType), ret));
         } else {
-          body._return(JExpr.direct(expressionSpecEntry.getValue().expression));
+          body._return(JExpr.direct(expressionSpec.expression));
         }
         computedMethod.annotate(XmlTransient.class);
       }
@@ -255,20 +281,22 @@ public class CodeModelEditor {
    * @param classOutlines         all classes in schema
    * @param changeSetsByClassname fqcn of original class to change set
    */
-  void applySyntheticSetters(Outline outline, BeanInclusionHelper.BeanInclusions beanInclusions,
+  void addSyntheticSetter(Outline outline, BeanInclusions beanInclusions,
       Collection<? extends ClassOutline> classOutlines,
-      Map<String, SchemaProcessor.ChangeSet> changeSetsByClassname) {
+      Map<String, ChangeSet> changeSetsByClassname) {
 
     JCodeModel codeModel = outline.getCodeModel();
 
     for (ClassOutline classOutline : classOutlines) {
-      BeanInclusionHelper.BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(classOutline.target);
+      BeanInclusionHelper.BeanInclusion beanInclusion =
+          beanInclusions.getBeanInclusion(classOutline.target);
       if (beanInclusion == null) {
         continue;
       }
-      Set<Map.Entry<String, BeanInclusionHelper.SetterSpec>> setterSpecEntries = beanInclusion.getSetters()
-          .entrySet();
-      SchemaProcessor.ChangeSet changeSet = changeSetsByClassname.get(classOutline.implClass.fullName());
+      Set<Map.Entry<String, BeanInclusionHelper.SetterSpec>> setterSpecEntries =
+          beanInclusion.getSetters()
+              .entrySet();
+      ChangeSet changeSet = changeSetsByClassname.get(classOutline.implClass.fullName());
 
       JDefinedClass implClass;
       if (changeSet == null) {
@@ -291,11 +319,8 @@ public class CodeModelEditor {
           JType parserIface = codeModel._ref(org.springframework.expression.ExpressionParser.class);
           JType contextIface =
               codeModel._ref(org.springframework.expression.EvaluationContext.class);
-          JType matcher = codeModel._ref(java.util.regex.Matcher.class);
-          JType pattern = codeModel._ref(java.util.regex.Pattern.class);
+
           JClass stringList = codeModel.ref(List.class).narrow(String.class);
-
-
           JType parser = codeModel
               ._ref(org.springframework.expression.spel.standard.SpelExpressionParser.class);
           JType context = codeModel
@@ -307,6 +332,8 @@ public class CodeModelEditor {
 
           // assign #matcher as spel var if regex present
           if (setterSpec.regex != null) {
+            JType matcher = codeModel._ref(java.util.regex.Matcher.class);
+            JType pattern = codeModel._ref(java.util.regex.Pattern.class);
             JVar patternVar = body.decl(pattern, "pattern",
                 codeModel.ref(Pattern.class).staticInvoke("compile").arg(setterSpec.regex));
             JVar matcherVar = body.decl(matcher, "matcher",
@@ -343,11 +370,10 @@ public class CodeModelEditor {
           JVar expVar = forEachBody.decl(codeModel._ref(Object.class), "exprValue",
               JExpr.invoke(parserVar, "parseExpression")
                   .arg(assignmentPartsVar.component(JExpr.lit(1)))
-                  .invoke("getValue").arg(contextVar)   );
+                  .invoke("getValue").arg(contextVar));
           forEachBody.invoke(beanWrapperVar, "setPropertyValue")
               .arg(assignmentPartsVar.component(JExpr.lit(0)))
               .arg(expVar);
-
         } else if (ClassHelper.isPresent("javax.el.ELProcessor")) {
           throw new IllegalArgumentException("tr:set requires Spring EL");
         } else {
@@ -355,5 +381,47 @@ public class CodeModelEditor {
         }
       }
     }
+  }
+
+  void addProperties(Outline outline, BeanInclusionHelper.BeanInclusion beanInclusion,
+      ClassOutline classOutline) {
+    if (beanInclusion == null) {
+      return;
+    }
+
+    Map<String, String> propertiesToAdd = beanInclusion.getPropertiesToAdd();
+    JDefinedClass implClass = classOutline.implClass;
+
+    for (Map.Entry<String, String> propertyAndClass : propertiesToAdd.entrySet()) {
+      String propertyToAdd = propertyAndClass.getKey();
+      String classNameOfProperty = propertyAndClass.getValue();
+      // can't add CPropertyInfo to classInfo as it requires a corresponding xml schema type
+      JClass propertyType = OutlineHelper.getJClassFromOutline(outline, classNameOfProperty);
+      JFieldVar field = implClass.field(JMod.PROTECTED,
+          propertyType,
+          propertyToAdd);
+      field.annotate(XmlTransient.class);
+
+      JMethod getter = implClass.method(JMod.PUBLIC, propertyType,
+          "get" + StringHelper.capitalize(propertyToAdd));
+      getter.body()
+          ._return(JExpr._this()
+              .ref(field));
+
+      JMethod setter = implClass.method(JMod.PUBLIC, outline.getCodeModel().VOID,
+          "set" + StringHelper.capitalize(propertyToAdd));
+      setter.body()
+          .assign(JExpr._this()
+              .ref(field), setter.param(propertyType, field.name()));
+    }
+  }
+
+  void addToObjectFactory(Outline outline, JDefinedClass newBean) {
+    String factoryName = newBean._package()
+        .name() + ".ObjectFactory";
+    JDefinedClass objFactory = OutlineHelper.getJDefinedClassFromOutline(outline, factoryName);
+    JMethod factoryMethod = objFactory.method(JMod.PUBLIC, newBean, "create" + newBean.name());
+    factoryMethod.body()
+        ._return(JExpr._new(newBean));
   }
 }

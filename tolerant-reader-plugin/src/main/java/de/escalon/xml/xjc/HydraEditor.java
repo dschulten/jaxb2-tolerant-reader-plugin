@@ -10,7 +10,10 @@ import java.util.Collection;
 import java.util.Map;
 import javax.xml.namespace.QName;
 
-public class HydraHelper {
+/**
+ * Allows to expose schema information as JSON-LD URIs for hydra-jsonld.
+ */
+public class HydraEditor {
 
   private static final boolean HYDRA_PRESENT =
       ClassHelper.isPresent("de.escalon.hypermedia.hydra.mapping.Expose");

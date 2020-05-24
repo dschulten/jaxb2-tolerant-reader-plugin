@@ -81,6 +81,13 @@ public class SpringExpressionTest {
     individuum.setEmployerFirstName("Ben");
     assertEquals("Ben", individuum.getEmployerFirstName());
     assertEquals("Ben", individuum.getEmployer().getName().getFirstName());
+  }
 
+  @Test
+  public void testLastNameBeforeBlank() {
+    Individuum individuum = new Individuum().withName(new Name()
+        .withFirstName("Gabriel")
+        .withLastName("Garcia Marquez"));
+    assertEquals("Garcia", individuum.getLastNameBeforeBlank());
   }
 }

@@ -28,6 +28,12 @@
           <tr:compute to="java.lang.String"
                       expr="T(org.apache.commons.lang3.StringUtils).trimToNull((name?.firstName?:'') + ' ' + (name?.lastName?:''))" />
         </tr:alias>
+        <tr:alias alias="lastNameBeforeBlank">
+          <tr:compute>
+            <tr:regex propertyExpr="name.lastName">^(.*) (.*)$</tr:regex>
+            <tr:expr>#matcher.group(1)</tr:expr>
+          </tr:compute>
+        </tr:alias>
         <tr:add property="myProperty" type="java.lang.Integer"/>
         <tr:alias alias="roleWrapper">
           <tr:set paramType="com.example.person.ValueWrapper">

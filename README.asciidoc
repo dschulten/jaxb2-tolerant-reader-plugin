@@ -419,7 +419,9 @@ NOTE: The TolerantReaderPlugin cannot determine this type automatically for adap
 
 ==== tr:compute element (optional)
 Specifies a computed field which will be generated as `@XmlTransient`, for use inside of a `tr:alias` element.
-A computed field requires you to provide an expression inside the `expr` attribute; furthermore, if the expression does not evaluate to `String`, the type to which the expression evaluates in the `to` attribute. Consider the examples in the supported expression languages below.
+
+===== expr attribute or tr:set element
+A computed field requires you to provide an expression inside the `expr` attribute or a tr:expr child element; furthermore, if the expression does not evaluate to `String`, the type to which the expression evaluates in the `to` attribute. Consider the examples in the supported expression languages below.
 
 The expression can be written with SpringEL, javax.el 3.0 or as plain java expression. 
 
@@ -450,6 +452,18 @@ That allows you to use expressions with Spring EL's safe navigation `?.` and Elv
   <tr:compute to="java.lang.String"
      expr="T(org.apache.commons.lang3.StringUtils).trimToNull(
          (name?.firstName?:'')  + ' ' + (name?.lastName?:''))" />
+</tr:alias>
+----
+
+If you use Spring EL, a tr:compute element also supports a tr:regex to parse an underlying string property. The attribute `propertyExpr` expects a Spring EL expression which specifies the property path on the current bean to which the regex should be applied. The matcher will be available as `#matcher` in Spring EL:
+
+[source,xml]
+----
+<tr:alias alias="lastNameBeforeBlank">
+  <tr:compute>
+    <tr:regex propertyExpr="name.lastName">^(.*) (.*)$</tr:regex>
+    <tr:expr>#matcher.group(1)</tr:expr>
+  </tr:compute>
 </tr:alias>
 ----
 
@@ -524,7 +538,7 @@ Include spring-expression and spring-beans as *plugin* dependency of the maven-j
 
 The plugin assumes that the incoming value is of type String by default, and makes that value accessible under the default variable name `#value` to Spring EL.
 
-There are several ways in which you can use `tr:set`. The first is to parse an incoming String value using a regex and assign the matching groups to fields on the current bean:
+There are several ways in which you can use `tr:set`. The first is to parse an incoming String value using a tr:regex element and assign the matching groups to fields on the current bean using tr:assign elements:
 
 [source, xml]
 ----

@@ -7,7 +7,6 @@ import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JExpr;
 import com.sun.codemodel.JFieldVar;
 import com.sun.codemodel.JMethod;
-import com.sun.codemodel.JMod;
 import com.sun.codemodel.JPackage;
 import com.sun.codemodel.JType;
 import com.sun.codemodel.JVar;
@@ -25,6 +24,7 @@ import com.sun.xml.xsom.XSModelGroup;
 import com.sun.xml.xsom.XSParticle;
 import com.sun.xml.xsom.XSTerm;
 import com.sun.xml.xsom.XSType;
+import de.escalon.xml.xjc.SchemaProcessor.ChangeSet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,7 +38,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
 import org.apache.commons.lang3.StringUtils;
@@ -47,26 +46,16 @@ import org.xml.sax.Locator;
 import static de.escalon.xml.xjc.SchemaInspector.isRequiredElementOrAttribute;
 
 /**
- * Edits class info by moving/renaming/deleting/annotating classes and properties.
+ * Edits class info by moving, renaming, deleting and annotating classes and properties.
+ * Uses {@link CodeModelEditor} to generate code if necessary.
  */
 public class ClassInfoEditor {
 
   private static final Set<String> IGNORED_ANNOTATIONS = new HashSet<String>(
       Arrays.asList(XmlSeeAlso.class.getName(), XmlAccessorType.class.getName()));
 
-  private CodeModelEditor codeModelEditor = new CodeModelEditor();
-  private HydraHelper hydraHelper = new HydraHelper();
-
-  SchemaProcessor.ChangeSet replaceClass(Outline outline, JPackage targetPackage, String newClassName,
-      ClassOutline toReplace) {
-
-    SchemaProcessor.ChangeSet
-        changeSet = defineNewClassFrom(outline, targetPackage, newClassName, toReplace);
-
-    // add to ObjectFactory
-    addToObjectFactory(outline, changeSet.definedClass);
-    return changeSet;
-  }
+  private final CodeModelEditor codeModelEditor = new CodeModelEditor();
+  private final HydraEditor hydraEditor = new HydraEditor();
 
   void removeClass(Outline outline, CClassInfo classInfo) {
     String fullName = classInfo.getName();
@@ -114,7 +103,8 @@ public class ClassInfoEditor {
     }
   }
 
-  SchemaProcessor.ChangeSet defineNewClassFrom(Outline outline, JPackage targetPackage, String newClassName,
+  private ChangeSet defineNewClassFrom(Outline outline, JPackage targetPackage,
+      String newClassName,
       ClassOutline toReplace) {
     CClassInfo oldClassInfo = toReplace.target;
     Locator locator = oldClassInfo.getLocator();
@@ -139,22 +129,12 @@ public class ClassInfoEditor {
     }
 
     JDefinedClass newBean = newClassOutline.implClass;
-    return new SchemaProcessor.ChangeSet(toReplace, newClassOutline, newBean);
+    return new ChangeSet(toReplace, newClassOutline, newBean);
   }
-
-  private void addToObjectFactory(Outline outline, JDefinedClass newBean) {
-    String factoryName = newBean._package()
-        .name() + ".ObjectFactory";
-    JDefinedClass objFactory = OutlineHelper.getJDefinedClassFromOutline(outline, factoryName);
-    JMethod factoryMethod = objFactory.method(JMod.PUBLIC, newBean, "create" + newBean.name());
-    factoryMethod.body()
-        ._return(JExpr._new(newBean));
-  }
-
 
   void createAliasBeans(Outline outline, BeanInclusionHelper.BeanInclusions beanInclusions,
       Collection<? extends ClassOutline> classOutlines,
-      Map<String, SchemaProcessor.ChangeSet> beansToChange) {
+      Map<String, ChangeSet> beansToChange) {
     for (ClassOutline classOutline : new ArrayList<ClassOutline>(classOutlines)) { // no
       // concurrent
       // mod
@@ -164,22 +144,34 @@ public class ClassInfoEditor {
       String aliasBeanName = getBeanAliasName(classInfo, beanInclusions);
       if (!aliasBeanName.isEmpty()) {
         JPackage parent = implClass.getPackage();
-        SchemaProcessor.ChangeSet
+        ChangeSet
             changeSet = replaceClass(outline, parent, aliasBeanName, classOutline);
         beansToChange.put(classOutline.target.fullName(), changeSet); // keep for later
       }
     }
   }
 
+  private ChangeSet replaceClass(Outline outline, JPackage targetPackage,
+      String newClassName,
+      ClassOutline toReplace) {
+
+    ChangeSet
+        changeSet = defineNewClassFrom(outline, targetPackage, newClassName, toReplace);
+
+    // add to ObjectFactory
+    codeModelEditor.addToObjectFactory(outline, changeSet.definedClass);
+    return changeSet;
+  }
+
   void removeBeansWhichHaveAliases(Outline outline,
-      Map<String, SchemaProcessor.ChangeSet> beansToChange) {
-    for (Map.Entry<String, SchemaProcessor.ChangeSet> beanToChange : beansToChange.entrySet()) {
+      Map<String, ChangeSet> beansToChange) {
+    for (Map.Entry<String, ChangeSet> beanToChange : beansToChange.entrySet()) {
       removeClass(outline, beanToChange.getValue().sourceClassOutline.target);
     }
   }
 
   void addXmlSeeAlso(Outline outline, Map<String, Set<String>> classesToKeep,
-      Map<String, SchemaProcessor.ChangeSet> beansToChange, CClassInfo classInfo,
+      Map<String, ChangeSet> beansToChange, CClassInfo classInfo,
       JDefinedClass implClass) {
     Iterator<CClassInfo> subclasses = classInfo.listSubclasses();
     JAnnotationArrayMember arrayValue = null;
@@ -191,7 +183,7 @@ public class ClassInfoEditor {
           JAnnotationUse annotateXmlSeeAlso = implClass.annotate(XmlSeeAlso.class);
           arrayValue = annotateXmlSeeAlso.paramArray("value");
         }
-        SchemaProcessor.ChangeSet changeSet = beansToChange.get(subclassName);
+        ChangeSet changeSet = beansToChange.get(subclassName);
 
         if (changeSet != null) {
           subclassName = changeSet.getAliasBeanName();
@@ -205,8 +197,10 @@ public class ClassInfoEditor {
     }
   }
 
-  private String getBeanAliasName(CClassInfo classInfo, BeanInclusionHelper.BeanInclusions beanInclusions) {
-    BeanInclusionHelper.BeanInclusion beanInclusionForClassInfo = beanInclusions.getBeanInclusion(classInfo);
+  private String getBeanAliasName(CClassInfo classInfo,
+      BeanInclusionHelper.BeanInclusions beanInclusions) {
+    BeanInclusionHelper.BeanInclusion beanInclusionForClassInfo =
+        beanInclusions.getBeanInclusion(classInfo);
 
     String aliasBeanName = "";
     if (beanInclusionForClassInfo != null) {
@@ -216,9 +210,9 @@ public class ClassInfoEditor {
   }
 
   void copyProperties(Outline outline, BeanInclusionHelper.BeanInclusions beanInclusions,
-      Map<String, SchemaProcessor.ChangeSet> beansToChange,
+      Map<String, ChangeSet> beansToChange,
       CClassInfo sourceClassInfo, JDefinedClass sourceImplClass,
-      SchemaProcessor.ChangeSet changeSet,
+      ChangeSet changeSet,
       JDefinedClass aliasBean,
       Map<String, XSComponent> expectedProperties) throws ClassNotFoundException, IOException {
 
@@ -261,7 +255,8 @@ public class ClassInfoEditor {
       }
       String sourcePropertyName = cPropertyInfo.getName(false);
 
-      BeanInclusionHelper.BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(sourceClassInfo);
+      BeanInclusionHelper.BeanInclusion beanInclusion =
+          beanInclusions.getBeanInclusion(sourceClassInfo);
       String fieldName = sourcePropertyName;
       if (beanInclusion != null) {
         String aliasFieldName = beanInclusion.getPropertyAlias(sourcePropertyName);
@@ -307,7 +302,8 @@ public class ClassInfoEditor {
     }
   }
 
-  private JClass getAliasFieldType(Outline outline, Map<String, SchemaProcessor.ChangeSet> beansToChange,
+  private JClass getAliasFieldType(Outline outline,
+      Map<String, ChangeSet> beansToChange,
       JType fieldType) {
     JClass ret = null;
     if (fieldType instanceof JClass) {
@@ -316,7 +312,7 @@ public class ClassInfoEditor {
         List<JClass> typeParameters = fieldAsJClass.getTypeParameters();
         // getter must have one type parameter
         JClass typeParameter = typeParameters.get(0);
-        SchemaProcessor.ChangeSet changeSet = beansToChange.get(typeParameter.fullName());
+        ChangeSet changeSet = beansToChange.get(typeParameter.fullName());
         if (changeSet != null) {
           String genericTypeParameterAlias = changeSet.getAliasBeanName();
           JDefinedClass aliasOfGenericTypeParameter =
@@ -327,7 +323,7 @@ public class ClassInfoEditor {
           ret = parseType.narrow(aliasOfGenericTypeParameter);
         }
       } else {
-        SchemaProcessor.ChangeSet changeSet = beansToChange.get(fieldType.fullName());
+        ChangeSet changeSet = beansToChange.get(fieldType.fullName());
 
         if (changeSet != null) {
           ret = OutlineHelper.getJDefinedClassFromOutline(outline, changeSet.getAliasBeanName());
@@ -340,18 +336,20 @@ public class ClassInfoEditor {
   void applyBeanAliasesAndAdaptersToClassMembers(Outline outline,
       BeanInclusionHelper.BeanInclusions beanInclusions,
       Collection<? extends ClassOutline> classOutlines, Map<String, Set<String>> classesToKeep,
-      Map<String, SchemaProcessor.ChangeSet> beansToChange) throws ClassNotFoundException, IOException {
+      Map<String, ChangeSet> beansToChange)
+      throws ClassNotFoundException, IOException {
 
     for (ClassOutline classOutline : classOutlines) {
       CClassInfo classInfo = classOutline.target;
       JDefinedClass implClass = classOutline.implClass;
-      codeModelEditor.applyAdaptersToFieldsAndAccessors(outline, beanInclusions, beansToChange, classInfo,
+      codeModelEditor.applyAdaptersToFieldsAndAccessors(outline, beanInclusions, beansToChange,
+          classInfo,
           implClass);
       applyBeanAliasesToFieldsAndAccessors(outline, beanInclusions, beansToChange, classInfo,
           implClass);
 
       JClass superClass = implClass._extends();
-      SchemaProcessor.ChangeSet changeSet = beansToChange.get(superClass.fullName());
+      ChangeSet changeSet = beansToChange.get(superClass.fullName());
       if (changeSet != null) {
         implClass._extends(changeSet.definedClass);
         classInfo.setBaseClass(changeSet.targetClassOutline.target);
@@ -359,8 +357,10 @@ public class ClassInfoEditor {
     }
   }
 
-  private void applyBeanAliasesToFieldsAndAccessors(Outline outline, BeanInclusionHelper.BeanInclusions beanInclusions,
-      Map<String, SchemaProcessor.ChangeSet> beansToChange, CClassInfo classInfo, JDefinedClass implClass)
+  private void applyBeanAliasesToFieldsAndAccessors(Outline outline,
+      BeanInclusionHelper.BeanInclusions beanInclusions,
+      Map<String, ChangeSet> beansToChange, CClassInfo classInfo,
+      JDefinedClass implClass)
       throws ClassNotFoundException, IOException {
     Collection<JMethod> methods = implClass.methods();
     Map<String, JFieldVar> fields = implClass.fields();
@@ -387,7 +387,8 @@ public class ClassInfoEditor {
         AnnotationHelper.applyAnnotations(outline, Annotatable.from(aliasTypeField),
             field.annotations());
 
-        codeModelEditor.applyTypeToAccessors(outline, implClass, methods, field, fieldType, publicName,
+        codeModelEditor.applyTypeToAccessors(outline, implClass, methods, field, fieldType,
+            publicName,
             aliasFieldType);
       }
     }
@@ -405,7 +406,7 @@ public class ClassInfoEditor {
 
   void applyXmlTypeToClasses(Collection<? extends ClassOutline> classOutlines,
       BeanInclusionHelper.BeanInclusions beanInclusions,
-      Map<String, Set<String>> classesToKeep) throws IOException {
+      Map<String, Set<String>> classesToKeep) {
     for (final ClassOutline classOutline : classOutlines) {
       CClassInfo classInfo = classOutline.target;
       String className = classInfo.getName();
@@ -429,58 +430,26 @@ public class ClassInfoEditor {
     Collection<? extends ClassOutline> classOutlines = outline.getClasses();
 
     for (final ClassOutline classOutline : classOutlines) {
-      BeanInclusionHelper.BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(classOutline.target);
-      addProperties(outline, beanInclusion, classOutline);
+      BeanInclusionHelper.BeanInclusion beanInclusion =
+          beanInclusions.getBeanInclusion(classOutline.target);
+      codeModelEditor.addProperties(outline, beanInclusion, classOutline);
     }
   }
 
   void addPropertiesToAliases(Outline outline, BeanInclusionHelper.BeanInclusions beanInclusions,
-      Map<String, SchemaProcessor.ChangeSet> beansToChange) {
-    for (SchemaProcessor.ChangeSet changeSet : beansToChange.values()) {
+      Map<String, ChangeSet> beansToChange) {
+    for (ChangeSet changeSet : beansToChange.values()) {
       ClassOutline targetClassOutline = changeSet.targetClassOutline;
       ClassOutline sourceClassOutline = changeSet.sourceClassOutline;
-      BeanInclusionHelper.BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(sourceClassOutline.target);
-      addProperties(outline, beanInclusion, targetClassOutline);
+      BeanInclusionHelper.BeanInclusion beanInclusion =
+          beanInclusions.getBeanInclusion(sourceClassOutline.target);
+      codeModelEditor.addProperties(outline, beanInclusion, targetClassOutline);
     }
   }
-
-  private void addProperties(Outline outline, BeanInclusionHelper.BeanInclusion beanInclusion,
-      ClassOutline classOutline) {
-    if (beanInclusion == null) {
-      return;
-    }
-
-    Map<String, String> propertiesToAdd = beanInclusion.getPropertiesToAdd();
-    JDefinedClass implClass = classOutline.implClass;
-
-    for (Map.Entry<String, String> propertyAndClass : propertiesToAdd.entrySet()) {
-      String propertyToAdd = propertyAndClass.getKey();
-      String classNameOfProperty = propertyAndClass.getValue();
-      // can't add CPropertyInfo to classInfo as it requires a corresponding xml schema type
-      JClass propertyType = OutlineHelper.getJClassFromOutline(outline, classNameOfProperty);
-      JFieldVar field = implClass.field(JMod.PROTECTED,
-          propertyType,
-          propertyToAdd);
-      field.annotate(XmlTransient.class);
-
-      JMethod getter = implClass.method(JMod.PUBLIC, propertyType,
-          "get" + StringHelper.capitalize(propertyToAdd));
-      getter.body()
-          ._return(JExpr._this()
-              .ref(field));
-
-      JMethod setter = implClass.method(JMod.PUBLIC, outline.getCodeModel().VOID,
-          "set" + StringHelper.capitalize(propertyToAdd));
-      setter.body()
-          .assign(JExpr._this()
-              .ref(field), setter.param(propertyType, field.name()));
-    }
-  }
-
 
   void applyXmlSeeAlso(Outline outline, BeanInclusionHelper.BeanInclusions beanInclusions,
       Collection<? extends ClassOutline> classOutlines, Map<String, Set<String>> classesToKeep,
-      Map<String, SchemaProcessor.ChangeSet> beansToChange) {
+      Map<String, ChangeSet> beansToChange) {
     for (ClassOutline classOutline : classOutlines) {
       CClassInfo classInfo = classOutline.target;
       JDefinedClass implClass = classOutline.implClass;
@@ -490,10 +459,11 @@ public class ClassInfoEditor {
 
   void applyXmlTypeToAliases(Collection<? extends ClassOutline> classOutlines,
       BeanInclusionHelper.BeanInclusions beanInclusions,
-      Map<String, Set<String>> classesToKeep, Map<String, SchemaProcessor.ChangeSet> beansToChange) {
+      Map<String, Set<String>> classesToKeep,
+      Map<String, ChangeSet> beansToChange) {
 
-    for (Map.Entry<String, SchemaProcessor.ChangeSet> beanToRenameEntry : beansToChange.entrySet()) {
-      SchemaProcessor.ChangeSet changeSet = beanToRenameEntry.getValue();
+    for (Map.Entry<String, ChangeSet> beanToRenameEntry : beansToChange.entrySet()) {
+      ChangeSet changeSet = beanToRenameEntry.getValue();
       final ClassOutline classOutline = changeSet.sourceClassOutline;
       CClassInfo classInfo = classOutline.target;
       String className = classInfo.getName();
@@ -514,7 +484,7 @@ public class ClassInfoEditor {
   void createRestrictedBeans(Outline outline, BeanInclusionHelper.BeanInclusions beanInclusions,
       Collection<? extends ClassOutline> classOutlines,
       Map<String, Set<String>> classesToKeep,
-      Map<String, SchemaProcessor.ChangeSet> beansToChange)
+      Map<String, ChangeSet> beansToChange)
       throws ClassNotFoundException, IOException {
 
     for (ClassOutline sourceClassOutline : new ArrayList<ClassOutline>(classOutlines)) {
@@ -525,7 +495,8 @@ public class ClassInfoEditor {
         continue;
       }
 
-      BeanInclusionHelper.BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(sourceClassInfo);
+      BeanInclusionHelper.BeanInclusion beanInclusion =
+          beanInclusions.getBeanInclusion(sourceClassInfo);
       XSComponent schemaComponent = sourceClassInfo.getSchemaComponent();
       if (schemaComponent instanceof XSComplexType) {
         XSComplexType xsComplexType = (XSComplexType) schemaComponent;
@@ -564,7 +535,7 @@ public class ClassInfoEditor {
 
           JPackage parent = sourceImplClass.getPackage();
           parent.remove(sourceImplClass);
-          SchemaProcessor.ChangeSet
+          ChangeSet
               changeSet = defineNewClassFrom(outline, parent, sourceImplClass.name(),
               sourceClassOutline);
 
@@ -586,14 +557,15 @@ public class ClassInfoEditor {
   }
 
   /**
-   * Removes unused classes and renames properties.
+   * Removes unused classes and properties and renames remaining aliased properties,
+   * also removing XmlType and XmlSeeAlso annotations.
    *
    * @param outline        of classes
    * @param beanInclusions describing editing tasks
    * @param classOutlines  to use
    * @param classesToKeep  which should not be removed
    */
-  void removeUnusedAndRenameProperties(Outline outline,
+  void removeUnusedClassesAndFieldsAndRenameProperties(Outline outline,
       BeanInclusionHelper.BeanInclusions beanInclusions,
       Collection<? extends ClassOutline> classOutlines, Map<String, Set<String>> classesToKeep) {
     for (final ClassOutline classOutline : classOutlines) {
@@ -610,7 +582,8 @@ public class ClassInfoEditor {
         Collection<JMethod> methodsToRemove = new ArrayList<JMethod>();
         final Set<String> propertiesToKeep = classesToKeep.get(className);
         List<CPropertyInfo> properties = classInfo.getProperties();
-        BeanInclusionHelper.BeanInclusion beanInclusion = beanInclusions.getBeanInclusion(classInfo);
+        BeanInclusionHelper.BeanInclusion beanInclusion =
+            beanInclusions.getBeanInclusion(classInfo);
 
         for (CPropertyInfo propertyInfo : new ArrayList<CPropertyInfo>(properties)) {
           String propertyPrivateName = propertyInfo.getName(false); // fooBar
@@ -641,7 +614,8 @@ public class ClassInfoEditor {
                   JFieldVar fieldVar = fields.get(propertyPrivateName);
                   fieldVar.name(propertyAlias);
 
-                  Set<String> settersAndGetters = ClassHelper.getSettersAndGetters(propertyPublicName);
+                  Set<String> settersAndGetters =
+                      ClassHelper.getSettersAndGetters(propertyPublicName);
 
                   for (JMethod method : methods) {
                     String methodName = method.name();
@@ -649,7 +623,8 @@ public class ClassInfoEditor {
                       method.name(methodName.replace(propertyPublicName, propertyAliasPublic));
                       if (methodName.startsWith("get") || methodName.startsWith("is")) {
                         // expose getter before renaming the property
-                        hydraHelper.applyExpose(propertyInfo.getName(false), Annotatable.from(method),
+                        hydraEditor.applyExpose(propertyInfo.getName(false),
+                            Annotatable.from(method),
                             beanInclusions, outline, classInfo);
                       }
                     }
@@ -659,7 +634,7 @@ public class ClassInfoEditor {
                 }
               } else {
                 // no alias property: just expose
-                hydraHelper.applyExpose(propertyInfo.getName(false),
+                hydraEditor.applyExpose(propertyInfo.getName(false),
                     Annotatable.from(ClassHelper.findGetterInClass(implClass,
                         propertyPublicName)),
                     beanInclusions, outline, classInfo);
@@ -688,9 +663,9 @@ public class ClassInfoEditor {
 
   void fillAliasBeanContent(Outline outline, Map<String, Set<String>> classesToKeep,
       BeanInclusionHelper.BeanInclusions beanInclusions,
-      Map<String, SchemaProcessor.ChangeSet> beansToChange)
+      Map<String, ChangeSet> beansToChange)
       throws ClassNotFoundException, IOException {
-    for (SchemaProcessor.ChangeSet changeSet : beansToChange.values()) {
+    for (ChangeSet changeSet : beansToChange.values()) {
       ClassOutline sourceClassOutline = changeSet.sourceClassOutline;
       CClassInfo sourceClassInfo = sourceClassOutline.target;
       JDefinedClass sourceImplClass = sourceClassOutline.implClass;
@@ -718,5 +693,4 @@ public class ClassInfoEditor {
           IGNORED_ANNOTATIONS);
     }
   }
-
 }
