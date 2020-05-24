@@ -3,6 +3,9 @@ package de.escalon.xml.xjc;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JType;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ClassHelper {
 
@@ -23,6 +26,12 @@ public class ClassHelper {
         JMethod getter;
         return (getter = implClass.getMethod("get" + publicName, new JType[0])) != null ? getter
                 : implClass.getMethod("is" + publicName, new JType[0]);
+    }
+
+    // TODO consider to replace by ClassHelper.findGetterInClass/findSetterInClass
+    static Set<String> getSettersAndGetters(String propertyPublicName) {
+        return new HashSet<String>(Arrays.asList("set" + propertyPublicName, // FooBar
+            "get" + propertyPublicName, "is" + propertyPublicName, "has" + propertyPublicName));
     }
     
 }

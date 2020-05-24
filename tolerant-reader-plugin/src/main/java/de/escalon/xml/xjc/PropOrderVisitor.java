@@ -35,15 +35,15 @@ import de.escalon.xml.xjc.BeanInclusionHelper.BeanInclusions;
  * Access original schema to find out the correct property order.
  * 
  * 
- * @author xs47xsd
+ * @author dschulten
  * @see SchemaWriter for traversal method
  */
 public class PropOrderVisitor implements XSVisitor {
 
-    private ClassOutline classOutline;
-    private Set<String> propertiesToKeep;
-    private List<String> propOrderList = new ArrayList<String>();
-    private BeanInclusions beanInclusions;
+    private final ClassOutline classOutline;
+    private final Set<String> propertiesToKeep;
+    private final List<String> propOrderList = new ArrayList<String>();
+    private final BeanInclusions beanInclusions;
 
     public PropOrderVisitor(ClassOutline classOutline, BeanInclusions beanInclusions, Set<String> propertiesToKeep) {
         this.classOutline = classOutline;

@@ -423,16 +423,23 @@ A computed field requires you to provide an expression inside the `expr` attribu
 
 The expression can be written with SpringEL, javax.el 3.0 or as plain java expression. 
 
-Include SpringEL as *plugin* dependency of the maven-jaxb2-plugin to use SpringEL: 
+Include spring-expression as *plugin* dependency of the maven-jaxb2-plugin to use `tr:compute`:
 
 [source,xml]
 ----
 <!-- inside plugin configuration -->
-<dependency>
-  <groupId>org.springframework</groupId>
-  <artifactId>spring-expression</artifactId>
-  <version>4.3.5.RELEASE</version>
-</dependency>
+<plugin>
+    <groupId>org.jvnet.jaxb2.maven2</groupId>
+    <artifactId>maven-jaxb2-plugin</artifactId>
+    <dependencies>
+        ...
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-expression</artifactId>
+      <version>4.3.5.RELEASE</version>
+    </dependency>
+    </dependencies>
+</plugin>
 ----
 
 That allows you to use expressions with Spring EL's safe navigation `?.` and Elvis `?:` operators, and you have access to static utilities, too:
@@ -451,11 +458,18 @@ You can also use javax.el 3.0 (starting from Java 1.7) if you add it as dependen
 [source,xml]
 ----
 <!-- inside plugin configuration -->
-<dependency>
-  <groupId>org.glassfish</groupId>
-  <artifactId>javax.el</artifactId>
-  <version>3.0.0</version>
-</dependency>
+<plugin>
+    <groupId>org.jvnet.jaxb2.maven2</groupId>
+    <artifactId>maven-jaxb2-plugin</artifactId>
+    <dependencies>
+        ...
+        <dependency>
+          <groupId>org.glassfish</groupId>
+          <artifactId>javax.el</artifactId>
+          <version>3.0.0</version>
+        </dependency>
+    </dependencies>
+</plugin>
 ----
 
 The generated code for javax.el 3.0 always addresses the current jaxb bean by the name `bean`:
@@ -482,9 +496,31 @@ If you include no EL dependencies, you can still write Java expressions, which r
 ----
 
 ==== tr:set element (optional)
-Specifies a synthetic setter which uses Spring EL to assign the incoming value, for use inside of a `tr:alias` element, usually in conjunction with a `tr:compute` element.
+Specifies a synthetic setter which uses Spring EL and Spring's BeanWrapper to assign the incoming value, for use inside of a `tr:alias` element, usually in conjunction with a `tr:compute` element.
 
-See the tr:compute element to see how to set up Spring EL.
+Include spring-expression and spring-beans as *plugin* dependency of the maven-jaxb2-plugin to use `tr:set`:
+
+[source,xml]
+----
+<!-- inside plugin configuration -->
+<plugin>
+    <groupId>org.jvnet.jaxb2.maven2</groupId>
+    <artifactId>maven-jaxb2-plugin</artifactId>
+    <dependencies>
+        ...
+        <dependency>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-expression</artifactId>
+          <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+    </dependencies>
+</plugin>
+----
 
 The plugin assumes that the incoming value is of type String by default, and makes that value accessible under the default variable name `#value` to Spring EL.
 

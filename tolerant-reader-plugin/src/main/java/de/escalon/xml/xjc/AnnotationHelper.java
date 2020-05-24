@@ -1,5 +1,6 @@
 package de.escalon.xml.xjc;
 
+import com.sun.codemodel.JMethod;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -70,7 +71,7 @@ public class AnnotationHelper {
                                     valueString)));
                 } else if (isEnumLiteral(valueString)) {
                     annotation.param(annotationParamName,
-                            getEnumValue(valueString));
+                        getEnumValue(valueString));
                 } else if (isArray(valueString)) {
                     String[] arrayValues = StringHelper.removeStartAndEnd(valueString)
                         .trim()
@@ -198,5 +199,31 @@ public class AnnotationHelper {
     private static boolean isNonEmptyString(String annotationArrayValue) {
         return annotationArrayValue.startsWith("\"") && annotationArrayValue.endsWith("\"")
                 && annotationArrayValue.length() > 2;
+    }
+
+    static boolean hasXmlElementDeclScope(JMethod method, String removedClassName) {
+        try {
+            Collection<JAnnotationUse> annotations = method.annotations();
+            for (JAnnotationUse ann : annotations) {
+                if ("javax.xml.bind.annotation.XmlElementDecl".equals(ann.getAnnotationClass()
+                    .fullName())) {
+                    Map<String, JAnnotationValue> annotationMembers = ann.getAnnotationMembers();
+                    JAnnotationValue scopeAnn = annotationMembers.get("scope");
+                    if (scopeAnn != null) {
+                        ByteArrayOutputStream out = new ByteArrayOutputStream();
+                        OutputStreamWriter writer = new OutputStreamWriter(out);
+                        scopeAnn.generate(new JFormatter(writer));
+                        writer.flush();
+                        String annotationCode = new String(out.toByteArray(), "us-ascii");
+                        if ((removedClassName + ".class").equals(annotationCode)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        } catch (Exception e) {
+            throw new RuntimeException("failed to determine scope annotation value", e);
+        }
     }
 }

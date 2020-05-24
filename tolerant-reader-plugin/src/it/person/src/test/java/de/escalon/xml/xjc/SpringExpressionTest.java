@@ -77,9 +77,10 @@ public class SpringExpressionTest {
 
   @Test
   public void testEmployer() {
-    Individuum individuum = new Individuum().withName(new Name().withFirstName("Joe"))
-        .withEmployer(new Individuum().withName(new Name().withFirstName("Lisa")));
+    Individuum individuum = new Individuum().withName(new Name().withFirstName("Joe"));
     individuum.setEmployerFirstName("Ben");
     assertEquals("Ben", individuum.getEmployerFirstName());
+    assertEquals("Ben", individuum.getEmployer().getName().getFirstName());
+
   }
 }
